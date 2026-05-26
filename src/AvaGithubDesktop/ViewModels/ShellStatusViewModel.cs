@@ -2,6 +2,7 @@ using Avalonia.Threading;
 using AvaGithubDesktop.Core.Messaging;
 using AvaGithubDesktop.Core.Services;
 using CodeWF.EventBus;
+using CodeWF.Log.Core;
 using ReactiveUI;
 
 namespace AvaGithubDesktop.ViewModels;
@@ -41,6 +42,7 @@ public sealed class ShellStatusViewModel : ViewModelBase
 
     private void SetStatus(string status)
     {
+        Logger.Info(status, status, log2UI: true, log2File: true, log2Console: false);
         if (Dispatcher.UIThread.CheckAccess())
         {
             StatusText = status;

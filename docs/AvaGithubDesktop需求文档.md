@@ -34,7 +34,11 @@
     - 如果是对Semi或Ursa的样式个性化调整，也可以创建AvaGithubDesktop.Semi、AvaGithubDesktop.Ursa进行维护，这样方便后续扩展、人工阅读理解维护；
 14. 工程不怕多，就怕代码逻辑、业务逻辑划分不清晰；
 15. 在./docs/GithubDesktop目录放了原Github Desktop软件部分截图，在d:\github\desktop仓库里实现的软件风格应该也是这样的，你一定要复刻desktop代码里实现的功能哦，截图是让你更明确
-16. 开发过程中将功能点简单列在本文档中，不列详细，只简单列功能
+16. 添加CodeWF.LogViewer NuGet包，本地仓库目录D:\github\CodeWF.LogViewer可参考用法，用于操作日志展示，默认展示在状态栏上方，高度150~200，便于使用者了解git提交步骤学习、关键操作记录，菜单Menu提供显示或隐藏日志栏，需要记录在App.config
+17. 将国际化也放菜单Menu提供切换，需要记录在App.config
+18. 添加Semi 6、7种主题切换，也放菜单Menu提供切换，需要记录在App.config，参考D:\github\Vex
+19. 桌面运行了Github Desktop程序，你可运行它，截取我们正在做的功能截图与它对比，但主要功能和样式还是参考它的源码D:\github\desktop
+20. 开发过程中将功能点简单列在本文档中，不列详细，只简单列功能
 
 ## 功能点
 
@@ -68,3 +72,4 @@
 - 弹窗按钮交互使用 MVVM 命令绑定，业务逻辑保持在 ViewModel
 - GitHub OAuth Client ID 存放在 `App.config`，通过 `CodeWF.Tools.Files` 读取
 - GitHub 登录使用浏览器 OAuth Device Flow
+- 使用 CodeWF.LogViewer 展示操作日志栏并持久化显隐状态

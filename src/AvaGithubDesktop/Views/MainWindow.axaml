@@ -63,6 +63,13 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRestoreStash}}" Command="{Binding RestoreStashCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuDiscardStash}}" Command="{Binding DiscardStashCommand}" />
                 </MenuItem>
+                <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuView}}">
+                    <MenuItem
+                        Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.ShowOperationLog}}"
+                        Command="{Binding ToggleOperationLogCommand}"
+                        IsChecked="{Binding IsOperationLogVisible}"
+                        ToggleType="CheckBox" />
+                </MenuItem>
                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuHelp}}">
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Changelog}}" Command="{Binding ShowChangelogCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAbout}}" Command="{Binding ShowAboutCommand}" />
@@ -71,7 +78,7 @@
         </StackPanel>
     </codewf:CodeWFWindow.LeftContent>
 
-    <Grid RowDefinitions="Auto,*,Auto">
+    <Grid RowDefinitions="Auto,*,Auto,Auto">
         <Border
             Grid.Row="0"
             Classes="toolbarBand">
@@ -912,6 +919,22 @@
 
         <Border
             Grid.Row="2"
+            Classes="operationLog"
+            IsVisible="{Binding IsOperationLogVisible}">
+            <Grid RowDefinitions="Auto,*">
+                <Border Classes="operationLogHeader">
+                    <TextBlock Classes="section" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.OperationLog}}" />
+                </Border>
+                <codewf:LogView
+                    Grid.Row="1"
+                    Padding="8"
+                    FontFamily="Consolas, Cascadia Mono, Microsoft YaHei UI"
+                    FontSize="12" />
+            </Grid>
+        </Border>
+
+        <Border
+            Grid.Row="3"
             Padding="10,5"
             Background="{DynamicResource StatusBarBackgroundBrush}"
             BorderBrush="{DynamicResource StatusBarBorderBrush}"

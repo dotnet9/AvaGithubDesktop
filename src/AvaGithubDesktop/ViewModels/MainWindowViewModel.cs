@@ -21,6 +21,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly IAccountDialogService _accountDialogService;
     private readonly IHelpService _helpService;
     private readonly IConfirmationDialogService _confirmationDialogService;
+    private readonly IAppSettingsStore _settingsStore;
     private readonly IAppLocalizer _localizer;
     private readonly IEventBus _eventBus;
     private string _repositoryPath;
@@ -48,6 +49,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isDiscardingStash;
     private bool _isDiscardingChanges;
     private bool _isSigningIn;
+    private bool _isOperationLogVisible;
     private bool _isInitialized;
     private bool _isBulkUpdatingIncludedChanges;
     private int _changedFilesCount;
@@ -85,6 +87,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         IAccountDialogService accountDialogService,
         IHelpService helpService,
         IConfirmationDialogService confirmationDialogService,
+        IAppSettingsStore settingsStore,
         IAppLocalizer localizer,
         IEventBus eventBus,
         ShellStatusViewModel statusBar)
@@ -97,9 +100,11 @@ public sealed class MainWindowViewModel : ViewModelBase
         _accountDialogService = accountDialogService;
         _helpService = helpService;
         _confirmationDialogService = confirmationDialogService;
+        _settingsStore = settingsStore;
         _localizer = localizer;
         _eventBus = eventBus;
         StatusBar = statusBar;
+        _isOperationLogVisible = _settingsStore.Current.IsOperationLogVisible ?? true;
         _repositoryPath = ResolveDefaultRepositoryPath();
 
         Languages = new ObservableCollection<LanguageOption>
@@ -133,6 +138,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         ViewSelectedCommitOnGitHubCommand = ReactiveCommand.CreateFromTask(
             ViewSelectedCommitOnGitHubAsync,
             this.WhenAnyValue(model => model.CanViewSelectedCommitOnGitHub));
+        ToggleOperationLogCommand = ReactiveCommand.Create(ToggleOperationLog);
 
         var canSynchronize = this.WhenAnyValue(model => model.CanSynchronize);
         SynchronizeRepositoryCommand = ReactiveCommand.CreateFromTask(SynchronizeRepositoryAsync, canSynchronize);
@@ -223,6 +229,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> CopySelectedCommitShaCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ViewSelectedCommitOnGitHubCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ToggleOperationLogCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CheckoutBranchCommand { get; }
 
@@ -943,6 +951,21 @@ public sealed class MainWindowViewModel : ViewModelBase
     public string SelectedChangesStatusText =>
         _localizer.Format(AvaGithubDesktopL.SelectedFilesCountFormat, IncludedChangesCount, ChangedFilesCount);
 
+    public bool IsOperationLogVisible
+    {
+        get => _isOperationLogVisible;
+        set
+        {
+            if (_isOperationLogVisible == value)
+            {
+                return;
+            }
+
+            this.RaiseAndSetIfChanged(ref _isOperationLogVisible, value);
+            _settingsStore.Update(settings => settings with { IsOperationLogVisible = value });
+        }
+    }
+
     public LanguageOption? SelectedLanguage
     {
         get => _selectedLanguage;
@@ -1094,6 +1117,15 @@ public sealed class MainWindowViewModel : ViewModelBase
     private async Task ViewRepositoryOnGitHubAsync()
     {
         await ViewRepositoryRemoteOnGitHubAsync(RemoteUrl);
+    }
+
+    private void ToggleOperationLog()
+    {
+        IsOperationLogVisible = !IsOperationLogVisible;
+        var messageKey = IsOperationLogVisible
+            ? AvaGithubDesktopL.StatusOperationLogShown
+            : AvaGithubDesktopL.StatusOperationLogHidden;
+        _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(messageKey)));
     }
 
     private async Task ViewSelectedCommitOnGitHubAsync()

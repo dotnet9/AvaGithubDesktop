@@ -13,7 +13,9 @@ public static class AvaGithubDesktopL
     public static readonly string MenuFile = "AvaGithubDesktop.AvaGithubDesktopL.MenuFile";
     public static readonly string MenuRepository = "AvaGithubDesktop.AvaGithubDesktopL.MenuRepository";
     public static readonly string MenuBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuBranch";
+    public static readonly string MenuView = "AvaGithubDesktop.AvaGithubDesktopL.MenuView";
     public static readonly string MenuHelp = "AvaGithubDesktop.AvaGithubDesktopL.MenuHelp";
+    public static readonly string ShowOperationLog = "AvaGithubDesktop.AvaGithubDesktopL.ShowOperationLog";
     public static readonly string MenuAddLocalRepository = "AvaGithubDesktop.AvaGithubDesktopL.MenuAddLocalRepository";
     public static readonly string MenuRefresh = "AvaGithubDesktop.AvaGithubDesktopL.MenuRefresh";
     public static readonly string MenuPush = "AvaGithubDesktop.AvaGithubDesktopL.MenuPush";
@@ -86,6 +88,7 @@ public static class AvaGithubDesktopL
     public static readonly string Status = "AvaGithubDesktop.AvaGithubDesktopL.Status";
     public static readonly string Path = "AvaGithubDesktop.AvaGithubDesktopL.Path";
     public static readonly string Language = "AvaGithubDesktop.AvaGithubDesktopL.Language";
+    public static readonly string OperationLog = "AvaGithubDesktop.AvaGithubDesktopL.OperationLog";
     public static readonly string English = "AvaGithubDesktop.AvaGithubDesktopL.English";
     public static readonly string SimplifiedChinese = "AvaGithubDesktop.AvaGithubDesktopL.SimplifiedChinese";
     public static readonly string NoRepositoryTitle = "AvaGithubDesktop.AvaGithubDesktopL.NoRepositoryTitle";
@@ -136,6 +139,8 @@ public static class AvaGithubDesktopL
     public static readonly string StatusOpenedChangelog = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedChangelog";
     public static readonly string StatusOpenedAbout = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedAbout";
     public static readonly string StatusOpenHelpFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenHelpFailedFormat";
+    public static readonly string StatusOperationLogShown = "AvaGithubDesktop.AvaGithubDesktopL.StatusOperationLogShown";
+    public static readonly string StatusOperationLogHidden = "AvaGithubDesktop.AvaGithubDesktopL.StatusOperationLogHidden";
     public static readonly string StatusLoadAccountFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusLoadAccountFailedFormat";
     public static readonly string StatusSigningInGitHub = "AvaGithubDesktop.AvaGithubDesktopL.StatusSigningInGitHub";
     public static readonly string StatusSignedInGitHubFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusSignedInGitHubFormat";
