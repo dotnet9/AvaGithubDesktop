@@ -16,6 +16,9 @@ public partial class App : PrismApplication
 {
     public override void Initialize()
     {
+        // CodeWF.Tools.Files 的 AppConfigHelper 支持 APP_CONFIG_FILE；这里固定读取输出目录的 App.config，
+        // 便于人工维护 GitHub OAuth Client ID，而不是落到 exe/dll.config 这类生成文件名里。
+        AppContext.SetData("APP_CONFIG_FILE", Path.Combine(AppContext.BaseDirectory, "App.config"));
         AvaloniaXamlLoader.Load(this);
         var langPlugin = new JsonLangPlugin
         {

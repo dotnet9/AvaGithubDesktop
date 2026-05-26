@@ -1006,20 +1006,15 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         try
         {
-            var request = await _accountDialogService.ShowSignInDialogAsync(
+            var account = await _accountDialogService.ShowSignInDialogAsync(
                 CurrentAccount?.Endpoint ?? GitHubAccountEndpoints.DotComApiEndpoint,
                 CancellationToken.None);
-            if (request is null)
+            if (account is null)
             {
                 _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusSignInCanceled)));
                 return;
             }
 
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusSigningInGitHub)));
-            var account = await _gitHubAccountService.SignInWithTokenAsync(
-                request.Endpoint,
-                request.Token,
-                CancellationToken.None);
             CurrentAccount = account;
             _eventBus.Publish(new StatusMessageChangedCommand(
                 _localizer.Format(AvaGithubDesktopL.StatusSignedInGitHubFormat, account.Login, account.FriendlyEndpoint)));

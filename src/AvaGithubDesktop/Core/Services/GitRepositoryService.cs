@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using System.Text.RegularExpressions;
 using AvaGithubDesktop.Core.Models;
 
@@ -475,7 +476,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
     private static GitChangeItem ParseChange(string line)
     {
         var statusCode = line.Length >= 2 ? line[..2] : line.Trim();
-        var path = line.Length > 3 ? line[3..] : string.Empty;
+        var path = line.Length > 3 ? DecodeGitStatusPath(line[3..]) : string.Empty;
         var kind = statusCode == "??"
             ? GitChangeKind.Untracked
             : statusCode[0] != ' '
@@ -483,6 +484,26 @@ public sealed class GitRepositoryService : IGitRepositoryService
                 : GitChangeKind.Unstaged;
 
         return new GitChangeItem(statusCode.Trim(), path, kind);
+    }
+
+    private static string DecodeGitStatusPath(string rawPath)
+    {
+        if (string.IsNullOrWhiteSpace(rawPath))
+        {
+            return string.Empty;
+        }
+
+        var renameSeparatorIndex = rawPath.IndexOf(" -> ", StringComparison.Ordinal);
+        if (renameSeparatorIndex < 0)
+        {
+            return DecodeGitQuotedPath(rawPath);
+        }
+
+        var oldPath = DecodeGitQuotedPath(rawPath[..renameSeparatorIndex]);
+        var newPath = DecodeGitQuotedPath(rawPath[(renameSeparatorIndex + 4)..]);
+        return string.IsNullOrWhiteSpace(oldPath) || string.IsNullOrWhiteSpace(newPath)
+            ? DecodeGitQuotedPath(rawPath)
+            : $"{oldPath} -> {newPath}";
     }
 
     private static IReadOnlyList<GitCommitItem> ParseHistory(string history)
@@ -543,9 +564,88 @@ public sealed class GitRepositoryService : IGitRepositoryService
 
         var statusCode = parts[0];
         var path = (statusCode.StartsWith('R') || statusCode.StartsWith('C')) && parts.Length >= 3
-            ? $"{parts[1]} -> {parts[2]}"
-            : parts[^1];
+            ? $"{DecodeGitQuotedPath(parts[1])} -> {DecodeGitQuotedPath(parts[2])}"
+            : DecodeGitQuotedPath(parts[^1]);
         return new GitCommitFileItem(statusCode, path);
+    }
+
+    private static string DecodeGitQuotedPath(string value)
+    {
+        var path = value.Trim();
+        if (path.Length < 2 || path[0] != '"' || path[^1] != '"')
+        {
+            return path;
+        }
+
+        // Git 默认 core.quotePath=true，中文路径会以 C-style 八进制字节输出；
+        // 这里按 UTF-8 字节还原，避免提交时把转义文本当成真实 pathspec。
+        var content = path[1..^1];
+        var builder = new StringBuilder(content.Length);
+        var pendingBytes = new List<byte>();
+
+        for (var index = 0; index < content.Length; index++)
+        {
+            var current = content[index];
+            if (current != '\\')
+            {
+                FlushPendingBytes(builder, pendingBytes);
+                builder.Append(current);
+                continue;
+            }
+
+            if (index == content.Length - 1)
+            {
+                FlushPendingBytes(builder, pendingBytes);
+                builder.Append('\\');
+                break;
+            }
+
+            var escaped = content[++index];
+            if (escaped is >= '0' and <= '7')
+            {
+                var byteValue = escaped - '0';
+                var consumedDigits = 1;
+                while (consumedDigits < 3
+                       && index + 1 < content.Length
+                       && content[index + 1] is >= '0' and <= '7')
+                {
+                    byteValue = (byteValue * 8) + (content[++index] - '0');
+                    consumedDigits++;
+                }
+
+                pendingBytes.Add((byte)byteValue);
+                continue;
+            }
+
+            FlushPendingBytes(builder, pendingBytes);
+            builder.Append(escaped switch
+            {
+                'a' => '\a',
+                'b' => '\b',
+                'f' => '\f',
+                'n' => '\n',
+                'r' => '\r',
+                't' => '\t',
+                'v' => '\v',
+                '\\' => '\\',
+                '"' => '"',
+                _ => escaped
+            });
+        }
+
+        FlushPendingBytes(builder, pendingBytes);
+        return builder.ToString();
+    }
+
+    private static void FlushPendingBytes(StringBuilder builder, List<byte> pendingBytes)
+    {
+        if (pendingBytes.Count == 0)
+        {
+            return;
+        }
+
+        builder.Append(Encoding.UTF8.GetString(pendingBytes.ToArray()));
+        pendingBytes.Clear();
     }
 
     private static GitCommitItem EmptyCommit()

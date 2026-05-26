@@ -1,59 +1,62 @@
 using System.Reactive;
 using AvaGithubDesktop.Core.Models;
+using AvaGithubDesktop.Core.Services;
 using ReactiveUI;
 
 namespace AvaGithubDesktop.ViewModels;
 
 public sealed class SignInWindowViewModel : ViewModelBase
 {
-    private readonly Func<string, Task> _openTokenPageAsync;
+    private readonly IGitHubAccountService _gitHubAccountService;
+    private readonly IRepositoryShellService _repositoryShellService;
+    private CancellationTokenSource? _signInCancellationTokenSource;
     private string _endpoint;
-    private string _token = string.Empty;
     private string _errorText = string.Empty;
+    private string _userCode = string.Empty;
+    private string _verificationUri = string.Empty;
+    private bool _isSigningIn;
 
     public SignInWindowViewModel(
         string title,
         string description,
         string endpointLabel,
         string endpointWatermark,
-        string tokenLabel,
-        string tokenWatermark,
-        string tokenHelp,
-        string openTokenPageText,
+        string browserButtonText,
+        string deviceCodeLabel,
+        string waitingForBrowserText,
+        string deviceCodeInstructionFormat,
         string cancelText,
-        string signInText,
-        string tokenRequiredText,
-        string openTokenPageFailedFormat,
+        string signingInText,
+        string signInFailedFormat,
         string endpoint,
-        Func<string, Task> openTokenPageAsync)
+        IGitHubAccountService gitHubAccountService,
+        IRepositoryShellService repositoryShellService)
     {
         Title = title;
         Description = description;
         EndpointLabel = endpointLabel;
         EndpointWatermark = endpointWatermark;
-        TokenLabel = tokenLabel;
-        TokenWatermark = tokenWatermark;
-        TokenHelp = tokenHelp;
-        OpenTokenPageText = openTokenPageText;
+        BrowserButtonText = browserButtonText;
+        DeviceCodeLabel = deviceCodeLabel;
+        WaitingForBrowserText = waitingForBrowserText;
+        DeviceCodeInstructionFormat = deviceCodeInstructionFormat;
         CancelText = cancelText;
-        SignInText = signInText;
-        TokenRequiredText = tokenRequiredText;
-        OpenTokenPageFailedFormat = openTokenPageFailedFormat;
+        SigningInText = signingInText;
+        SignInFailedFormat = signInFailedFormat;
         _endpoint = endpoint;
-        _openTokenPageAsync = openTokenPageAsync;
+        _gitHubAccountService = gitHubAccountService;
+        _repositoryShellService = repositoryShellService;
 
-        OpenTokenPageCommand = ReactiveCommand.CreateFromTask(OpenTokenPageAsync);
-        CancelCommand = ReactiveCommand.Create(() => RequestClose(null));
-        SignInCommand = ReactiveCommand.Create(SignIn);
+        var canStartSignIn = this.WhenAnyValue(model => model.IsSigningIn, isSigningIn => !isSigningIn);
+        BeginBrowserSignInCommand = ReactiveCommand.CreateFromTask(BeginBrowserSignInAsync, canStartSignIn);
+        CancelCommand = ReactiveCommand.Create(Cancel);
     }
 
-    public event EventHandler<DialogCloseRequestedEventArgs<GitHubSignInRequest?>>? CloseRequested;
+    public event EventHandler<DialogCloseRequestedEventArgs<GitHubAccount?>>? CloseRequested;
 
-    public ReactiveCommand<Unit, Unit> OpenTokenPageCommand { get; }
+    public ReactiveCommand<Unit, Unit> BeginBrowserSignInCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CancelCommand { get; }
-
-    public ReactiveCommand<Unit, Unit> SignInCommand { get; }
 
     public string Title { get; }
 
@@ -63,32 +66,24 @@ public sealed class SignInWindowViewModel : ViewModelBase
 
     public string EndpointWatermark { get; }
 
-    public string TokenLabel { get; }
+    public string BrowserButtonText { get; }
 
-    public string TokenWatermark { get; }
+    public string DeviceCodeLabel { get; }
 
-    public string TokenHelp { get; }
+    public string WaitingForBrowserText { get; }
 
-    public string OpenTokenPageText { get; }
+    public string DeviceCodeInstructionFormat { get; }
 
     public string CancelText { get; }
 
-    public string SignInText { get; }
+    public string SigningInText { get; }
 
-    public string TokenRequiredText { get; }
-
-    public string OpenTokenPageFailedFormat { get; }
+    public string SignInFailedFormat { get; }
 
     public string Endpoint
     {
         get => _endpoint;
         set => this.RaiseAndSetIfChanged(ref _endpoint, value);
-    }
-
-    public string Token
-    {
-        get => _token;
-        set => this.RaiseAndSetIfChanged(ref _token, value);
     }
 
     public string ErrorText
@@ -103,33 +98,86 @@ public sealed class SignInWindowViewModel : ViewModelBase
 
     public bool HasError => !string.IsNullOrWhiteSpace(ErrorText);
 
-    private void SignIn()
+    public string UserCode
     {
-        if (string.IsNullOrWhiteSpace(Token))
+        get => _userCode;
+        private set
         {
-            ErrorText = TokenRequiredText;
-            return;
+            this.RaiseAndSetIfChanged(ref _userCode, value);
+            this.RaisePropertyChanged(nameof(HasDeviceCode));
+            this.RaisePropertyChanged(nameof(DeviceCodeInstructionText));
         }
-
-        ErrorText = string.Empty;
-        RequestClose(new GitHubSignInRequest(Endpoint, Token));
     }
 
-    private async Task OpenTokenPageAsync()
+    public string VerificationUri
     {
+        get => _verificationUri;
+        private set => this.RaiseAndSetIfChanged(ref _verificationUri, value);
+    }
+
+    public bool HasDeviceCode => !string.IsNullOrWhiteSpace(UserCode);
+
+    public string DeviceCodeInstructionText =>
+        string.IsNullOrWhiteSpace(UserCode)
+            ? string.Empty
+            : string.Format(DeviceCodeInstructionFormat, UserCode);
+
+    public bool IsSigningIn
+    {
+        get => _isSigningIn;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isSigningIn, value);
+            this.RaisePropertyChanged(nameof(BrowserButtonDisplayText));
+        }
+    }
+
+    public string BrowserButtonDisplayText => IsSigningIn ? SigningInText : BrowserButtonText;
+
+    private async Task BeginBrowserSignInAsync()
+    {
+        IsSigningIn = true;
+        ErrorText = string.Empty;
+        _signInCancellationTokenSource?.Dispose();
+        _signInCancellationTokenSource = new CancellationTokenSource();
+
         try
         {
-            ErrorText = string.Empty;
-            await _openTokenPageAsync(Endpoint);
+            var authorization = await _gitHubAccountService.BeginDeviceAuthorizationAsync(
+                Endpoint,
+                _signInCancellationTokenSource.Token);
+            UserCode = authorization.UserCode;
+            VerificationUri = authorization.VerificationUri;
+
+            // Device Flow 不需要 client secret，适合桌面客户端；令牌交换仍统一由账号服务处理。
+            await _repositoryShellService.OpenUrlAsync(authorization.VerificationUriComplete);
+            var account = await _gitHubAccountService.CompleteDeviceSignInAsync(
+                authorization,
+                _signInCancellationTokenSource.Token);
+            RequestClose(account);
+        }
+        catch (OperationCanceledException)
+        {
+            RequestClose(null);
         }
         catch (Exception ex)
         {
-            ErrorText = string.Format(OpenTokenPageFailedFormat, ex.Message);
+            ErrorText = string.Format(SignInFailedFormat, ex.Message);
+        }
+        finally
+        {
+            IsSigningIn = false;
         }
     }
 
-    private void RequestClose(GitHubSignInRequest? result)
+    private void Cancel()
     {
-        CloseRequested?.Invoke(this, new DialogCloseRequestedEventArgs<GitHubSignInRequest?>(result));
+        _signInCancellationTokenSource?.Cancel();
+        RequestClose(null);
+    }
+
+    private void RequestClose(GitHubAccount? account)
+    {
+        CloseRequested?.Invoke(this, new DialogCloseRequestedEventArgs<GitHubAccount?>(account));
     }
 }

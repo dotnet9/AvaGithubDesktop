@@ -52,6 +52,15 @@ public sealed record GitHubAccount(
 
 public sealed record GitHubSignInRequest(string Endpoint, string Token);
 
+public sealed record GitHubDeviceAuthorization(
+    string Endpoint,
+    string DeviceCode,
+    string UserCode,
+    string VerificationUri,
+    string VerificationUriComplete,
+    int ExpiresIn,
+    int Interval);
+
 public static class GitHubAccountEndpoints
 {
     public const string DotComApiEndpoint = "https://api.github.com";

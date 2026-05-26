@@ -66,3 +66,5 @@
 - Desktop 风格 GitHub 账号登录入口、账户状态展示和退出登录
 - 软件专属 Logo 资产与应用图标
 - 弹窗按钮交互使用 MVVM 命令绑定，业务逻辑保持在 ViewModel
+- GitHub OAuth Client ID 存放在 `App.config`，通过 `CodeWF.Tools.Files` 读取
+- GitHub 登录使用浏览器 OAuth Device Flow

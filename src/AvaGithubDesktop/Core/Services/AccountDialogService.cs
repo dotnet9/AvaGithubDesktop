@@ -11,16 +11,19 @@ public sealed class AccountDialogService : IAccountDialogService
 {
     private readonly IAppLocalizer _localizer;
     private readonly IRepositoryShellService _repositoryShellService;
+    private readonly IGitHubAccountService _gitHubAccountService;
 
     public AccountDialogService(
         IAppLocalizer localizer,
-        IRepositoryShellService repositoryShellService)
+        IRepositoryShellService repositoryShellService,
+        IGitHubAccountService gitHubAccountService)
     {
         _localizer = localizer;
         _repositoryShellService = repositoryShellService;
+        _gitHubAccountService = gitHubAccountService;
     }
 
-    public async Task<GitHubSignInRequest?> ShowSignInDialogAsync(
+    public async Task<GitHubAccount?> ShowSignInDialogAsync(
         string defaultEndpoint,
         CancellationToken cancellationToken)
     {
@@ -31,18 +34,18 @@ public sealed class AccountDialogService : IAccountDialogService
             _localizer.Get(AvaGithubDesktopL.SignInDescription),
             _localizer.Get(AvaGithubDesktopL.SignInEndpointLabel),
             _localizer.Get(AvaGithubDesktopL.SignInEndpointWatermark),
-            _localizer.Get(AvaGithubDesktopL.SignInTokenLabel),
-            _localizer.Get(AvaGithubDesktopL.SignInTokenWatermark),
-            _localizer.Get(AvaGithubDesktopL.SignInTokenHelp),
-            _localizer.Get(AvaGithubDesktopL.OpenTokenPage),
+            _localizer.Get(AvaGithubDesktopL.SignInBrowserButton),
+            _localizer.Get(AvaGithubDesktopL.SignInDeviceCodeLabel),
+            _localizer.Get(AvaGithubDesktopL.SignInWaitingForBrowser),
+            _localizer.Get(AvaGithubDesktopL.SignInDeviceCodeInstructionFormat),
             _localizer.Get(AvaGithubDesktopL.Cancel),
-            _localizer.Get(AvaGithubDesktopL.SignIn),
-            _localizer.Get(AvaGithubDesktopL.SignInTokenRequired),
-            _localizer.Get(AvaGithubDesktopL.StatusOpenTokenPageFailedFormat),
+            _localizer.Get(AvaGithubDesktopL.SigningIn),
+            _localizer.Get(AvaGithubDesktopL.StatusSignInFailedFormat),
             string.IsNullOrWhiteSpace(defaultEndpoint)
                 ? GitHubAccountEndpoints.DotComApiEndpoint
                 : defaultEndpoint,
-            OpenTokenPageAsync);
+            _gitHubAccountService,
+            _repositoryShellService);
         var window = new SignInWindow(model);
 
         if (GetMainWindow() is not { } owner)
@@ -51,11 +54,8 @@ public sealed class AccountDialogService : IAccountDialogService
             return null;
         }
 
-        return await window.ShowDialog<GitHubSignInRequest?>(owner);
+        return await window.ShowDialog<GitHubAccount?>(owner);
     }
-
-    private Task OpenTokenPageAsync(string endpoint) =>
-        _repositoryShellService.OpenUrlAsync(GitHubAccountEndpoints.BuildNewTokenUrl(endpoint));
 
     private static Window? GetMainWindow()
     {

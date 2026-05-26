@@ -22,7 +22,7 @@ public partial class SignInWindow : CodeWFWindow
 
     private void ViewModel_OnCloseRequested(
         object? sender,
-        DialogCloseRequestedEventArgs<GitHubSignInRequest?> e)
+        DialogCloseRequestedEventArgs<GitHubAccount?> e)
     {
         Close(e.Result);
     }

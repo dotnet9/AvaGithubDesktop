@@ -8,6 +8,14 @@ public interface IGitHubAccountService
 
     Task<IReadOnlyList<GitHubAccount>> LoadAsync(CancellationToken cancellationToken);
 
+    Task<GitHubDeviceAuthorization> BeginDeviceAuthorizationAsync(
+        string endpoint,
+        CancellationToken cancellationToken);
+
+    Task<GitHubAccount> CompleteDeviceSignInAsync(
+        GitHubDeviceAuthorization authorization,
+        CancellationToken cancellationToken);
+
     Task<GitHubAccount> SignInWithTokenAsync(
         string endpoint,
         string token,

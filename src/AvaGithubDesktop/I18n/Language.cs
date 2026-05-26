@@ -41,11 +41,11 @@ public static class AvaGithubDesktopL
     public static readonly string SignInDescription = "AvaGithubDesktop.AvaGithubDesktopL.SignInDescription";
     public static readonly string SignInEndpointLabel = "AvaGithubDesktop.AvaGithubDesktopL.SignInEndpointLabel";
     public static readonly string SignInEndpointWatermark = "AvaGithubDesktop.AvaGithubDesktopL.SignInEndpointWatermark";
-    public static readonly string SignInTokenLabel = "AvaGithubDesktop.AvaGithubDesktopL.SignInTokenLabel";
-    public static readonly string SignInTokenWatermark = "AvaGithubDesktop.AvaGithubDesktopL.SignInTokenWatermark";
-    public static readonly string SignInTokenHelp = "AvaGithubDesktop.AvaGithubDesktopL.SignInTokenHelp";
-    public static readonly string OpenTokenPage = "AvaGithubDesktop.AvaGithubDesktopL.OpenTokenPage";
-    public static readonly string SignInTokenRequired = "AvaGithubDesktop.AvaGithubDesktopL.SignInTokenRequired";
+    public static readonly string SignInBrowserButton = "AvaGithubDesktop.AvaGithubDesktopL.SignInBrowserButton";
+    public static readonly string SignInDeviceCodeLabel = "AvaGithubDesktop.AvaGithubDesktopL.SignInDeviceCodeLabel";
+    public static readonly string SignInWaitingForBrowser = "AvaGithubDesktop.AvaGithubDesktopL.SignInWaitingForBrowser";
+    public static readonly string SignInDeviceCodeInstructionFormat = "AvaGithubDesktop.AvaGithubDesktopL.SignInDeviceCodeInstructionFormat";
+    public static readonly string SigningIn = "AvaGithubDesktop.AvaGithubDesktopL.SigningIn";
     public static readonly string Changelog = "AvaGithubDesktop.AvaGithubDesktopL.Changelog";
     public static readonly string AboutDescription = "AvaGithubDesktop.AvaGithubDesktopL.AboutDescription";
     public static readonly string AboutVersionLabel = "AvaGithubDesktop.AvaGithubDesktopL.AboutVersionLabel";
@@ -144,7 +144,6 @@ public static class AvaGithubDesktopL
     public static readonly string StatusSigningOutGitHub = "AvaGithubDesktop.AvaGithubDesktopL.StatusSigningOutGitHub";
     public static readonly string StatusSignedOutGitHub = "AvaGithubDesktop.AvaGithubDesktopL.StatusSignedOutGitHub";
     public static readonly string StatusSignOutFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusSignOutFailedFormat";
-    public static readonly string StatusOpenTokenPageFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenTokenPageFailedFormat";
     public static readonly string StatusOpenedRepositoryShell = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedRepositoryShell";
     public static readonly string StatusOpenRepositoryShellFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenRepositoryShellFailedFormat";
     public static readonly string StatusOpenedRepositoryInExternalEditor = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedRepositoryInExternalEditor";

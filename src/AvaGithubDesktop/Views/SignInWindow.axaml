@@ -6,9 +6,9 @@
     xmlns:vm="using:AvaGithubDesktop.ViewModels"
     x:DataType="vm:SignInWindowViewModel"
     Width="520"
-    Height="430"
+    Height="400"
     MinWidth="500"
-    MinHeight="400"
+    MinHeight="380"
     Background="{DynamicResource PanelBackgroundBrush}"
     CanMaximize="False"
     CanMinimize="False"
@@ -48,17 +48,23 @@
                     Text="{Binding Endpoint, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </StackPanel>
 
-            <StackPanel Grid.Row="3" Spacing="6">
-                <TextBlock Classes="formLabel" Text="{Binding TokenLabel}" />
-                <TextBox
-                    Classes="signInInput"
-                    PasswordChar="*"
-                    PlaceholderText="{Binding TokenWatermark}"
-                    Text="{Binding Token, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            </StackPanel>
+            <Border
+                Grid.Row="3"
+                Classes="confirmationFileList"
+                IsVisible="{Binding HasDeviceCode}">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="formLabel" Text="{Binding DeviceCodeLabel}" />
+                    <TextBlock
+                        Classes="monospace"
+                        FontSize="20"
+                        FontWeight="SemiBold"
+                        Text="{Binding UserCode}" />
+                    <TextBlock Classes="muted" Text="{Binding DeviceCodeInstructionText}" TextWrapping="Wrap" />
+                    <TextBlock Classes="muted" Text="{Binding WaitingForBrowserText}" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
 
             <StackPanel Grid.Row="4" Spacing="8">
-                <TextBlock Classes="muted" Text="{Binding TokenHelp}" TextWrapping="Wrap" />
                 <TextBlock
                     Classes="warning"
                     IsVisible="{Binding HasError}"
@@ -66,22 +72,18 @@
                     TextWrapping="Wrap" />
             </StackPanel>
 
-            <Grid Grid.Row="5" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
+            <Grid Grid.Row="5" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                 <Button
-                    Classes="inlineAction"
-                    Command="{Binding OpenTokenPageCommand}"
-                    Content="{Binding OpenTokenPageText}" />
-                <Button
-                    Grid.Column="2"
+                    Grid.Column="1"
                     MinWidth="86"
                     Command="{Binding CancelCommand}"
                     Content="{Binding CancelText}" />
                 <Button
-                    Grid.Column="3"
+                    Grid.Column="2"
                     Classes="signInPrimary"
-                    MinWidth="96"
-                    Command="{Binding SignInCommand}"
-                    Content="{Binding SignInText}" />
+                    MinWidth="136"
+                    Command="{Binding BeginBrowserSignInCommand}"
+                    Content="{Binding BrowserButtonDisplayText}" />
             </Grid>
         </Grid>
     </Border>
