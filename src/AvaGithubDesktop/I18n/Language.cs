@@ -141,6 +141,8 @@ public static class AvaGithubDesktopL
     public static readonly string StatusShowChangeInFileManagerFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusShowChangeInFileManagerFailedFormat";
     public static readonly string StatusOpenedChangeInExternalEditor = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedChangeInExternalEditor";
     public static readonly string StatusOpenChangeInExternalEditorFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenChangeInExternalEditorFailedFormat";
+    public static readonly string StatusCopiedCommitSha = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopiedCommitSha";
+    public static readonly string StatusCopyCommitShaFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopyCommitShaFailedFormat";
     public static readonly string StatusDiscardChangesCanceled = "AvaGithubDesktop.AvaGithubDesktopL.StatusDiscardChangesCanceled";
     public static readonly string StatusDiscardingChangesFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusDiscardingChangesFormat";
     public static readonly string StatusDiscardedChangesFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusDiscardedChangesFormat";
@@ -158,6 +160,7 @@ public static class AvaGithubDesktopL
     public static readonly string NoHistoryDetail = "AvaGithubDesktop.AvaGithubDesktopL.NoHistoryDetail";
     public static readonly string SelectedCommit = "AvaGithubDesktop.AvaGithubDesktopL.SelectedCommit";
     public static readonly string CommitSha = "AvaGithubDesktop.AvaGithubDesktopL.CommitSha";
+    public static readonly string CopyCommitSha = "AvaGithubDesktop.AvaGithubDesktopL.CopyCommitSha";
     public static readonly string Author = "AvaGithubDesktop.AvaGithubDesktopL.Author";
     public static readonly string Date = "AvaGithubDesktop.AvaGithubDesktopL.Date";
     public static readonly string CommitChangedFileCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.CommitChangedFileCountFormat";

@@ -120,6 +120,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         ViewRepositoryOnGitHubCommand = ReactiveCommand.CreateFromTask(ViewRepositoryOnGitHubAsync, canViewCurrentRepositoryOnGitHub);
         ShowChangesCommand = ReactiveCommand.Create(ShowChanges);
         ShowHistoryCommand = ReactiveCommand.Create(ShowHistory);
+        CopySelectedCommitShaCommand = ReactiveCommand.CreateFromTask(CopySelectedCommitShaAsync, this.WhenAnyValue(model => model.CanCopySelectedCommitSha));
 
         var canSynchronize = this.WhenAnyValue(model => model.CanSynchronize);
         SynchronizeRepositoryCommand = ReactiveCommand.CreateFromTask(SynchronizeRepositoryAsync, canSynchronize);
@@ -192,6 +193,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ShowChangesCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ShowHistoryCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> CopySelectedCommitShaCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CheckoutBranchCommand { get; }
 
@@ -506,6 +509,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             this.RaiseAndSetIfChanged(ref _selectedCommit, value);
             this.RaisePropertyChanged(nameof(HasSelectedCommit));
             this.RaisePropertyChanged(nameof(SelectedCommitChangedFilesHeader));
+            this.RaisePropertyChanged(nameof(CanCopySelectedCommitSha));
             if (value is null)
             {
                 SelectedCommitFile = null;
@@ -524,6 +528,11 @@ public sealed class MainWindowViewModel : ViewModelBase
     }
 
     public bool HasSelectedCommit => SelectedCommit is not null;
+
+    public bool CanCopySelectedCommitSha =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        SelectedCommit is not null;
 
     public string HistoryHeaderText
     {
@@ -979,6 +988,19 @@ public sealed class MainWindowViewModel : ViewModelBase
             Path.Combine(RootPath, relativePath),
             AvaGithubDesktopL.StatusCopiedChangeFullPath,
             AvaGithubDesktopL.StatusCopyChangeFullPathFailedFormat);
+    }
+
+    private async Task CopySelectedCommitShaAsync()
+    {
+        if (SelectedCommit is null)
+        {
+            return;
+        }
+
+        await CopyTextAsync(
+            SelectedCommit.Sha,
+            AvaGithubDesktopL.StatusCopiedCommitSha,
+            AvaGithubDesktopL.StatusCopyCommitShaFailedFormat);
     }
 
     private async Task ShowChangeInFileManagerAsync(GitChangeItemViewModel change)
@@ -1809,6 +1831,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private void RaiseCommitStateChanged()
     {
         this.RaisePropertyChanged(nameof(CanCommit));
+        this.RaisePropertyChanged(nameof(CanCopySelectedCommitSha));
         this.RaisePropertyChanged(nameof(CommitButtonText));
         this.RaisePropertyChanged(nameof(SelectedChangesStatusText));
     }

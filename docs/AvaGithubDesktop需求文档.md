@@ -60,3 +60,4 @@
 - Desktop 风格 Changes 列表空白区域丢弃所有更改与贮藏所有更改菜单
 - Desktop 风格 Changes 文件项复制完整文件路径
 - Desktop 风格 Changes 文件项在外部编辑器中打开
+- Desktop 风格 History 选中提交复制完整 SHA

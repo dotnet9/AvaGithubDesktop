@@ -101,6 +101,13 @@
         <Setter Property="HorizontalContentAlignment" Value="Center" />
     </Style>
 
+    <Style Selector="Button.inlineAction">
+        <Setter Property="MinHeight" Value="24" />
+        <Setter Property="Padding" Value="8,2" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+
     <Style Selector="Button.destructive">
         <Setter Property="MinHeight" Value="30" />
         <Setter Property="Padding" Value="12,5" />
