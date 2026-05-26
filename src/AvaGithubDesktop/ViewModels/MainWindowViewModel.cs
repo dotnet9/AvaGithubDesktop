@@ -22,6 +22,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private string _rootPath = "-";
     private string _currentBranch = "-";
     private string _upstream = "-";
+    private string _remoteName = "-";
     private string _remoteUrl = "-";
     private string _lastCommit = "-";
     private string _aheadBehindText = "-";
@@ -32,6 +33,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isLoading;
     private bool _isCommitting;
     private bool _isCheckingOutBranch;
+    private bool _isSyncing;
     private bool _isInitialized;
     private bool _isBulkUpdatingIncludedChanges;
     private int _changedFilesCount;
@@ -41,6 +43,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private int _includedChangesCount;
     private int _ahead;
     private int _behind;
+    private DateTimeOffset? _lastFetchedAt;
     private bool? _areAllChangesIncluded = false;
     private LanguageOption? _selectedLanguage;
     private GitChangeItemViewModel? _selectedChange;
@@ -53,6 +56,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isDiffLoading;
     private string _diffTitle = string.Empty;
     private string _diffText = string.Empty;
+    private RepositorySyncOperation _activeSyncOperation = RepositorySyncOperation.None;
     private CompositeDisposable _changeSubscriptions = new();
 
     public MainWindowViewModel(
@@ -79,23 +83,48 @@ public sealed class MainWindowViewModel : ViewModelBase
         var canExecuteRepositoryCommand = this.WhenAnyValue(
             model => model.IsLoading,
             model => model.IsCommitting,
-            (loading, committing) => !loading && !committing);
+            model => model.IsCheckingOutBranch,
+            model => model.IsSyncing,
+            (loading, committing, checkingOutBranch, syncing) =>
+                !loading && !committing && !checkingOutBranch && !syncing);
         BrowseRepositoryCommand = ReactiveCommand.CreateFromTask(BrowseRepositoryAsync, canExecuteRepositoryCommand);
         OpenRepositoryCommand = ReactiveCommand.CreateFromTask(OpenRepositoryAsync, canExecuteRepositoryCommand);
         RefreshRepositoryCommand = ReactiveCommand.CreateFromTask(OpenRepositoryAsync, canExecuteRepositoryCommand);
         ShowChangesCommand = ReactiveCommand.Create(ShowChanges);
         ShowHistoryCommand = ReactiveCommand.Create(ShowHistory);
 
+        var canSynchronize = this.WhenAnyValue(
+            model => model.HasRepository,
+            model => model.IsLoading,
+            model => model.IsCommitting,
+            model => model.IsCheckingOutBranch,
+            model => model.IsSyncing,
+            model => model.RemoteName,
+            (hasRepository, isLoading, isCommitting, isCheckingOutBranch, isSyncing, remoteName) =>
+                hasRepository &&
+                !string.IsNullOrWhiteSpace(remoteName) &&
+                remoteName != "-" &&
+                !isLoading &&
+                !isCommitting &&
+                !isCheckingOutBranch &&
+                !isSyncing);
+        SynchronizeRepositoryCommand = ReactiveCommand.CreateFromTask(SynchronizeRepositoryAsync, canSynchronize);
+        FetchRepositoryCommand = ReactiveCommand.CreateFromTask(FetchRepositoryAsync, canSynchronize);
+        PullRepositoryCommand = ReactiveCommand.CreateFromTask(PullRepositoryAsync, canSynchronize);
+        PushRepositoryCommand = ReactiveCommand.CreateFromTask(PushRepositoryAsync, canSynchronize);
+
         var canCommit = this.WhenAnyValue(
             model => model.HasRepository,
             model => model.IsLoading,
             model => model.IsCommitting,
+            model => model.IsSyncing,
             model => model.CommitSummary,
             model => model.IncludedChangesCount,
-            (hasRepository, isLoading, isCommitting, summary, includedChangesCount) =>
+            (hasRepository, isLoading, isCommitting, isSyncing, summary, includedChangesCount) =>
                 hasRepository &&
                 !isLoading &&
                 !isCommitting &&
+                !isSyncing &&
                 includedChangesCount > 0 &&
                 !string.IsNullOrWhiteSpace(summary));
         CommitCommand = ReactiveCommand.CreateFromTask(CommitChangesAsync, canCommit);
@@ -105,12 +134,14 @@ public sealed class MainWindowViewModel : ViewModelBase
             model => model.IsLoading,
             model => model.IsCommitting,
             model => model.IsCheckingOutBranch,
+            model => model.IsSyncing,
             model => model.SelectedBranch,
-            (hasRepository, isLoading, isCommitting, isCheckingOutBranch, selectedBranch) =>
+            (hasRepository, isLoading, isCommitting, isCheckingOutBranch, isSyncing, selectedBranch) =>
                 hasRepository &&
                 !isLoading &&
                 !isCommitting &&
                 !isCheckingOutBranch &&
+                !isSyncing &&
                 selectedBranch is not null &&
                 !selectedBranch.IsCurrent);
         CheckoutBranchCommand = ReactiveCommand.CreateFromTask(CheckoutSelectedBranchAsync, canCheckoutBranch);
@@ -119,6 +150,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             UpdateAheadBehindText();
             RaiseLocalizedDerivedText();
+            RaiseSyncStateChanged();
             QueueDiffLoad();
         };
     }
@@ -140,6 +172,14 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> RefreshRepositoryCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CommitCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> SynchronizeRepositoryCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> FetchRepositoryCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> PullRepositoryCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> PushRepositoryCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ShowChangesCommand { get; }
 
@@ -172,6 +212,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             this.RaiseAndSetIfChanged(ref _currentBranch, value);
             this.RaisePropertyChanged(nameof(CommitButtonText));
+            RaiseSyncStateChanged();
         }
     }
 
@@ -181,10 +222,30 @@ public sealed class MainWindowViewModel : ViewModelBase
         private set => this.RaiseAndSetIfChanged(ref _upstream, value);
     }
 
+    public string RemoteName
+    {
+        get => _remoteName;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _remoteName, value);
+            RaiseSyncStateChanged();
+        }
+    }
+
     public string RemoteUrl
     {
         get => _remoteUrl;
         private set => this.RaiseAndSetIfChanged(ref _remoteUrl, value);
+    }
+
+    public DateTimeOffset? LastFetchedAt
+    {
+        get => _lastFetchedAt;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _lastFetchedAt, value);
+            RaiseSyncStateChanged();
+        }
     }
 
     public string LastCommit
@@ -220,6 +281,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(ShowEmptyRepository));
             RaiseCommitStateChanged();
             RaiseBranchStateChanged();
+            RaiseSyncStateChanged();
         }
     }
 
@@ -234,6 +296,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(ShowEmptyRepository));
             RaiseCommitStateChanged();
             RaiseBranchStateChanged();
+            RaiseSyncStateChanged();
         }
     }
 
@@ -245,6 +308,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             this.RaiseAndSetIfChanged(ref _isCommitting, value);
             RaiseCommitStateChanged();
             RaiseBranchStateChanged();
+            RaiseSyncStateChanged();
         }
     }
 
@@ -255,6 +319,19 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             this.RaiseAndSetIfChanged(ref _isCheckingOutBranch, value);
             RaiseBranchStateChanged();
+            RaiseSyncStateChanged();
+        }
+    }
+
+    public bool IsSyncing
+    {
+        get => _isSyncing;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isSyncing, value);
+            RaiseCommitStateChanged();
+            RaiseBranchStateChanged();
+            RaiseSyncStateChanged();
         }
     }
 
@@ -394,9 +471,79 @@ public sealed class MainWindowViewModel : ViewModelBase
         HasRepository &&
         !IsLoading &&
         !IsCommitting &&
+        !IsSyncing &&
         !IsCheckingOutBranch &&
         SelectedBranch is not null &&
         !SelectedBranch.IsCurrent;
+
+    public bool HasRemote => HasRepository && !string.IsNullOrWhiteSpace(RemoteName) && RemoteName != "-";
+
+    public bool CanSynchronize =>
+        HasRepository &&
+        HasRemote &&
+        !IsLoading &&
+        !IsCommitting &&
+        !IsCheckingOutBranch &&
+        !IsSyncing;
+
+    public string SyncActionTitle
+    {
+        get
+        {
+            if (!HasRemote)
+            {
+                return _localizer.Get(AvaGithubDesktopL.SyncNoRemote);
+            }
+
+            if (IsSyncing)
+            {
+                return _activeSyncOperation switch
+                {
+                    RepositorySyncOperation.Pull => _localizer.Format(AvaGithubDesktopL.SyncPullingTitleFormat, RemoteName),
+                    RepositorySyncOperation.Push => _localizer.Format(AvaGithubDesktopL.SyncPushingTitleFormat, RemoteName),
+                    _ => _localizer.Format(AvaGithubDesktopL.SyncFetchingTitleFormat, RemoteName)
+                };
+            }
+
+            if (_behind > 0)
+            {
+                return _localizer.Format(AvaGithubDesktopL.SyncPullTitleFormat, RemoteName);
+            }
+
+            if (_ahead > 0)
+            {
+                return _localizer.Format(AvaGithubDesktopL.SyncPushTitleFormat, RemoteName);
+            }
+
+            return _localizer.Format(AvaGithubDesktopL.SyncFetchTitleFormat, RemoteName);
+        }
+    }
+
+    public string SyncActionDescription
+    {
+        get
+        {
+            if (!HasRemote)
+            {
+                return _localizer.Get(AvaGithubDesktopL.SyncNoRemoteDescription);
+            }
+
+            if (IsSyncing)
+            {
+                return _localizer.Get(AvaGithubDesktopL.SyncInProgressDescription);
+            }
+
+            return FormatLastFetched(LastFetchedAt);
+        }
+    }
+
+    public string SyncActionIcon => IsSyncing
+        ? "..."
+        : _behind > 0
+            ? "↓"
+            : _ahead > 0
+                ? "↑"
+                : "↻";
 
     public GitChangeItemViewModel? SelectedChange
     {
@@ -487,6 +634,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         HasRepository &&
         !IsLoading &&
         !IsCommitting &&
+        !IsSyncing &&
         IncludedChangesCount > 0 &&
         !string.IsNullOrWhiteSpace(CommitSummary);
 
@@ -597,6 +745,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             HasRepository = false;
+            RemoteName = "-";
+            RemoteUrl = "-";
+            LastFetchedAt = null;
             ApplyBranches(Array.Empty<GitBranchItem>());
             ApplyHistory(Array.Empty<GitCommitItem>());
             ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusRepositoryLoadFailedFormat, ex.Message);
@@ -663,6 +814,103 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private Task SynchronizeRepositoryAsync()
+    {
+        if (_behind > 0)
+        {
+            return PullRepositoryAsync();
+        }
+
+        if (_ahead > 0)
+        {
+            return PushRepositoryAsync();
+        }
+
+        return FetchRepositoryAsync();
+    }
+
+    private Task FetchRepositoryAsync() =>
+        RunRemoteOperationAsync(RepositorySyncOperation.Fetch);
+
+    private Task PullRepositoryAsync() =>
+        RunRemoteOperationAsync(RepositorySyncOperation.Pull);
+
+    private Task PushRepositoryAsync() =>
+        RunRemoteOperationAsync(RepositorySyncOperation.Push);
+
+    private async Task RunRemoteOperationAsync(RepositorySyncOperation operation)
+    {
+        if (!CanSynchronize)
+        {
+            ErrorMessage = _localizer.Get(AvaGithubDesktopL.SyncNoRemoteDescription);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+            return;
+        }
+
+        _activeSyncOperation = operation;
+        IsSyncing = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(GetRemoteOperationStartedMessage(operation)));
+
+        try
+        {
+            switch (operation)
+            {
+                case RepositorySyncOperation.Pull:
+                    await _gitRepositoryService.PullAsync(RootPath, RemoteName, CancellationToken.None);
+                    break;
+                case RepositorySyncOperation.Push:
+                    await _gitRepositoryService.PushAsync(RootPath, RemoteName, CurrentBranch, CancellationToken.None);
+                    break;
+                default:
+                    await _gitRepositoryService.FetchAsync(RootPath, RemoteName, CancellationToken.None);
+                    break;
+            }
+
+            var snapshot = await _gitRepositoryService.LoadRepositoryAsync(RootPath, CancellationToken.None);
+            ApplySnapshot(snapshot);
+            var branches = await _gitRepositoryService.LoadBranchesAsync(snapshot.RootPath, CancellationToken.None);
+            ApplyBranches(branches);
+            var history = await _gitRepositoryService.LoadHistoryAsync(snapshot.RootPath, HistoryCommitLimit, CancellationToken.None);
+            ApplyHistory(history);
+            _eventBus.Publish(new StatusMessageChangedCommand(GetRemoteOperationCompletedMessage(operation)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(GetRemoteOperationFailedKey(operation), ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            _activeSyncOperation = RepositorySyncOperation.None;
+            IsSyncing = false;
+        }
+    }
+
+    private string GetRemoteOperationStartedMessage(RepositorySyncOperation operation) =>
+        operation switch
+        {
+            RepositorySyncOperation.Pull => _localizer.Format(AvaGithubDesktopL.StatusPullingFormat, RemoteName),
+            RepositorySyncOperation.Push => _localizer.Format(AvaGithubDesktopL.StatusPushingFormat, RemoteName),
+            _ => _localizer.Format(AvaGithubDesktopL.StatusFetchingFormat, RemoteName)
+        };
+
+    private string GetRemoteOperationCompletedMessage(RepositorySyncOperation operation) =>
+        operation switch
+        {
+            RepositorySyncOperation.Pull => _localizer.Format(AvaGithubDesktopL.StatusPulledFormat, RemoteName),
+            RepositorySyncOperation.Push => _localizer.Format(AvaGithubDesktopL.StatusPushedFormat, RemoteName),
+            _ => _localizer.Format(AvaGithubDesktopL.StatusFetchedFormat, RemoteName)
+        };
+
+    private static string GetRemoteOperationFailedKey(RepositorySyncOperation operation) =>
+        operation switch
+        {
+            RepositorySyncOperation.Pull => AvaGithubDesktopL.StatusPullFailedFormat,
+            RepositorySyncOperation.Push => AvaGithubDesktopL.StatusPushFailedFormat,
+            _ => AvaGithubDesktopL.StatusFetchFailedFormat
+        };
+
     private void ApplySnapshot(GitRepositorySnapshot snapshot)
     {
         HasRepository = true;
@@ -670,7 +918,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         RootPath = snapshot.RootPath;
         CurrentBranch = snapshot.CurrentBranch;
         Upstream = snapshot.Upstream;
+        RemoteName = snapshot.RemoteName;
         RemoteUrl = snapshot.RemoteUrl;
+        LastFetchedAt = snapshot.LastFetchedAt;
         LastCommit = snapshot.LastCommit;
         ChangedFilesCount = snapshot.ChangedFilesCount;
         StagedCount = snapshot.StagedCount;
@@ -679,6 +929,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _ahead = snapshot.Ahead;
         _behind = snapshot.Behind;
         UpdateAheadBehindText();
+        RaiseSyncStateChanged();
 
         var selectedPath = SelectedChange?.Path;
         _changeSubscriptions.Dispose();
@@ -743,6 +994,33 @@ public sealed class MainWindowViewModel : ViewModelBase
         AheadBehindText = HasRepository
             ? _localizer.Format(AvaGithubDesktopL.AheadBehindFormat, _ahead, _behind)
             : "-";
+        RaiseSyncStateChanged();
+    }
+
+    private string FormatLastFetched(DateTimeOffset? lastFetchedAt)
+    {
+        if (lastFetchedAt is null)
+        {
+            return _localizer.Get(AvaGithubDesktopL.SyncNeverFetched);
+        }
+
+        var elapsed = DateTimeOffset.Now - lastFetchedAt.Value.ToLocalTime();
+        if (elapsed.TotalMinutes < 2)
+        {
+            return _localizer.Get(AvaGithubDesktopL.SyncLastFetchedJustNow);
+        }
+
+        if (elapsed.TotalHours < 1)
+        {
+            return _localizer.Format(AvaGithubDesktopL.SyncLastFetchedMinutesAgoFormat, Math.Max(1, (int)elapsed.TotalMinutes));
+        }
+
+        if (elapsed.TotalDays < 1)
+        {
+            return _localizer.Format(AvaGithubDesktopL.SyncLastFetchedHoursAgoFormat, Math.Max(1, (int)elapsed.TotalHours));
+        }
+
+        return _localizer.Format(AvaGithubDesktopL.SyncLastFetchedDaysAgoFormat, Math.Max(1, (int)elapsed.TotalDays));
     }
 
     private void SetAllChangesIncluded(bool include)
@@ -790,6 +1068,15 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(SelectedChangesStatusText));
         this.RaisePropertyChanged(nameof(HistoryHeaderText));
         this.RaisePropertyChanged(nameof(SelectedCommitChangedFilesHeader));
+    }
+
+    private void RaiseSyncStateChanged()
+    {
+        this.RaisePropertyChanged(nameof(HasRemote));
+        this.RaisePropertyChanged(nameof(CanSynchronize));
+        this.RaisePropertyChanged(nameof(SyncActionTitle));
+        this.RaisePropertyChanged(nameof(SyncActionDescription));
+        this.RaisePropertyChanged(nameof(SyncActionIcon));
     }
 
     private void ShowChanges()
@@ -943,4 +1230,12 @@ public enum RepositorySection
 {
     Changes,
     History
+}
+
+public enum RepositorySyncOperation
+{
+    None,
+    Fetch,
+    Pull,
+    Push
 }

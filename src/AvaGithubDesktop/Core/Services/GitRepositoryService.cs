@@ -22,17 +22,24 @@ public sealed class GitRepositoryService : IGitRepositoryService
         var branch = await ResolveBranchAsync(root, cancellationToken);
         var status = await RunRequiredGitAsync(root, cancellationToken, "status", "--porcelain=v1", "-b");
         var upstream = await RunOptionalGitAsync(root, cancellationToken, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}");
-        var remote = await RunOptionalGitAsync(root, cancellationToken, "remote", "get-url", "origin");
+        var remotes = await RunOptionalGitAsync(root, cancellationToken, "remote");
+        var remoteName = ResolveRemoteName(upstream, remotes);
+        var remote = remoteName == "-"
+            ? string.Empty
+            : await RunOptionalGitAsync(root, cancellationToken, "remote", "get-url", remoteName);
         var lastCommit = await RunOptionalGitAsync(root, cancellationToken, "log", "-1", "--pretty=format:%h%x09%s%x09%cr");
         var changes = ParseChanges(status);
         var (ahead, behind) = ParseAheadBehind(status);
+        var lastFetchedAt = await ResolveLastFetchedAtAsync(root, cancellationToken);
 
         return new GitRepositorySnapshot(
             RepositoryName: new DirectoryInfo(root).Name,
             RootPath: root,
             CurrentBranch: branch,
             Upstream: string.IsNullOrWhiteSpace(upstream) ? "-" : upstream,
+            RemoteName: remoteName,
             RemoteUrl: string.IsNullOrWhiteSpace(remote) ? "-" : remote,
+            LastFetchedAt: lastFetchedAt,
             LastCommit: FormatLastCommit(lastCommit),
             Ahead: ahead,
             Behind: behind,
@@ -100,6 +107,76 @@ public sealed class GitRepositoryService : IGitRepositoryService
 
         var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
         await RunRequiredGitAsync(root, cancellationToken, "checkout", branchName);
+    }
+
+    public async Task FetchAsync(
+        string repositoryPath,
+        string remoteName,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        if (string.IsNullOrWhiteSpace(remoteName) || remoteName == "-")
+        {
+            throw new ArgumentException("A remote is required.", nameof(remoteName));
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        await RunRequiredGitAsync(root, cancellationToken, "fetch", "--prune", "--recurse-submodules=on-demand", remoteName);
+    }
+
+    public async Task PullAsync(
+        string repositoryPath,
+        string remoteName,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        if (string.IsNullOrWhiteSpace(remoteName) || remoteName == "-")
+        {
+            throw new ArgumentException("A remote is required.", nameof(remoteName));
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        await RunRequiredGitAsync(root, cancellationToken, "pull", "--ff", "--recurse-submodules", remoteName);
+    }
+
+    public async Task PushAsync(
+        string repositoryPath,
+        string remoteName,
+        string branchName,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        if (string.IsNullOrWhiteSpace(remoteName) || remoteName == "-")
+        {
+            throw new ArgumentException("A remote is required.", nameof(remoteName));
+        }
+
+        if (string.IsNullOrWhiteSpace(branchName) || branchName.StartsWith("HEAD", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("A local branch is required.", nameof(branchName));
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        var upstream = await RunOptionalGitAsync(root, cancellationToken, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}");
+        if (string.IsNullOrWhiteSpace(upstream))
+        {
+            await RunRequiredGitAsync(root, cancellationToken, "push", "--set-upstream", remoteName, branchName);
+            return;
+        }
+
+        await RunRequiredGitAsync(root, cancellationToken, "push", remoteName, branchName);
     }
 
     public async Task<string> LoadWorkingTreeDiffAsync(
@@ -227,6 +304,45 @@ public sealed class GitRepositoryService : IGitRepositoryService
 
         var shortSha = await RunOptionalGitAsync(root, cancellationToken, "rev-parse", "--short", "HEAD");
         return string.IsNullOrWhiteSpace(shortSha) ? "HEAD" : $"HEAD ({shortSha})";
+    }
+
+    private static string ResolveRemoteName(string upstream, string remotes)
+    {
+        if (!string.IsNullOrWhiteSpace(upstream))
+        {
+            var separatorIndex = upstream.IndexOf('/', StringComparison.Ordinal);
+            if (separatorIndex > 0)
+            {
+                return upstream[..separatorIndex];
+            }
+        }
+
+        var remoteNames = remotes
+            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (remoteNames.Length == 0)
+        {
+            return "-";
+        }
+
+        return remoteNames.FirstOrDefault(remote => remote.Equals("origin", StringComparison.OrdinalIgnoreCase))
+            ?? remoteNames[0];
+    }
+
+    private static async Task<DateTimeOffset?> ResolveLastFetchedAtAsync(string root, CancellationToken cancellationToken)
+    {
+        var gitDirectory = await RunOptionalGitAsync(root, cancellationToken, "rev-parse", "--git-dir");
+        if (string.IsNullOrWhiteSpace(gitDirectory))
+        {
+            return null;
+        }
+
+        var fullGitDirectory = Path.IsPathFullyQualified(gitDirectory)
+            ? gitDirectory
+            : Path.GetFullPath(Path.Combine(root, gitDirectory));
+        var fetchHeadPath = Path.Combine(fullGitDirectory, "FETCH_HEAD");
+        return File.Exists(fetchHeadPath)
+            ? new DateTimeOffset(File.GetLastWriteTime(fetchHeadPath))
+            : null;
     }
 
     private static IReadOnlyList<GitChangeItem> ParseChanges(string status)

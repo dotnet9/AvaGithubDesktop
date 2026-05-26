@@ -4,6 +4,14 @@
         <Setter Property="Padding" Value="12,5" />
     </Style>
 
+    <Style Selector="Button.syncToolbar">
+        <Setter Property="MinWidth" Value="180" />
+        <Setter Property="MinHeight" Value="38" />
+        <Setter Property="Padding" Value="10,4" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
     <Style Selector="TextBox.repositoryPath">
         <Setter Property="MinHeight" Value="30" />
         <Setter Property="VerticalContentAlignment" Value="Center" />

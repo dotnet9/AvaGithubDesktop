@@ -43,3 +43,4 @@
 - Desktop 风格 History 提交列表与提交文件清单
 - Desktop 风格选中文件文本 Diff 预览
 - 本地分支列表与分支 Checkout
+- Desktop 风格 Fetch/Pull/Push 远端同步入口

@@ -16,6 +16,9 @@ public static class AvaGithubDesktopL
     public static readonly string MenuHelp = "AvaGithubDesktop.AvaGithubDesktopL.MenuHelp";
     public static readonly string MenuAddLocalRepository = "AvaGithubDesktop.AvaGithubDesktopL.MenuAddLocalRepository";
     public static readonly string MenuRefresh = "AvaGithubDesktop.AvaGithubDesktopL.MenuRefresh";
+    public static readonly string MenuPush = "AvaGithubDesktop.AvaGithubDesktopL.MenuPush";
+    public static readonly string MenuPull = "AvaGithubDesktop.AvaGithubDesktopL.MenuPull";
+    public static readonly string MenuFetch = "AvaGithubDesktop.AvaGithubDesktopL.MenuFetch";
     public static readonly string MenuAbout = "AvaGithubDesktop.AvaGithubDesktopL.MenuAbout";
     public static readonly string Repository = "AvaGithubDesktop.AvaGithubDesktopL.Repository";
     public static readonly string CurrentRepository = "AvaGithubDesktop.AvaGithubDesktopL.CurrentRepository";
@@ -86,4 +89,27 @@ public static class AvaGithubDesktopL
     public static readonly string StatusCheckingOutBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckingOutBranchFormat";
     public static readonly string StatusCheckedOutBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckedOutBranchFormat";
     public static readonly string StatusCheckoutBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckoutBranchFailedFormat";
+    public static readonly string SyncFetchTitleFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncFetchTitleFormat";
+    public static readonly string SyncPullTitleFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncPullTitleFormat";
+    public static readonly string SyncPushTitleFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncPushTitleFormat";
+    public static readonly string SyncFetchingTitleFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncFetchingTitleFormat";
+    public static readonly string SyncPullingTitleFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncPullingTitleFormat";
+    public static readonly string SyncPushingTitleFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncPushingTitleFormat";
+    public static readonly string SyncNoRemote = "AvaGithubDesktop.AvaGithubDesktopL.SyncNoRemote";
+    public static readonly string SyncNoRemoteDescription = "AvaGithubDesktop.AvaGithubDesktopL.SyncNoRemoteDescription";
+    public static readonly string SyncInProgressDescription = "AvaGithubDesktop.AvaGithubDesktopL.SyncInProgressDescription";
+    public static readonly string SyncNeverFetched = "AvaGithubDesktop.AvaGithubDesktopL.SyncNeverFetched";
+    public static readonly string SyncLastFetchedJustNow = "AvaGithubDesktop.AvaGithubDesktopL.SyncLastFetchedJustNow";
+    public static readonly string SyncLastFetchedMinutesAgoFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncLastFetchedMinutesAgoFormat";
+    public static readonly string SyncLastFetchedHoursAgoFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncLastFetchedHoursAgoFormat";
+    public static readonly string SyncLastFetchedDaysAgoFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncLastFetchedDaysAgoFormat";
+    public static readonly string StatusFetchingFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusFetchingFormat";
+    public static readonly string StatusFetchedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusFetchedFormat";
+    public static readonly string StatusFetchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusFetchFailedFormat";
+    public static readonly string StatusPullingFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPullingFormat";
+    public static readonly string StatusPulledFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPulledFormat";
+    public static readonly string StatusPullFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPullFailedFormat";
+    public static readonly string StatusPushingFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPushingFormat";
+    public static readonly string StatusPushedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPushedFormat";
+    public static readonly string StatusPushFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPushFailedFormat";
 }

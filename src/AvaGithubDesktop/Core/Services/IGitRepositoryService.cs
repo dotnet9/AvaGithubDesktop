@@ -20,6 +20,22 @@ public interface IGitRepositoryService
         string branchName,
         CancellationToken cancellationToken);
 
+    Task FetchAsync(
+        string repositoryPath,
+        string remoteName,
+        CancellationToken cancellationToken);
+
+    Task PullAsync(
+        string repositoryPath,
+        string remoteName,
+        CancellationToken cancellationToken);
+
+    Task PushAsync(
+        string repositoryPath,
+        string remoteName,
+        string branchName,
+        CancellationToken cancellationToken);
+
     Task<string> LoadWorkingTreeDiffAsync(
         string repositoryPath,
         IReadOnlyList<string> paths,
