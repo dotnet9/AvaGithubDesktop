@@ -1,0 +1,37 @@
+<codewf:CodeWFWindow
+    x:Class="AvaGithubDesktop.Views.MarkdownDocumentWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:codewf="https://codewf.com"
+    xmlns:md="https://codewf.com"
+    Width="720"
+    Height="640"
+    MinWidth="560"
+    MinHeight="420"
+    Background="{DynamicResource PanelBackgroundBrush}"
+    CanResize="True"
+    ShowInTaskbar="False"
+    TitleBarBackground="#24292F"
+    TitleBarBorderBrush="#11161C"
+    TitleBarForeground="#F3F4F6"
+    TitleBarHeight="34"
+    WindowStartupLocation="CenterOwner">
+
+    <codewf:CodeWFWindow.LeftContent>
+        <TextBlock
+            x:Name="TitleText"
+            Margin="12,0,0,0"
+            VerticalAlignment="Center"
+            FontSize="13"
+            FontWeight="SemiBold"
+            Foreground="#F3F4F6" />
+    </codewf:CodeWFWindow.LeftContent>
+
+    <Border Padding="28" Background="{DynamicResource PanelBackgroundBrush}">
+        <ScrollViewer
+            HorizontalScrollBarVisibility="Disabled"
+            VerticalScrollBarVisibility="Auto">
+            <md:MarkdownViewer x:Name="DocumentMarkdownViewer" />
+        </ScrollViewer>
+    </Border>
+</codewf:CodeWFWindow>

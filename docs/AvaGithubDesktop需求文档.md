@@ -49,3 +49,4 @@
 - 版本号集中维护在根目录 Directory.Build.props；第一位用于架构级调整，第二位用于功能新增或修改，第三/四位用于日常开发迭代与修复
 - Desktop 风格 Current Branch 分支弹出选择器与分支过滤
 - Desktop 风格 Stash all changes、Stashed Changes、Restore stash、Discard stash
+- 使用 CodeWF.Markdown 展示更新日志与关于信息

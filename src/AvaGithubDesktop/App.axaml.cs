@@ -36,6 +36,7 @@ public partial class App : PrismApplication
         containerRegistry.RegisterSingleton<IAppLocalizer, AppLocalizer>();
         containerRegistry.RegisterSingleton<IGitRepositoryService, GitRepositoryService>();
         containerRegistry.RegisterSingleton<IRepositoryPickerService, RepositoryPickerService>();
+        containerRegistry.RegisterSingleton<IHelpService, HelpService>();
         containerRegistry.RegisterSingleton<ShellStatusViewModel>();
         containerRegistry.RegisterSingleton<MainWindowViewModel>();
         containerRegistry.Register<MainWindow>();

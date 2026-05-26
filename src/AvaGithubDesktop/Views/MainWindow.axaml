@@ -51,7 +51,8 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuDiscardStash}}" Command="{Binding DiscardStashCommand}" />
                 </MenuItem>
                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuHelp}}">
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAbout}}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Changelog}}" Command="{Binding ShowChangelogCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAbout}}" Command="{Binding ShowAboutCommand}" />
                 </MenuItem>
             </Menu>
         </StackPanel>

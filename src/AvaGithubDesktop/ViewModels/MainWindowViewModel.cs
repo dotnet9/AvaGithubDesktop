@@ -15,6 +15,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private const int HistoryCommitLimit = 50;
     private readonly IGitRepositoryService _gitRepositoryService;
     private readonly IRepositoryPickerService _repositoryPickerService;
+    private readonly IHelpService _helpService;
     private readonly IAppLocalizer _localizer;
     private readonly IEventBus _eventBus;
     private string _repositoryPath;
@@ -68,12 +69,14 @@ public sealed class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel(
         IGitRepositoryService gitRepositoryService,
         IRepositoryPickerService repositoryPickerService,
+        IHelpService helpService,
         IAppLocalizer localizer,
         IEventBus eventBus,
         ShellStatusViewModel statusBar)
     {
         _gitRepositoryService = gitRepositoryService;
         _repositoryPickerService = repositoryPickerService;
+        _helpService = helpService;
         _localizer = localizer;
         _eventBus = eventBus;
         StatusBar = statusBar;
@@ -107,6 +110,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         StashAllChangesCommand = ReactiveCommand.CreateFromTask(StashAllChangesAsync, this.WhenAnyValue(model => model.CanStashChanges));
         RestoreStashCommand = ReactiveCommand.CreateFromTask(RestoreStashAsync, this.WhenAnyValue(model => model.CanRestoreStash));
         DiscardStashCommand = ReactiveCommand.CreateFromTask(DiscardStashAsync, this.WhenAnyValue(model => model.CanDiscardStash));
+        ShowChangelogCommand = ReactiveCommand.CreateFromTask(ShowChangelogAsync);
+        ShowAboutCommand = ReactiveCommand.CreateFromTask(ShowAboutAsync);
 
         _localizer.CultureChanged += (_, _) =>
         {
@@ -158,6 +163,10 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> RestoreStashCommand { get; }
 
     public ReactiveCommand<Unit, Unit> DiscardStashCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ShowChangelogCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ShowAboutCommand { get; }
 
     public string RepositoryPath
     {
@@ -815,6 +824,34 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         RepositoryPath = selectedPath;
         await OpenRepositoryAsync();
+    }
+
+    private async Task ShowChangelogAsync()
+    {
+        try
+        {
+            await _helpService.ShowChangelogWindowAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedChangelog)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenHelpFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+    }
+
+    private async Task ShowAboutAsync()
+    {
+        try
+        {
+            await _helpService.ShowAboutWindowAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedAbout)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenHelpFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
     }
 
     private async Task OpenRepositoryAsync()
