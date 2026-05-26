@@ -1,7 +1,13 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="src/AvaGithubDesktop.Controls/AvaGithubDesktop.Controls.csproj" />
-    <Project Path="src/AvaGithubDesktop.Controls.Themes/AvaGithubDesktop.Controls.Themes.csproj" />
-    <Project Path="src/AvaGithubDesktop/AvaGithubDesktop.csproj" />
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="docs/AvaGithubDesktop需求文档.md" />
+    <File Path="docs/开发日志.md" />
+    <File Path="docs/更新日志.md" />
+    <File Path="README.md" />
   </Folder>
+  <Project Path="src/AvaGithubDesktop.Controls.Themes/AvaGithubDesktop.Controls.Themes.csproj" />
+  <Project Path="src/AvaGithubDesktop.Controls/AvaGithubDesktop.Controls.csproj" />
+  <Project Path="src/AvaGithubDesktop/AvaGithubDesktop.csproj" />
 </Solution>
