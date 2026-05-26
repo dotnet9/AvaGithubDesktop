@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <AssemblyName>AvaGithubDesktop.Controls</AssemblyName>
+    <RootNamespace>AvaGithubDesktop.Controls</RootNamespace>
+    <IsPackable>true</IsPackable>
+    <Title>AvaGithubDesktop.Controls</Title>
+    <Description>Reusable controls for AvaGithubDesktop.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+  </ItemGroup>
+</Project>

@@ -36,6 +36,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AvaGithubDesktop.Controls.Themes\AvaGithubDesktop.Controls.Themes.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="I18n\Language.cs">
+      <DependentUpon>Language.tt</DependentUpon>
+    </Compile>
+    <None Update="I18n\Language.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Language.cs</LastGenOutput>
+    </None>
     <None Update="I18n\*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>I18n\AvaGithubDesktop\%(Filename)%(Extension)</TargetPath>

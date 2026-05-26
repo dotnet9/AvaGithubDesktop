@@ -1,5 +1,7 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/AvaGithubDesktop.Controls/AvaGithubDesktop.Controls.csproj" />
+    <Project Path="src/AvaGithubDesktop.Controls.Themes/AvaGithubDesktop.Controls.Themes.csproj" />
     <Project Path="src/AvaGithubDesktop/AvaGithubDesktop.csproj" />
   </Folder>
 </Solution>

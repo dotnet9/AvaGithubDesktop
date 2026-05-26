@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <AssemblyName>AvaGithubDesktop.Controls.Themes</AssemblyName>
+    <RootNamespace>AvaGithubDesktop.Controls.Themes</RootNamespace>
+    <IsPackable>true</IsPackable>
+    <Title>AvaGithubDesktop.Controls.Themes</Title>
+    <Description>Theme resources for AvaGithubDesktop controls and shell UI.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AvaGithubDesktop.Controls\AvaGithubDesktop.Controls.csproj" />
+  </ItemGroup>
+</Project>

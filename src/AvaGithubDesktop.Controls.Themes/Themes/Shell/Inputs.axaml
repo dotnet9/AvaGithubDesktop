@@ -1,0 +1,44 @@
+<Styles xmlns="https://github.com/avaloniaui">
+    <Style Selector="Button.toolbar">
+        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="Padding" Value="12,5" />
+    </Style>
+
+    <Style Selector="TextBox.repositoryPath">
+        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="TextBox.commitSummary">
+        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="TextBox.commitDescription">
+        <Setter Property="MinHeight" Value="88" />
+        <Setter Property="AcceptsReturn" Value="True" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style Selector="TextBox.diffViewer">
+        <Setter Property="AcceptsReturn" Value="True" />
+        <Setter Property="FontFamily" Value="Consolas, Cascadia Mono, monospace" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+    </Style>
+
+    <Style Selector="Button.commitButton">
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Button.repositoryTab">
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+</Styles>

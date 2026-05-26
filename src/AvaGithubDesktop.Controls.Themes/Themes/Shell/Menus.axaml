@@ -1,0 +1,22 @@
+<Styles xmlns="https://github.com/avaloniaui">
+    <Style Selector="Menu.titleBar">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Height" Value="34" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Menu.titleBar > MenuItem">
+        <Setter Property="Foreground" Value="#F3F4F6" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Padding" Value="8,0" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style Selector="Menu.titleBar > MenuItem:pointerover">
+        <Setter Property="Background" Value="#32383F" />
+    </Style>
+
+    <Style Selector="Menu.titleBar > MenuItem:open">
+        <Setter Property="Background" Value="#3A424B" />
+    </Style>
+</Styles>
