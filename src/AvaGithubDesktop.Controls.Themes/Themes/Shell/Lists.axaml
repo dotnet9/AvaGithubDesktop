@@ -59,4 +59,17 @@
     <Style Selector="ListBox.branchSelector ListBoxItem:selected">
         <Setter Property="Background" Value="#DDEBFA" />
     </Style>
+
+    <Style Selector="Button.repositoryListItem">
+        <Setter Property="MinHeight" Value="29" />
+        <Setter Property="Padding" Value="8,0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+
+    <Style Selector="Button.repositoryListItem:pointerover">
+        <Setter Property="Background" Value="#EEF3F8" />
+    </Style>
 </Styles>

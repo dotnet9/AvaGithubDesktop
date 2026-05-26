@@ -31,6 +31,12 @@ public static class AvaGithubDesktopL
     public static readonly string Repository = "AvaGithubDesktop.AvaGithubDesktopL.Repository";
     public static readonly string CurrentRepository = "AvaGithubDesktop.AvaGithubDesktopL.CurrentRepository";
     public static readonly string RepositoryPathWatermark = "AvaGithubDesktop.AvaGithubDesktopL.RepositoryPathWatermark";
+    public static readonly string RepositorySelectorDetailFallback = "AvaGithubDesktop.AvaGithubDesktopL.RepositorySelectorDetailFallback";
+    public static readonly string RepositoryFilterPlaceholder = "AvaGithubDesktop.AvaGithubDesktopL.RepositoryFilterPlaceholder";
+    public static readonly string AddRepository = "AvaGithubDesktop.AvaGithubDesktopL.AddRepository";
+    public static readonly string AddExistingRepository = "AvaGithubDesktop.AvaGithubDesktopL.AddExistingRepository";
+    public static readonly string RecentRepositories = "AvaGithubDesktop.AvaGithubDesktopL.RecentRepositories";
+    public static readonly string NoRepositoriesFound = "AvaGithubDesktop.AvaGithubDesktopL.NoRepositoriesFound";
     public static readonly string Browse = "AvaGithubDesktop.AvaGithubDesktopL.Browse";
     public static readonly string Open = "AvaGithubDesktop.AvaGithubDesktopL.Open";
     public static readonly string Refresh = "AvaGithubDesktop.AvaGithubDesktopL.Refresh";

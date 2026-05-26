@@ -15,6 +15,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private const int HistoryCommitLimit = 50;
     private readonly IGitRepositoryService _gitRepositoryService;
     private readonly IRepositoryPickerService _repositoryPickerService;
+    private readonly IRepositoryHistoryService _repositoryHistoryService;
     private readonly IHelpService _helpService;
     private readonly IAppLocalizer _localizer;
     private readonly IEventBus _eventBus;
@@ -32,6 +33,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private string _commitDescription = string.Empty;
     private string _changesFilterText = string.Empty;
     private string _branchFilterText = string.Empty;
+    private string _repositoryFilterText = string.Empty;
     private bool _hasRepository;
     private bool _isLoading;
     private bool _isCommitting;
@@ -65,10 +67,12 @@ public sealed class MainWindowViewModel : ViewModelBase
     private string _diffText = string.Empty;
     private RepositorySyncOperation _activeSyncOperation = RepositorySyncOperation.None;
     private CompositeDisposable _changeSubscriptions = new();
+    private IReadOnlyList<RepositoryListItemViewModel> _knownRepositories = [];
 
     public MainWindowViewModel(
         IGitRepositoryService gitRepositoryService,
         IRepositoryPickerService repositoryPickerService,
+        IRepositoryHistoryService repositoryHistoryService,
         IHelpService helpService,
         IAppLocalizer localizer,
         IEventBus eventBus,
@@ -76,6 +80,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         _gitRepositoryService = gitRepositoryService;
         _repositoryPickerService = repositoryPickerService;
+        _repositoryHistoryService = repositoryHistoryService;
         _helpService = helpService;
         _localizer = localizer;
         _eventBus = eventBus;
@@ -117,6 +122,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             UpdateAheadBehindText();
             RaiseLocalizedDerivedText();
+            RebuildRepositoryGroups();
+            this.RaisePropertyChanged(nameof(RepositorySelectorTitle));
+            this.RaisePropertyChanged(nameof(RepositorySelectorDetail));
             RaiseSyncStateChanged();
             QueueDiffLoad();
         };
@@ -133,6 +141,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ObservableCollection<GitBranchItem> Branches { get; } = new();
 
     public ObservableCollection<GitBranchItem> FilteredBranches { get; } = new();
+
+    public ObservableCollection<RepositoryListGroupViewModel> RepositoryGroups { get; } = new();
 
     public ShellStatusViewModel StatusBar { get; }
 
@@ -177,14 +187,40 @@ public sealed class MainWindowViewModel : ViewModelBase
     public string RepositoryName
     {
         get => _repositoryName;
-        private set => this.RaiseAndSetIfChanged(ref _repositoryName, value);
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _repositoryName, value);
+            this.RaisePropertyChanged(nameof(RepositorySelectorTitle));
+        }
     }
 
     public string RootPath
     {
         get => _rootPath;
-        private set => this.RaiseAndSetIfChanged(ref _rootPath, value);
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _rootPath, value);
+            this.RaisePropertyChanged(nameof(RepositorySelectorDetail));
+        }
     }
+
+    public string RepositoryFilterText
+    {
+        get => _repositoryFilterText;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _repositoryFilterText, value);
+            RebuildRepositoryGroups();
+        }
+    }
+
+    public string RepositorySelectorTitle =>
+        HasRepository ? RepositoryName : _localizer.Get(AvaGithubDesktopL.NoRepositoryTitle);
+
+    public string RepositorySelectorDetail =>
+        HasRepository ? RootPath : _localizer.Get(AvaGithubDesktopL.RepositorySelectorDetailFallback);
+
+    public bool HasNoRepositoryMatches => RepositoryGroups.Count == 0;
 
     public string CurrentBranch
     {
@@ -260,6 +296,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             this.RaiseAndSetIfChanged(ref _hasRepository, value);
             this.RaisePropertyChanged(nameof(ShowEmptyRepository));
+            this.RaisePropertyChanged(nameof(RepositorySelectorTitle));
+            this.RaisePropertyChanged(nameof(RepositorySelectorDetail));
+            UpdateCurrentRepositoryIndicators();
             RaiseOperationStateChanged();
         }
     }
@@ -805,6 +844,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
 
         _isInitialized = true;
+        await LoadRepositoryHistoryAsync();
         if (Directory.Exists(RepositoryPath))
         {
             await OpenRepositoryAsync();
@@ -823,6 +863,13 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
 
         RepositoryPath = selectedPath;
+        await OpenRepositoryAsync();
+    }
+
+    private async Task OpenKnownRepositoryAsync(RepositoryListItemViewModel repository)
+    {
+        RepositoryFilterText = string.Empty;
+        RepositoryPath = repository.Path;
         await OpenRepositoryAsync();
     }
 
@@ -876,6 +923,8 @@ public sealed class MainWindowViewModel : ViewModelBase
             ApplyBranches(branches);
             var history = await _gitRepositoryService.LoadHistoryAsync(snapshot.RootPath, HistoryCommitLimit, CancellationToken.None);
             ApplyHistory(history);
+            await _repositoryHistoryService.AddOrUpdateAsync(snapshot.RootPath, CancellationToken.None);
+            await LoadRepositoryHistoryAsync();
             _eventBus.Publish(new RepositoryOpenedCommand(snapshot.RepositoryName, snapshot.ChangedFilesCount));
         }
         catch (Exception ex)
@@ -1149,12 +1198,101 @@ public sealed class MainWindowViewModel : ViewModelBase
         ApplyHistory(history);
     }
 
+    private async Task LoadRepositoryHistoryAsync()
+    {
+        var entries = await _repositoryHistoryService.LoadKnownRepositoriesAsync(CancellationToken.None);
+        _knownRepositories = entries
+            .Select(entry => new RepositoryListItemViewModel(entry, OpenKnownRepositoryAsync))
+            .ToArray();
+        UpdateCurrentRepositoryIndicators();
+        RebuildRepositoryGroups();
+    }
+
+    private void RebuildRepositoryGroups()
+    {
+        RepositoryGroups.Clear();
+
+        var filteredRepositories = _knownRepositories
+            .Where(MatchesRepositoryFilter)
+            .ToArray();
+
+        if (filteredRepositories.Length > 1)
+        {
+            AddRepositoryGroup(
+                _localizer.Get(AvaGithubDesktopL.RecentRepositories),
+                filteredRepositories
+                    .OrderByDescending(repository => repository.LastOpenedAt)
+                    .ThenBy(repository => repository.Name, StringComparer.OrdinalIgnoreCase)
+                    .Take(5));
+        }
+
+        foreach (var group in filteredRepositories
+                     .GroupBy(repository => repository.GroupName)
+                     .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase))
+        {
+            AddRepositoryGroup(
+                group.Key,
+                group.OrderBy(repository => repository.Name, StringComparer.OrdinalIgnoreCase));
+        }
+
+        this.RaisePropertyChanged(nameof(HasNoRepositoryMatches));
+    }
+
+    private void AddRepositoryGroup(string header, IEnumerable<RepositoryListItemViewModel> repositories)
+    {
+        var items = repositories.ToArray();
+        if (items.Length == 0)
+        {
+            return;
+        }
+
+        RepositoryGroups.Add(new RepositoryListGroupViewModel(header, items));
+    }
+
+    private bool MatchesRepositoryFilter(RepositoryListItemViewModel repository)
+    {
+        var filter = RepositoryFilterText.Trim();
+        if (string.IsNullOrWhiteSpace(filter))
+        {
+            return true;
+        }
+
+        return repository.Name.Contains(filter, StringComparison.OrdinalIgnoreCase)
+               || repository.Path.Contains(filter, StringComparison.OrdinalIgnoreCase)
+               || repository.GroupName.Contains(filter, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void UpdateCurrentRepositoryIndicators()
+    {
+        var currentPath = HasRepository ? RootPath : RepositoryPath;
+        var normalizedCurrentPath = NormalizePathForComparison(currentPath);
+        foreach (var repository in _knownRepositories)
+        {
+            repository.IsCurrent = string.Equals(
+                NormalizePathForComparison(repository.Path),
+                normalizedCurrentPath,
+                StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    private static string NormalizePathForComparison(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return string.Empty;
+        }
+
+        return Path.GetFullPath(path.Trim())
+            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+    }
+
     private void ApplySnapshot(GitRepositorySnapshot snapshot)
     {
         // 每次打开、提交、切分支、同步后都从 Git 重新读取快照，避免 UI 自己推断仓库状态。
         HasRepository = true;
         RepositoryName = snapshot.RepositoryName;
         RootPath = snapshot.RootPath;
+        UpdateCurrentRepositoryIndicators();
         CurrentBranch = snapshot.CurrentBranch;
         Upstream = snapshot.Upstream;
         RemoteName = snapshot.RemoteName;
@@ -1396,6 +1534,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(BranchesHeaderText));
         this.RaisePropertyChanged(nameof(StashAllChangesButtonText));
         this.RaisePropertyChanged(nameof(StashDescriptionText));
+        this.RaisePropertyChanged(nameof(RepositorySelectorTitle));
+        this.RaisePropertyChanged(nameof(RepositorySelectorDetail));
     }
 
     private void RaiseSyncStateChanged()

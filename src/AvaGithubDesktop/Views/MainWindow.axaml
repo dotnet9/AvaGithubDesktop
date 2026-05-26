@@ -65,34 +65,117 @@
             Background="{DynamicResource PanelBackgroundBrush}"
             BorderBrush="{DynamicResource PanelBorderBrush}"
             BorderThickness="0,0,0,1">
-            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="8">
-                <TextBlock
-                    VerticalAlignment="Center"
-                    Classes="section"
-                    Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Repository}}" />
-                <TextBox
+            <Grid ColumnDefinitions="280,190,180,*,150" ColumnSpacing="8">
+                <Button
+                    Classes="repositorySelector"
+                    HorizontalAlignment="Stretch"
+                    ToolTip.Tip="{Binding RepositorySelectorDetail}">
+                    <Button.Flyout>
+                        <Flyout>
+                            <Border Classes="repositoryFlyout">
+                                <Grid Width="330" RowDefinitions="Auto,*" RowSpacing="10">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <TextBox
+                                            Classes="repositoryFilter"
+                                            PlaceholderText="{i18n:I18n {x:Static l:AvaGithubDesktopL.RepositoryFilterPlaceholder}}"
+                                            Text="{Binding RepositoryFilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        <Button Grid.Column="1" Classes="repositoryAdd">
+                                            <Button.Flyout>
+                                                <Flyout>
+                                                    <StackPanel Width="220" Spacing="4">
+                                                        <Button
+                                                            Classes="repositoryAddMenu"
+                                                            Command="{Binding BrowseRepositoryCommand}"
+                                                            Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.AddExistingRepository}}" />
+                                                    </StackPanel>
+                                                </Flyout>
+                                            </Button.Flyout>
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.AddRepository}}" />
+                                                <TextBlock FontWeight="SemiBold" Text="v" />
+                                            </StackPanel>
+                                        </Button>
+                                    </Grid>
+                                    <Grid Grid.Row="1">
+                                        <ScrollViewer
+                                            MaxHeight="520"
+                                            HorizontalScrollBarVisibility="Disabled"
+                                            VerticalScrollBarVisibility="Auto">
+                                            <ItemsControl ItemsSource="{Binding RepositoryGroups}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:RepositoryListGroupViewModel">
+                                                        <StackPanel>
+                                                            <TextBlock Classes="repositoryGroupHeader" Text="{Binding Header}" />
+                                                            <ItemsControl ItemsSource="{Binding Items}">
+                                                                <ItemsControl.ItemTemplate>
+                                                                    <DataTemplate x:DataType="vm:RepositoryListItemViewModel">
+                                                                        <Button
+                                                                            Classes="repositoryListItem"
+                                                                            Command="{Binding OpenCommand}"
+                                                                            ToolTip.Tip="{Binding Path}">
+                                                                            <Grid ColumnDefinitions="20,*,Auto" ColumnSpacing="8">
+                                                                                <TextBlock
+                                                                                    VerticalAlignment="Center"
+                                                                                    Classes="muted"
+                                                                                    Text="▱" />
+                                                                                <TextBlock
+                                                                                    Grid.Column="1"
+                                                                                    VerticalAlignment="Center"
+                                                                                    Text="{Binding Name}"
+                                                                                    TextTrimming="CharacterEllipsis" />
+                                                                                <TextBlock
+                                                                                    Grid.Column="2"
+                                                                                    VerticalAlignment="Center"
+                                                                                    Foreground="#0969DA"
+                                                                                    FontSize="18"
+                                                                                    IsVisible="{Binding IsCurrent}"
+                                                                                    Text="•" />
+                                                                            </Grid>
+                                                                        </Button>
+                                                                    </DataTemplate>
+                                                                </ItemsControl.ItemTemplate>
+                                                            </ItemsControl>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Classes="muted"
+                                            IsVisible="{Binding HasNoRepositoryMatches}"
+                                            Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.NoRepositoriesFound}}" />
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </Flyout>
+                    </Button.Flyout>
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Classes="muted"
+                            FontSize="18"
+                            Text="▱" />
+                        <StackPanel Grid.Column="1" Spacing="1">
+                            <TextBlock
+                                Classes="muted"
+                                FontSize="11"
+                                Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.CurrentRepository}}" />
+                            <TextBlock
+                                FontWeight="SemiBold"
+                                Text="{Binding RepositorySelectorTitle}"
+                                TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                        <TextBlock
+                            Grid.Column="2"
+                            VerticalAlignment="Center"
+                            FontWeight="SemiBold"
+                            Text="v" />
+                    </Grid>
+                </Button>
+                <Button
                     Grid.Column="1"
-                    Classes="repositoryPath"
-                    PlaceholderText="{i18n:I18n {x:Static l:AvaGithubDesktopL.RepositoryPathWatermark}}"
-                    Text="{Binding RepositoryPath, Mode=TwoWay}"
-                    />
-                <Button
-                    Grid.Column="2"
-                    Classes="toolbar"
-                    Command="{Binding BrowseRepositoryCommand}"
-                    Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.Browse}}" />
-                <Button
-                    Grid.Column="3"
-                    Classes="toolbar"
-                    Command="{Binding OpenRepositoryCommand}"
-                    Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.Open}}" />
-                <Button
-                    Grid.Column="4"
-                    Classes="toolbar"
-                    Command="{Binding RefreshRepositoryCommand}"
-                    Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.Refresh}}" />
-                <Button
-                    Grid.Column="5"
                     Classes="branchSelector"
                     IsEnabled="{Binding HasRepository}">
                     <Button.Flyout>
@@ -187,7 +270,7 @@
                     </Grid>
                 </Button>
                 <Button
-                    Grid.Column="6"
+                    Grid.Column="2"
                     Classes="syncToolbar"
                     Command="{Binding SynchronizeRepositoryCommand}"
                     IsEnabled="{Binding CanSynchronize}">
@@ -211,7 +294,7 @@
                     </Grid>
                 </Button>
                 <ComboBox
-                    Grid.Column="7"
+                    Grid.Column="4"
                     Width="150"
                     ItemsSource="{Binding Languages}"
                     SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}">

@@ -50,3 +50,4 @@
 - Desktop 风格 Current Branch 分支弹出选择器与分支过滤
 - Desktop 风格 Stash all changes、Stashed Changes、Restore stash、Discard stash
 - 使用 CodeWF.Markdown 展示更新日志与关于信息
+- Desktop 风格 Current repository 仓库选择器、最近仓库和仓库过滤
