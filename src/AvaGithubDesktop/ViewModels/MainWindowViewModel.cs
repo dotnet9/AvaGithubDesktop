@@ -59,7 +59,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private LanguageOption? _selectedLanguage;
     private GitChangeItemViewModel? _selectedChange;
     private GitCommitItem? _selectedCommit;
-    private GitCommitFileItem? _selectedCommitFile;
+    private GitCommitFileItemViewModel? _selectedCommitFile;
     private GitBranchItem? _selectedBranch;
     private GitStashEntry? _currentBranchStash;
     private RepositorySection _selectedSection = RepositorySection.Changes;
@@ -159,6 +159,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ObservableCollection<GitChangeItemViewModel> FilteredChangedFiles { get; } = new();
 
     public ObservableCollection<GitCommitItem> HistoryCommits { get; } = new();
+
+    public ObservableCollection<GitCommitFileItemViewModel> SelectedCommitFiles { get; } = new();
 
     public ObservableCollection<GitBranchItem> Branches { get; } = new();
 
@@ -506,24 +508,12 @@ public sealed class MainWindowViewModel : ViewModelBase
         get => _selectedCommit;
         set
         {
+            var selectedFilePath = SelectedCommitFile?.Path;
             this.RaiseAndSetIfChanged(ref _selectedCommit, value);
             this.RaisePropertyChanged(nameof(HasSelectedCommit));
             this.RaisePropertyChanged(nameof(SelectedCommitChangedFilesHeader));
             this.RaisePropertyChanged(nameof(CanCopySelectedCommitSha));
-            if (value is null)
-            {
-                SelectedCommitFile = null;
-                return;
-            }
-
-            if (SelectedCommitFile is null || !value.Files.Any(file => file.Path == SelectedCommitFile.Path))
-            {
-                SelectedCommitFile = value.Files.FirstOrDefault();
-            }
-            else if (IsHistorySelected)
-            {
-                QueueDiffLoad();
-            }
+            ApplySelectedCommitFiles(value, selectedFilePath);
         }
     }
 
@@ -729,7 +719,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
-    public GitCommitFileItem? SelectedCommitFile
+    public GitCommitFileItemViewModel? SelectedCommitFile
     {
         get => _selectedCommitFile;
         set
@@ -1001,6 +991,50 @@ public sealed class MainWindowViewModel : ViewModelBase
             SelectedCommit.Sha,
             AvaGithubDesktopL.StatusCopiedCommitSha,
             AvaGithubDesktopL.StatusCopyCommitShaFailedFormat);
+    }
+
+    private async Task CopyCommitFileRelativePathAsync(GitCommitFileItemViewModel file)
+    {
+        await CopyTextAsync(
+            file.GitPath,
+            AvaGithubDesktopL.StatusCopiedChangePath,
+            AvaGithubDesktopL.StatusCopyChangePathFailedFormat);
+    }
+
+    private async Task CopyCommitFileFullPathAsync(GitCommitFileItemViewModel file)
+    {
+        await CopyTextAsync(
+            Path.Combine(RootPath, file.GitPath),
+            AvaGithubDesktopL.StatusCopiedChangeFullPath,
+            AvaGithubDesktopL.StatusCopyChangeFullPathFailedFormat);
+    }
+
+    private async Task ShowCommitFileInFileManagerAsync(GitCommitFileItemViewModel file)
+    {
+        try
+        {
+            await _repositoryShellService.ShowItemInFileManagerAsync(Path.Combine(RootPath, file.GitPath));
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusShowedChangeInFileManager)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusShowChangeInFileManagerFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+    }
+
+    private async Task OpenCommitFileInExternalEditorAsync(GitCommitFileItemViewModel file)
+    {
+        try
+        {
+            await _repositoryShellService.OpenItemAsync(Path.Combine(RootPath, file.GitPath));
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedChangeInExternalEditor)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenChangeInExternalEditorFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
     }
 
     private async Task ShowChangeInFileManagerAsync(GitChangeItemViewModel change)
@@ -1661,6 +1695,31 @@ public sealed class MainWindowViewModel : ViewModelBase
         SelectedCommit = !string.IsNullOrWhiteSpace(selectedSha)
             ? HistoryCommits.FirstOrDefault(commit => commit.Sha == selectedSha) ?? HistoryCommits.FirstOrDefault()
             : HistoryCommits.FirstOrDefault();
+    }
+
+    private void ApplySelectedCommitFiles(GitCommitItem? commit, string? preferredSelectedPath)
+    {
+        // History 文件项也需要右键菜单命令，因此用轻量 ViewModel 包装模型并集中注入外部操作回调。
+        SelectedCommitFiles.Clear();
+        if (commit is null)
+        {
+            SelectedCommitFile = null;
+            return;
+        }
+
+        foreach (var file in commit.Files)
+        {
+            SelectedCommitFiles.Add(new GitCommitFileItemViewModel(
+                file,
+                CopyCommitFileFullPathAsync,
+                CopyCommitFileRelativePathAsync,
+                ShowCommitFileInFileManagerAsync,
+                OpenCommitFileInExternalEditorAsync));
+        }
+
+        SelectedCommitFile = !string.IsNullOrWhiteSpace(preferredSelectedPath)
+            ? SelectedCommitFiles.FirstOrDefault(file => file.Path == preferredSelectedPath) ?? SelectedCommitFiles.FirstOrDefault()
+            : SelectedCommitFiles.FirstOrDefault();
     }
 
     private void ApplyBranches(IReadOnlyList<GitBranchItem> branches)

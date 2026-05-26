@@ -727,11 +727,20 @@
                                 <ListBox
                                     Grid.Row="1"
                                     Classes="changes"
-                                    ItemsSource="{Binding SelectedCommit.Files}"
+                                    ItemsSource="{Binding SelectedCommitFiles}"
                                     SelectedItem="{Binding SelectedCommitFile, Mode=TwoWay}">
                                     <ListBox.ItemTemplate>
-                                        <DataTemplate x:DataType="models:GitCommitFileItem">
+                                        <DataTemplate x:DataType="vm:GitCommitFileItemViewModel">
                                             <Border Height="38" Padding="8,0">
+                                                <Border.ContextFlyout>
+                                                    <MenuFlyout>
+                                                        <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyFilePath}}" Command="{Binding CopyFullPathCommand}" />
+                                                        <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyRelativePath}}" Command="{Binding CopyRelativePathCommand}" />
+                                                        <Separator />
+                                                        <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuOpenInExternalEditor}}" Command="{Binding OpenInExternalEditorCommand}" IsEnabled="{Binding CanOpenFileLocation}" />
+                                                        <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowInFileManager}}" Command="{Binding ShowInFileManagerCommand}" IsEnabled="{Binding CanOpenFileLocation}" />
+                                                    </MenuFlyout>
+                                                </Border.ContextFlyout>
                                                 <Grid ColumnDefinitions="90,*" ColumnSpacing="8">
                                                     <Border
                                                         Padding="7,2"
