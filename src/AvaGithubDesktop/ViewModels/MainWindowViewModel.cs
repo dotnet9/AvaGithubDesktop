@@ -135,6 +135,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         StashAllChangesCommand = ReactiveCommand.CreateFromTask(StashAllChangesAsync, this.WhenAnyValue(model => model.CanStashChanges));
         RestoreStashCommand = ReactiveCommand.CreateFromTask(RestoreStashAsync, this.WhenAnyValue(model => model.CanRestoreStash));
         DiscardStashCommand = ReactiveCommand.CreateFromTask(DiscardStashAsync, this.WhenAnyValue(model => model.CanDiscardStash));
+        DiscardAllChangesCommand = ReactiveCommand.CreateFromTask(DiscardAllChangesAsync, this.WhenAnyValue(model => model.CanDiscardChanges));
         ShowChangelogCommand = ReactiveCommand.CreateFromTask(ShowChangelogAsync);
         ShowAboutCommand = ReactiveCommand.CreateFromTask(ShowAboutAsync);
 
@@ -199,6 +200,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> RestoreStashCommand { get; }
 
     public ReactiveCommand<Unit, Unit> DiscardStashCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> DiscardAllChangesCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ShowChangelogCommand { get; }
 
@@ -592,6 +595,11 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public bool CanDiscardStash => CanRestoreStash;
 
+    public bool CanDiscardChanges =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        ChangedFilesCount > 0;
+
     public string StashAllChangesButtonText
     {
         get
@@ -983,12 +991,28 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private async Task DiscardChangeAsync(GitChangeItemViewModel change)
     {
-        if (!HasRepository || !CanRunRepositoryCommand)
+        await DiscardChangesAsync(new[] { change });
+    }
+
+    private async Task DiscardAllChangesAsync()
+    {
+        if (!CanDiscardChanges)
         {
             return;
         }
 
-        var confirmed = await _confirmationDialogService.ShowDiscardChangesConfirmationAsync(new[] { change.Path });
+        await DiscardChangesAsync(ChangedFiles.ToArray());
+    }
+
+    private async Task DiscardChangesAsync(IReadOnlyList<GitChangeItemViewModel> changes)
+    {
+        if (!HasRepository || !CanRunRepositoryCommand || changes.Count == 0)
+        {
+            return;
+        }
+
+        var confirmed = await _confirmationDialogService.ShowDiscardChangesConfirmationAsync(
+            changes.Select(change => change.Path).ToArray());
         if (!confirmed)
         {
             _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusDiscardChangesCanceled)));
@@ -1002,15 +1026,16 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         IsDiscardingChanges = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(
-            _localizer.Format(AvaGithubDesktopL.StatusDiscardingChangesFormat, change.Path)));
+        _eventBus.Publish(new StatusMessageChangedCommand(GetDiscardChangesStartedMessage(changes)));
 
         try
         {
-            await _gitRepositoryService.DiscardChangesAsync(RootPath, new[] { change.Change }, CancellationToken.None);
+            await _gitRepositoryService.DiscardChangesAsync(
+                RootPath,
+                changes.Select(change => change.Change).ToArray(),
+                CancellationToken.None);
             await ReloadRepositoryWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(
-                _localizer.Format(AvaGithubDesktopL.StatusDiscardedChangesFormat, change.Path)));
+            _eventBus.Publish(new StatusMessageChangedCommand(GetDiscardChangesCompletedMessage(changes)));
         }
         catch (Exception ex)
         {
@@ -1021,6 +1046,20 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             IsDiscardingChanges = false;
         }
+    }
+
+    private string GetDiscardChangesStartedMessage(IReadOnlyList<GitChangeItemViewModel> changes)
+    {
+        return changes.Count == 1
+            ? _localizer.Format(AvaGithubDesktopL.StatusDiscardingChangesFormat, changes[0].Path)
+            : _localizer.Format(AvaGithubDesktopL.StatusDiscardingChangesCountFormat, changes.Count);
+    }
+
+    private string GetDiscardChangesCompletedMessage(IReadOnlyList<GitChangeItemViewModel> changes)
+    {
+        return changes.Count == 1
+            ? _localizer.Format(AvaGithubDesktopL.StatusDiscardedChangesFormat, changes[0].Path)
+            : _localizer.Format(AvaGithubDesktopL.StatusDiscardedChangesCountFormat, changes.Count);
     }
 
     private async Task CopyTextAsync(string text, string successKey, string failureFormatKey)
@@ -1808,6 +1847,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(CanStashChanges));
         this.RaisePropertyChanged(nameof(CanRestoreStash));
         this.RaisePropertyChanged(nameof(CanDiscardStash));
+        this.RaisePropertyChanged(nameof(CanDiscardChanges));
         this.RaisePropertyChanged(nameof(StashAllChangesButtonText));
         this.RaisePropertyChanged(nameof(StashDescriptionText));
     }

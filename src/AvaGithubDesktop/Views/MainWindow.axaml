@@ -428,6 +428,12 @@
                             IsVisible="{Binding IsChangesSelected}"
                             ItemsSource="{Binding FilteredChangedFiles}"
                             SelectedItem="{Binding SelectedChange, Mode=TwoWay}">
+                            <ListBox.ContextFlyout>
+                                <MenuFlyout>
+                                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuDiscardAllChanges}}" Command="{Binding DiscardAllChangesCommand}" />
+                                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuStashAllChanges}}" Command="{Binding StashAllChangesCommand}" />
+                                </MenuFlyout>
+                            </ListBox.ContextFlyout>
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="vm:GitChangeItemViewModel">
                                     <Border

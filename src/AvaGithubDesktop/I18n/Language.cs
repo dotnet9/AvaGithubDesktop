@@ -26,6 +26,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuCopyRepositoryPath = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyRepositoryPath";
     public static readonly string MenuCopyRelativePath = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyRelativePath";
     public static readonly string MenuDiscardChanges = "AvaGithubDesktop.AvaGithubDesktopL.MenuDiscardChanges";
+    public static readonly string MenuDiscardAllChanges = "AvaGithubDesktop.AvaGithubDesktopL.MenuDiscardAllChanges";
     public static readonly string MenuStashAllChanges = "AvaGithubDesktop.AvaGithubDesktopL.MenuStashAllChanges";
     public static readonly string MenuRestoreStash = "AvaGithubDesktop.AvaGithubDesktopL.MenuRestoreStash";
     public static readonly string MenuDiscardStash = "AvaGithubDesktop.AvaGithubDesktopL.MenuDiscardStash";
@@ -137,6 +138,8 @@ public static class AvaGithubDesktopL
     public static readonly string StatusDiscardChangesCanceled = "AvaGithubDesktop.AvaGithubDesktopL.StatusDiscardChangesCanceled";
     public static readonly string StatusDiscardingChangesFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusDiscardingChangesFormat";
     public static readonly string StatusDiscardedChangesFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusDiscardedChangesFormat";
+    public static readonly string StatusDiscardingChangesCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusDiscardingChangesCountFormat";
+    public static readonly string StatusDiscardedChangesCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusDiscardedChangesCountFormat";
     public static readonly string StatusDiscardChangesFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusDiscardChangesFailedFormat";
     public static readonly string ChangedFileCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.ChangedFileCountFormat";
     public static readonly string ChangedFilesCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.ChangedFilesCountFormat";
