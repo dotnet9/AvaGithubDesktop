@@ -27,8 +27,14 @@
 9. 源码与文档等目录组织可参考 D:\github\Vex
 10. 前面提的仓库目录引用时都通过NuGet包的形式安装
 11. 完成一个功能，截图分析验证通过，用英文规范化提交及推送，再迭代下一个功能
-
-开发过程中将功能点简单列在本文档中，不列详细，只简单列功能
+12. 参考Vex(D:\github\Vex)，语言资源使用T4文件；
+13. 注意样式封装，不要直接在App.axaml里写Style，注意封装到文件中去，参考Vex，可再创建
+    - AvaGithubDesktop.Controls工程，用于放本项目可能自定义的控件（有的话）
+    - AvaGithubDesktop.Controls.Themes工程放对应的自定义控件样式及主题等
+    - 如果是对Semi或Ursa的样式个性化调整，也可以创建AvaGithubDesktop.Semi、AvaGithubDesktop.Ursa进行维护，这样方便后续扩展、人工阅读理解维护；
+14. 工程不怕多，就怕代码逻辑、业务逻辑划分不清晰；
+15. 在./docs/GithubDesktop目录放了原Github Desktop软件部分截图，在d:\github\desktop仓库里实现的软件风格应该也是这样的，你一定要复刻desktop代码里实现的功能哦，截图是让你更明确
+16. 开发过程中将功能点简单列在本文档中，不列详细，只简单列功能
 
 ## 功能点
 
