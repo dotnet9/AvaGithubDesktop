@@ -193,29 +193,36 @@
 
                     <Border
                         Grid.Row="1"
-                        Height="36"
-                        Padding="12,0"
+                        Padding="12,8"
                         Background="{DynamicResource PanelBackgroundBrush}"
                         BorderBrush="{DynamicResource PanelBorderBrush}"
                         BorderThickness="0,0,0,1"
                         IsVisible="{Binding IsChangesSelected}">
-                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
-                            <CheckBox
-                                VerticalAlignment="Center"
-                                IsChecked="{Binding AreAllChangesIncluded, Mode=TwoWay}"
-                                IsThreeState="True" />
-                            <TextBlock
-                                Grid.Column="1"
-                                VerticalAlignment="Center"
-                                FontWeight="SemiBold"
-                                Text="{Binding ChangedFilesHeaderText}"
-                                TextTrimming="CharacterEllipsis" />
-                            <TextBlock
-                                Grid.Column="2"
-                                VerticalAlignment="Center"
-                                Classes="muted"
-                                FontSize="12"
-                                Text="{Binding SelectedChangesStatusText}" />
+                        <Grid RowDefinitions="Auto,Auto" RowSpacing="7">
+                            <TextBox
+                                Grid.Row="0"
+                                Classes="changesFilter"
+                                IsEnabled="{Binding HasRepository}"
+                                PlaceholderText="{i18n:I18n {x:Static l:AvaGithubDesktopL.ChangesFilterPlaceholder}}"
+                                Text="{Binding ChangesFilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                <CheckBox
+                                    VerticalAlignment="Center"
+                                    IsChecked="{Binding AreAllChangesIncluded, Mode=TwoWay}"
+                                    IsThreeState="True" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    FontWeight="SemiBold"
+                                    Text="{Binding ChangedFilesHeaderText}"
+                                    TextTrimming="CharacterEllipsis" />
+                                <TextBlock
+                                    Grid.Column="2"
+                                    VerticalAlignment="Center"
+                                    Classes="muted"
+                                    FontSize="12"
+                                    Text="{Binding SelectedChangesStatusText}" />
+                            </Grid>
                         </Grid>
                     </Border>
 
@@ -246,7 +253,7 @@
                             Grid.Row="0"
                             Classes="changes"
                             IsVisible="{Binding IsChangesSelected}"
-                            ItemsSource="{Binding ChangedFiles}"
+                            ItemsSource="{Binding FilteredChangedFiles}"
                             SelectedItem="{Binding SelectedChange, Mode=TwoWay}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="vm:GitChangeItemViewModel">

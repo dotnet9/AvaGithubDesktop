@@ -29,6 +29,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private string _errorMessage = string.Empty;
     private string _commitSummary = string.Empty;
     private string _commitDescription = string.Empty;
+    private string _changesFilterText = string.Empty;
     private bool _hasRepository;
     private bool _isLoading;
     private bool _isCommitting;
@@ -158,6 +159,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ObservableCollection<LanguageOption> Languages { get; }
 
     public ObservableCollection<GitChangeItemViewModel> ChangedFiles { get; } = new();
+
+    public ObservableCollection<GitChangeItemViewModel> FilteredChangedFiles { get; } = new();
 
     public ObservableCollection<GitCommitItem> HistoryCommits { get; } = new();
 
@@ -605,6 +608,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _commitDescription, value);
     }
 
+    public string ChangesFilterText
+    {
+        get => _changesFilterText;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _changesFilterText, value);
+            ApplyChangesFilter();
+        }
+    }
+
     public int IncludedChangesCount
     {
         get => _includedChangesCount;
@@ -663,12 +676,24 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         get
         {
+            if (HasActiveChangesFilter)
+            {
+                return _localizer.Format(
+                    AvaGithubDesktopL.ChangedFilesFilteredCountFormat,
+                    FilteredChangedFilesCount,
+                    ChangedFilesCount);
+            }
+
             var formatKey = ChangedFilesCount == 1
                 ? AvaGithubDesktopL.ChangedFileCountFormat
                 : AvaGithubDesktopL.ChangedFilesCountFormat;
             return _localizer.Format(formatKey, ChangedFilesCount);
         }
     }
+
+    public int FilteredChangedFilesCount => FilteredChangedFiles.Count;
+
+    public bool HasActiveChangesFilter => !string.IsNullOrWhiteSpace(ChangesFilterText);
 
     public string SelectedChangesStatusText =>
         _localizer.Format(AvaGithubDesktopL.SelectedFilesCountFormat, IncludedChangesCount, ChangedFilesCount);
@@ -840,6 +865,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private async Task RunRemoteOperationAsync(RepositorySyncOperation operation)
     {
+        // 所有远端同步动作共用同一条状态机，保证 toolbar、菜单和状态栏不会出现并发操作。
         if (!CanSynchronize)
         {
             ErrorMessage = _localizer.Get(AvaGithubDesktopL.SyncNoRemoteDescription);
@@ -913,6 +939,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private void ApplySnapshot(GitRepositorySnapshot snapshot)
     {
+        // 每次打开、提交、切分支、同步后都从 Git 重新读取快照，避免 UI 自己推断仓库状态。
         HasRepository = true;
         RepositoryName = snapshot.RepositoryName;
         RootPath = snapshot.RootPath;
@@ -938,6 +965,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         foreach (var change in snapshot.Changes)
         {
             var changeViewModel = new GitChangeItemViewModel(change);
+            // 单个文件勾选变化会影响提交按钮、全选三态和“已选择”文案，需要集中刷新派生状态。
             var subscription = changeViewModel
                 .WhenAnyValue(model => model.IsIncluded)
                 .Skip(1)
@@ -953,9 +981,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
 
         UpdateIncludedState();
-        SelectedChange = !string.IsNullOrWhiteSpace(selectedPath)
-            ? ChangedFiles.FirstOrDefault(change => change.Path == selectedPath) ?? ChangedFiles.FirstOrDefault()
-            : ChangedFiles.FirstOrDefault();
+        ApplyChangesFilter(selectedPath);
     }
 
     private void ApplyHistory(IReadOnlyList<GitCommitItem> commits)
@@ -1028,7 +1054,11 @@ public sealed class MainWindowViewModel : ViewModelBase
         _isBulkUpdatingIncludedChanges = true;
         try
         {
-            foreach (var change in ChangedFiles)
+            // 有过滤条件时，全选只作用于当前可见文件，保留被过滤隐藏文件原来的勾选状态。
+            var changes = HasActiveChangesFilter
+                ? FilteredChangedFiles
+                : ChangedFiles;
+            foreach (var change in changes)
             {
                 change.IsIncluded = include;
             }
@@ -1041,17 +1071,57 @@ public sealed class MainWindowViewModel : ViewModelBase
         UpdateIncludedState();
     }
 
+    private void ApplyChangesFilter(string? preferredSelectedPath = null)
+    {
+        // 过滤集合单独维护，提交仍读取全量 ChangedFiles，避免隐藏文件被意外移出提交选择。
+        var filterText = ChangesFilterText.Trim();
+        var selectedPath = preferredSelectedPath ?? SelectedChange?.Path;
+        FilteredChangedFiles.Clear();
+
+        foreach (var change in ChangedFiles.Where(change => MatchesChangesFilter(change, filterText)))
+        {
+            FilteredChangedFiles.Add(change);
+        }
+
+        this.RaisePropertyChanged(nameof(FilteredChangedFilesCount));
+        this.RaisePropertyChanged(nameof(HasActiveChangesFilter));
+        this.RaisePropertyChanged(nameof(ChangedFilesHeaderText));
+
+        SelectedChange = !string.IsNullOrWhiteSpace(selectedPath)
+            ? FilteredChangedFiles.FirstOrDefault(change => change.Path == selectedPath) ?? FilteredChangedFiles.FirstOrDefault()
+            : FilteredChangedFiles.FirstOrDefault();
+        UpdateIncludedState();
+    }
+
+    private static bool MatchesChangesFilter(GitChangeItemViewModel change, string filterText)
+    {
+        if (string.IsNullOrWhiteSpace(filterText))
+        {
+            return true;
+        }
+
+        return change.Path.Contains(filterText, StringComparison.OrdinalIgnoreCase)
+            || change.DisplayStatus.Contains(filterText, StringComparison.OrdinalIgnoreCase)
+            || change.StatusCode.Contains(filterText, StringComparison.OrdinalIgnoreCase);
+    }
+
     private void UpdateIncludedState()
     {
         IncludedChangesCount = ChangedFiles.Count(change => change.IsIncluded);
-        var allIncluded = ChangedFiles.Count == 0
+        // 全选框反映当前筛选范围；提交按钮数量反映全量已勾选文件，两者职责不同。
+        var scopedChanges = HasActiveChangesFilter
+            ? FilteredChangedFiles
+            : ChangedFiles;
+        var scopedIncludedChangesCount = scopedChanges.Count(change => change.IsIncluded);
+        var allIncluded = scopedChanges.Count == 0
             ? false
-            : IncludedChangesCount == ChangedFiles.Count
+            : scopedIncludedChangesCount == scopedChanges.Count
                 ? true
-                : IncludedChangesCount == 0
+                : scopedIncludedChangesCount == 0
                     ? false
                     : (bool?)null;
         this.RaiseAndSetIfChanged(ref _areAllChangesIncluded, allIncluded, nameof(AreAllChangesIncluded));
+        this.RaisePropertyChanged(nameof(ChangedFilesHeaderText));
     }
 
     private void RaiseCommitStateChanged()
@@ -1065,6 +1135,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         this.RaisePropertyChanged(nameof(CommitButtonText));
         this.RaisePropertyChanged(nameof(ChangedFilesHeaderText));
+        this.RaisePropertyChanged(nameof(FilteredChangedFilesCount));
+        this.RaisePropertyChanged(nameof(HasActiveChangesFilter));
         this.RaisePropertyChanged(nameof(SelectedChangesStatusText));
         this.RaisePropertyChanged(nameof(HistoryHeaderText));
         this.RaisePropertyChanged(nameof(SelectedCommitChangedFilesHeader));

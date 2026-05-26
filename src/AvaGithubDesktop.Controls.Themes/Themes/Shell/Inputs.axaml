@@ -17,6 +17,11 @@
         <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
+    <Style Selector="TextBox.changesFilter">
+        <Setter Property="MinHeight" Value="28" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
     <Style Selector="TextBox.commitSummary">
         <Setter Property="MinHeight" Value="30" />
         <Setter Property="VerticalContentAlignment" Value="Center" />

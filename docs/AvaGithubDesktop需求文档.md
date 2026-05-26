@@ -44,3 +44,6 @@
 - Desktop 风格选中文件文本 Diff 预览
 - 本地分支列表与分支 Checkout
 - Desktop 风格 Fetch/Pull/Push 远端同步入口
+- Desktop 风格 Changes 文件过滤
+- 版本号、更新日志与开发日志
+- 版本号集中维护在根目录 Directory.Build.props；第一位用于架构级调整，第二位用于功能新增或修改，第三/四位用于日常开发迭代与修复

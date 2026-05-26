@@ -69,6 +69,8 @@ public static class AvaGithubDesktopL
     public static readonly string Committing = "AvaGithubDesktop.AvaGithubDesktopL.Committing";
     public static readonly string ChangedFileCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.ChangedFileCountFormat";
     public static readonly string ChangedFilesCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.ChangedFilesCountFormat";
+    public static readonly string ChangedFilesFilteredCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.ChangedFilesFilteredCountFormat";
+    public static readonly string ChangesFilterPlaceholder = "AvaGithubDesktop.AvaGithubDesktopL.ChangesFilterPlaceholder";
     public static readonly string SelectedFilesCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.SelectedFilesCountFormat";
     public static readonly string HistoryCommitCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.HistoryCommitCountFormat";
     public static readonly string HistoryCommitsCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.HistoryCommitsCountFormat";

@@ -64,6 +64,8 @@
       "Committing": "Committing...",
       "ChangedFileCountFormat": "{0} changed file",
       "ChangedFilesCountFormat": "{0} changed files",
+      "ChangedFilesFilteredCountFormat": "{0} of {1} changed files",
+      "ChangesFilterPlaceholder": "Filter",
       "SelectedFilesCountFormat": "{0} of {1} selected",
       "HistoryCommitCountFormat": "{0} commit",
       "HistoryCommitsCountFormat": "{0} commits",

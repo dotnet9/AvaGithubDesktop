@@ -125,6 +125,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
         }
 
         var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        // 对齐 GitHub Desktop 的默认 fetch 行为：清理已删除远端分支，并按需更新子模块。
         await RunRequiredGitAsync(root, cancellationToken, "fetch", "--prune", "--recurse-submodules=on-demand", remoteName);
     }
 
@@ -144,6 +145,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
         }
 
         var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        // 未显式配置 pull.ff 时，Desktop 采用 fast-forward 优先；这里固定使用 --ff，避免静默 rebase。
         await RunRequiredGitAsync(root, cancellationToken, "pull", "--ff", "--recurse-submodules", remoteName);
     }
 
@@ -172,6 +174,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
         var upstream = await RunOptionalGitAsync(root, cancellationToken, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}");
         if (string.IsNullOrWhiteSpace(upstream))
         {
+            // 首次推送本地分支时建立 upstream，后续 ahead/behind 才能通过 status -b 正确计算。
             await RunRequiredGitAsync(root, cancellationToken, "push", "--set-upstream", remoteName, branchName);
             return;
         }
@@ -270,6 +273,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
 
         var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
         var status = await RunRequiredGitAsync(root, cancellationToken, "status", "--porcelain=v1");
+        // Desktop 的提交面板允许只提交勾选文件。先把已跟踪文件全部退回，再只 add 勾选路径。
         var trackedPaths = ParseChanges(status)
             .Where(change => change.Kind != GitChangeKind.Untracked)
             .SelectMany(change => change.GitPaths)
@@ -308,6 +312,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
 
     private static string ResolveRemoteName(string upstream, string remotes)
     {
+        // 优先使用当前 upstream 的远端名；没有 upstream 时回退到 origin 或第一个远端。
         if (!string.IsNullOrWhiteSpace(upstream))
         {
             var separatorIndex = upstream.IndexOf('/', StringComparison.Ordinal);
@@ -330,6 +335,8 @@ public sealed class GitRepositoryService : IGitRepositoryService
 
     private static async Task<DateTimeOffset?> ResolveLastFetchedAtAsync(string root, CancellationToken cancellationToken)
     {
+        // Git 没有直接记录“最后一次 fetch 时间”的 porcelain 输出，Desktop 也会展示近似状态；
+        // 这里用 FETCH_HEAD 的修改时间作为 UI 上的“最近获取”时间。
         var gitDirectory = await RunOptionalGitAsync(root, cancellationToken, "rev-parse", "--git-dir");
         if (string.IsNullOrWhiteSpace(gitDirectory))
         {

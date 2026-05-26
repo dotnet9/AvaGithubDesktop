@@ -64,6 +64,8 @@
       "Committing": "正在提交...",
       "ChangedFileCountFormat": "{0} 个变更文件",
       "ChangedFilesCountFormat": "{0} 个变更文件",
+      "ChangedFilesFilteredCountFormat": "{0}/{1} 个变更文件",
+      "ChangesFilterPlaceholder": "过滤",
       "SelectedFilesCountFormat": "已选择 {0}/{1}",
       "HistoryCommitCountFormat": "{0} 个提交",
       "HistoryCommitsCountFormat": "{0} 个提交",

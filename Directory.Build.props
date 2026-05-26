@@ -1,5 +1,25 @@
 <Project>
   <PropertyGroup>
+    <!--
+      版本规则：
+      第一位：架构级调整；第二位：功能新增或行为修改；第三/四位：日常开发迭代与修复。
+      当前版本必须和 docs/更新日志.md 的最新版本号保持一致，方便后续更新日志窗口直接关联展示。
+    -->
+    <Version>0.2.0.0</Version>
+    <AssemblyVersion>0.2.0.0</AssemblyVersion>
+    <FileVersion>0.2.0.0</FileVersion>
+    <InformationalVersion>0.2.0.0</InformationalVersion>
+    <Authors>沙漠尽头的狼</Authors>
+    <Company>CodeWF</Company>
+    <Title>AvaGithubDesktop</Title>
+    <Product>AvaGithubDesktop</Product>
+    <Description>GitHub Desktop 风格的跨平台 Git 桌面客户端</Description>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/dotnet9/AvaGithubDesktop</RepositoryUrl>
+    <PackageProjectUrl>https://codewf.com</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Copyright>Copyright © 2026 AvaGithubDesktop - CodeWF(码坊) https://codewf.com</Copyright>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
