@@ -73,3 +73,4 @@
 - GitHub OAuth Client ID 存放在 `App.config`，通过 `CodeWF.Tools.Files` 读取
 - GitHub 登录使用浏览器 OAuth Device Flow
 - 使用 CodeWF.LogViewer 展示操作日志栏并持久化显隐状态
+- 菜单提供语言切换并将当前语言写入 App.config

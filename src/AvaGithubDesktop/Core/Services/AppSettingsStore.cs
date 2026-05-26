@@ -6,6 +6,7 @@ namespace AvaGithubDesktop.Core.Services;
 public sealed class AppSettingsStore : IAppSettingsStore
 {
     private const string IsOperationLogVisibleKey = nameof(AppSettings.IsOperationLogVisible);
+    private const string CultureNameKey = nameof(AppSettings.CultureName);
     private readonly object _syncRoot = new();
     private AppSettings? _settings;
 
@@ -36,7 +37,8 @@ public sealed class AppSettingsStore : IAppSettingsStore
         var configPath = AppConfigHelper.GetDefaultConfigPath();
         return new AppSettings
         {
-            IsOperationLogVisible = Get<bool?>(configPath, IsOperationLogVisibleKey)
+            IsOperationLogVisible = Get<bool?>(configPath, IsOperationLogVisibleKey),
+            CultureName = Get<string>(configPath, CultureNameKey)
         };
     }
 
@@ -46,6 +48,7 @@ public sealed class AppSettingsStore : IAppSettingsStore
         {
             var configPath = AppConfigHelper.GetDefaultConfigPath();
             AppConfigHelper.Set(configPath, IsOperationLogVisibleKey, settings.IsOperationLogVisible);
+            AppConfigHelper.Set(configPath, CultureNameKey, settings.CultureName);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Xml.XmlException)
         {

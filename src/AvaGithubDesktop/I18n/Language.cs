@@ -141,6 +141,7 @@ public static class AvaGithubDesktopL
     public static readonly string StatusOpenHelpFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenHelpFailedFormat";
     public static readonly string StatusOperationLogShown = "AvaGithubDesktop.AvaGithubDesktopL.StatusOperationLogShown";
     public static readonly string StatusOperationLogHidden = "AvaGithubDesktop.AvaGithubDesktopL.StatusOperationLogHidden";
+    public static readonly string StatusLanguageSwitchedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusLanguageSwitchedFormat";
     public static readonly string StatusLoadAccountFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusLoadAccountFailedFormat";
     public static readonly string StatusSigningInGitHub = "AvaGithubDesktop.AvaGithubDesktopL.StatusSigningInGitHub";
     public static readonly string StatusSignedInGitHubFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusSignedInGitHubFormat";

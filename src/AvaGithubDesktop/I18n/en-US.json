@@ -136,6 +136,7 @@
       "StatusOpenHelpFailedFormat": "Failed to open help window: {0}",
       "StatusOperationLogShown": "Operation log shown.",
       "StatusOperationLogHidden": "Operation log hidden.",
+      "StatusLanguageSwitchedFormat": "Language switched to {0}.",
       "StatusLoadAccountFailedFormat": "Failed to load GitHub account: {0}",
       "StatusSigningInGitHub": "Signing in to GitHub...",
       "StatusSignedInGitHubFormat": "Signed in to GitHub as @{0} ({1}).",

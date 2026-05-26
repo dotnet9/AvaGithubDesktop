@@ -50,7 +50,7 @@ public sealed class AppLocalizer : IAppLocalizer
         return string.Format(Culture, Get(key), args);
     }
 
-    private static void ApplyThirdPartyCulture(string cultureName)
+    public static void ApplyThirdPartyCulture(string cultureName)
     {
         if (Application.Current is not { } app)
         {

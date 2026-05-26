@@ -139,6 +139,8 @@ public sealed class MainWindowViewModel : ViewModelBase
             ViewSelectedCommitOnGitHubAsync,
             this.WhenAnyValue(model => model.CanViewSelectedCommitOnGitHub));
         ToggleOperationLogCommand = ReactiveCommand.Create(ToggleOperationLog);
+        SelectSimplifiedChineseCommand = ReactiveCommand.Create(() => SelectLanguageByCulture("zh-CN"));
+        SelectEnglishCommand = ReactiveCommand.Create(() => SelectLanguageByCulture("en-US"));
 
         var canSynchronize = this.WhenAnyValue(model => model.CanSynchronize);
         SynchronizeRepositoryCommand = ReactiveCommand.CreateFromTask(SynchronizeRepositoryAsync, canSynchronize);
@@ -231,6 +233,10 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ViewSelectedCommitOnGitHubCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ToggleOperationLogCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> SelectSimplifiedChineseCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> SelectEnglishCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CheckoutBranchCommand { get; }
 
@@ -978,9 +984,18 @@ public sealed class MainWindowViewModel : ViewModelBase
             }
 
             _localizer.SetCulture(value.CultureName);
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusReady)));
+            _settingsStore.Update(settings => settings with { CultureName = value.CultureName });
+            this.RaisePropertyChanged(nameof(IsSimplifiedChineseSelected));
+            this.RaisePropertyChanged(nameof(IsEnglishSelected));
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Format(AvaGithubDesktopL.StatusLanguageSwitchedFormat, value.DisplayName)));
         }
     }
+
+    public bool IsSimplifiedChineseSelected =>
+        string.Equals(SelectedLanguage?.CultureName, "zh-CN", StringComparison.OrdinalIgnoreCase);
+
+    public bool IsEnglishSelected =>
+        string.Equals(SelectedLanguage?.CultureName, "en-US", StringComparison.OrdinalIgnoreCase);
 
     public async Task InitializeAsync()
     {
@@ -1126,6 +1141,15 @@ public sealed class MainWindowViewModel : ViewModelBase
             ? AvaGithubDesktopL.StatusOperationLogShown
             : AvaGithubDesktopL.StatusOperationLogHidden;
         _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(messageKey)));
+    }
+
+    private void SelectLanguageByCulture(string cultureName)
+    {
+        var language = Languages.FirstOrDefault(option => option.CultureName.Equals(cultureName, StringComparison.OrdinalIgnoreCase));
+        if (language is not null)
+        {
+            SelectedLanguage = language;
+        }
     }
 
     private async Task ViewSelectedCommitOnGitHubAsync()

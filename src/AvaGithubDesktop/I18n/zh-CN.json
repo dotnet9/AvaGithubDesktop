@@ -136,6 +136,7 @@
       "StatusOpenHelpFailedFormat": "打开帮助窗口失败：{0}",
       "StatusOperationLogShown": "已显示操作日志。",
       "StatusOperationLogHidden": "已隐藏操作日志。",
+      "StatusLanguageSwitchedFormat": "语言已切换为 {0}。",
       "StatusLoadAccountFailedFormat": "加载 GitHub 账户失败：{0}",
       "StatusSigningInGitHub": "正在登录 GitHub...",
       "StatusSignedInGitHubFormat": "已登录 GitHub 账户 @{0}（{1}）。",

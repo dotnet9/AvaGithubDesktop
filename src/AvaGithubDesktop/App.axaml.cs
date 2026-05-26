@@ -6,6 +6,7 @@ using AvaGithubDesktop.ViewModels;
 using AvaGithubDesktop.Views;
 using CodeWF.EventBus;
 using CodeWF.Log.Core;
+using CodeWF.Tools.Helpers;
 using Lang.Avalonia;
 using Lang.Avalonia.Json;
 using Prism.DryIoc;
@@ -22,11 +23,13 @@ public partial class App : PrismApplication
         AppContext.SetData("APP_CONFIG_FILE", Path.Combine(AppContext.BaseDirectory, "App.config"));
         ConfigureOperationLogger();
         AvaloniaXamlLoader.Load(this);
+        var cultureName = GetConfiguredCultureName();
         var langPlugin = new JsonLangPlugin
         {
             ResourceFolder = Path.Combine(AppContext.BaseDirectory, "I18n")
         };
-        I18nManager.Instance.Register(langPlugin, new CultureInfo("zh-CN"), out _);
+        I18nManager.Instance.Register(langPlugin, new CultureInfo(cultureName), out _);
+        AppLocalizer.ApplyThirdPartyCulture(cultureName);
         base.Initialize();
     }
 
@@ -63,4 +66,20 @@ public partial class App : PrismApplication
         Logger.TimeFormat = "HH:mm:ss";
         Logger.EnableConsoleOutput = false;
     }
+
+    private static string GetConfiguredCultureName()
+    {
+        var configPath = AppConfigHelper.GetDefaultConfigPath();
+        if (AppConfigHelper.TryGet(configPath, nameof(Core.Models.AppSettings.CultureName), out string? cultureName)
+            && IsSupportedCulture(cultureName))
+        {
+            return cultureName!;
+        }
+
+        return "zh-CN";
+    }
+
+    private static bool IsSupportedCulture(string? cultureName) =>
+        string.Equals(cultureName, "zh-CN", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(cultureName, "en-US", StringComparison.OrdinalIgnoreCase);
 }
