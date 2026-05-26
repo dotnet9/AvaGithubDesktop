@@ -47,3 +47,4 @@
 - Desktop 风格 Changes 文件过滤
 - 版本号、更新日志与开发日志
 - 版本号集中维护在根目录 Directory.Build.props；第一位用于架构级调整，第二位用于功能新增或修改，第三/四位用于日常开发迭代与修复
+- Desktop 风格 Current Branch 分支弹出选择器与分支过滤

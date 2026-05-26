@@ -30,6 +30,12 @@ public static class AvaGithubDesktopL
     public static readonly string History = "AvaGithubDesktop.AvaGithubDesktopL.History";
     public static readonly string Branches = "AvaGithubDesktop.AvaGithubDesktopL.Branches";
     public static readonly string Branch = "AvaGithubDesktop.AvaGithubDesktopL.Branch";
+    public static readonly string BranchFilterPlaceholder = "AvaGithubDesktop.AvaGithubDesktopL.BranchFilterPlaceholder";
+    public static readonly string BranchCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.BranchCountFormat";
+    public static readonly string BranchesCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.BranchesCountFormat";
+    public static readonly string BranchesFilteredCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.BranchesFilteredCountFormat";
+    public static readonly string CheckoutSelectedBranch = "AvaGithubDesktop.AvaGithubDesktopL.CheckoutSelectedBranch";
+    public static readonly string NoBranchesFound = "AvaGithubDesktop.AvaGithubDesktopL.NoBranchesFound";
     public static readonly string Summary = "AvaGithubDesktop.AvaGithubDesktopL.Summary";
     public static readonly string CurrentBranch = "AvaGithubDesktop.AvaGithubDesktopL.CurrentBranch";
     public static readonly string Upstream = "AvaGithubDesktop.AvaGithubDesktopL.Upstream";

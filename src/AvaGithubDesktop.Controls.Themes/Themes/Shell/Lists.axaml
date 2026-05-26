@@ -11,6 +11,13 @@
         <Setter Property="Padding" Value="0" />
     </Style>
 
+    <Style Selector="ListBox.branchSelector">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+
     <Style Selector="ListBox.changes ListBoxItem">
         <Setter Property="Padding" Value="0" />
         <Setter Property="Margin" Value="0" />
@@ -18,6 +25,12 @@
     </Style>
 
     <Style Selector="ListBox.history ListBoxItem">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+
+    <Style Selector="ListBox.branchSelector ListBoxItem">
         <Setter Property="Padding" Value="0" />
         <Setter Property="Margin" Value="0" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -36,6 +49,14 @@
     </Style>
 
     <Style Selector="ListBox.history ListBoxItem:selected">
+        <Setter Property="Background" Value="#DDEBFA" />
+    </Style>
+
+    <Style Selector="ListBox.branchSelector ListBoxItem:pointerover">
+        <Setter Property="Background" Value="#EEF3F8" />
+    </Style>
+
+    <Style Selector="ListBox.branchSelector ListBoxItem:selected">
         <Setter Property="Background" Value="#DDEBFA" />
     </Style>
 </Styles>

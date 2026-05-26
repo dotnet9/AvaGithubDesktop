@@ -30,6 +30,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private string _commitSummary = string.Empty;
     private string _commitDescription = string.Empty;
     private string _changesFilterText = string.Empty;
+    private string _branchFilterText = string.Empty;
     private bool _hasRepository;
     private bool _isLoading;
     private bool _isCommitting;
@@ -165,6 +166,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ObservableCollection<GitCommitItem> HistoryCommits { get; } = new();
 
     public ObservableCollection<GitBranchItem> Branches { get; } = new();
+
+    public ObservableCollection<GitBranchItem> FilteredBranches { get; } = new();
 
     public ShellStatusViewModel StatusBar { get; }
 
@@ -479,6 +482,31 @@ public sealed class MainWindowViewModel : ViewModelBase
         SelectedBranch is not null &&
         !SelectedBranch.IsCurrent;
 
+    public int FilteredBranchesCount => FilteredBranches.Count;
+
+    public bool HasActiveBranchFilter => !string.IsNullOrWhiteSpace(BranchFilterText);
+
+    public bool HasNoFilteredBranches => HasRepository && !IsLoading && FilteredBranches.Count == 0;
+
+    public string BranchesHeaderText
+    {
+        get
+        {
+            if (HasActiveBranchFilter)
+            {
+                return _localizer.Format(
+                    AvaGithubDesktopL.BranchesFilteredCountFormat,
+                    FilteredBranchesCount,
+                    Branches.Count);
+            }
+
+            var formatKey = Branches.Count == 1
+                ? AvaGithubDesktopL.BranchCountFormat
+                : AvaGithubDesktopL.BranchesCountFormat;
+            return _localizer.Format(formatKey, Branches.Count);
+        }
+    }
+
     public bool HasRemote => HasRepository && !string.IsNullOrWhiteSpace(RemoteName) && RemoteName != "-";
 
     public bool CanSynchronize =>
@@ -615,6 +643,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             this.RaiseAndSetIfChanged(ref _changesFilterText, value);
             ApplyChangesFilter();
+        }
+    }
+
+    public string BranchFilterText
+    {
+        get => _branchFilterText;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _branchFilterText, value);
+            ApplyBranchFilter();
         }
     }
 
@@ -1008,11 +1046,42 @@ public sealed class MainWindowViewModel : ViewModelBase
             Branches.Add(branch);
         }
 
-        SelectedBranch = Branches.FirstOrDefault(branch => branch.IsCurrent)
-            ?? (!string.IsNullOrWhiteSpace(selectedName)
-                ? Branches.FirstOrDefault(branch => branch.Name == selectedName)
-                : null)
-            ?? Branches.FirstOrDefault();
+        ApplyBranchFilter(selectedName, preferCurrentBranch: true);
+    }
+
+    private void ApplyBranchFilter(string? preferredSelectedName = null, bool preferCurrentBranch = false)
+    {
+        // Desktop 的分支弹出层允许输入关键字缩小范围；过滤只影响弹出层列表，不改动真实分支集合。
+        var filterText = BranchFilterText.Trim();
+        var selectedName = preferredSelectedName ?? SelectedBranch?.Name;
+        FilteredBranches.Clear();
+
+        foreach (var branch in Branches.Where(branch => MatchesBranchFilter(branch, filterText)))
+        {
+            FilteredBranches.Add(branch);
+        }
+
+        var currentBranch = preferCurrentBranch
+            ? FilteredBranches.FirstOrDefault(branch => branch.IsCurrent)
+            : null;
+        var selectedBranch = !string.IsNullOrWhiteSpace(selectedName)
+            ? FilteredBranches.FirstOrDefault(branch => branch.Name == selectedName)
+            : null;
+        SelectedBranch = currentBranch ?? selectedBranch ?? FilteredBranches.FirstOrDefault();
+
+        RaiseBranchStateChanged();
+    }
+
+    private static bool MatchesBranchFilter(GitBranchItem branch, string filterText)
+    {
+        if (string.IsNullOrWhiteSpace(filterText))
+        {
+            return true;
+        }
+
+        return branch.Name.Contains(filterText, StringComparison.OrdinalIgnoreCase)
+            || branch.Upstream.Contains(filterText, StringComparison.OrdinalIgnoreCase)
+            || branch.RelativeDate.Contains(filterText, StringComparison.OrdinalIgnoreCase);
     }
 
     private void UpdateAheadBehindText()
@@ -1140,6 +1209,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(SelectedChangesStatusText));
         this.RaisePropertyChanged(nameof(HistoryHeaderText));
         this.RaisePropertyChanged(nameof(SelectedCommitChangedFilesHeader));
+        this.RaisePropertyChanged(nameof(BranchesHeaderText));
     }
 
     private void RaiseSyncStateChanged()
@@ -1176,6 +1246,10 @@ public sealed class MainWindowViewModel : ViewModelBase
     private void RaiseBranchStateChanged()
     {
         this.RaisePropertyChanged(nameof(CanCheckoutBranch));
+        this.RaisePropertyChanged(nameof(FilteredBranchesCount));
+        this.RaisePropertyChanged(nameof(HasActiveBranchFilter));
+        this.RaisePropertyChanged(nameof(HasNoFilteredBranches));
+        this.RaisePropertyChanged(nameof(BranchesHeaderText));
     }
 
     private async Task CheckoutSelectedBranchAsync()

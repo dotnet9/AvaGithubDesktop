@@ -60,7 +60,7 @@
             Background="{DynamicResource PanelBackgroundBrush}"
             BorderBrush="{DynamicResource PanelBorderBrush}"
             BorderThickness="0,0,0,1">
-            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="8">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="8">
                 <TextBlock
                     VerticalAlignment="Center"
                     Classes="section"
@@ -86,33 +86,103 @@
                     Classes="toolbar"
                     Command="{Binding RefreshRepositoryCommand}"
                     Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.Refresh}}" />
-                <TextBlock
+                <Button
                     Grid.Column="5"
-                    VerticalAlignment="Center"
-                    Classes="section"
-                    Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Branch}}" />
-                <ComboBox
+                    Classes="branchSelector"
+                    IsEnabled="{Binding HasRepository}">
+                    <Button.Flyout>
+                        <Flyout>
+                            <Border Classes="branchFlyout">
+                                <Grid Width="365" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="10">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            Classes="section"
+                                            Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Branches}}" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            VerticalAlignment="Center"
+                                            Classes="muted"
+                                            FontSize="12"
+                                            Text="{Binding BranchesHeaderText}" />
+                                    </Grid>
+                                    <TextBox
+                                        Grid.Row="1"
+                                        Classes="branchFilter"
+                                        PlaceholderText="{i18n:I18n {x:Static l:AvaGithubDesktopL.BranchFilterPlaceholder}}"
+                                        Text="{Binding BranchFilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Grid Grid.Row="2">
+                                        <ListBox
+                                            Classes="branchSelector"
+                                            Height="260"
+                                            ItemsSource="{Binding FilteredBranches}"
+                                            SelectedItem="{Binding SelectedBranch, Mode=TwoWay}">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate x:DataType="models:GitBranchItem">
+                                                    <Border Height="38" Padding="12,0">
+                                                        <Grid ColumnDefinitions="18,*,Auto" ColumnSpacing="8">
+                                                            <TextBlock
+                                                                VerticalAlignment="Center"
+                                                                FontWeight="SemiBold"
+                                                                IsVisible="{Binding IsCurrent}"
+                                                                Text="✓" />
+                                                            <TextBlock
+                                                                Grid.Column="1"
+                                                                VerticalAlignment="Center"
+                                                                FontWeight="SemiBold"
+                                                                Text="{Binding Name}"
+                                                                TextTrimming="CharacterEllipsis" />
+                                                            <TextBlock
+                                                                Grid.Column="2"
+                                                                VerticalAlignment="Center"
+                                                                Classes="muted"
+                                                                FontSize="11"
+                                                                Text="{Binding DisplayDetail}"
+                                                                TextTrimming="CharacterEllipsis" />
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Classes="muted"
+                                            IsVisible="{Binding HasNoFilteredBranches}"
+                                            Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.NoBranchesFound}}" />
+                                    </Grid>
+                                    <Button
+                                        Grid.Row="3"
+                                        HorizontalAlignment="Stretch"
+                                        Classes="branchCheckout"
+                                        Command="{Binding CheckoutBranchCommand}"
+                                        Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.CheckoutSelectedBranch}}"
+                                        IsEnabled="{Binding CanCheckoutBranch}" />
+                                </Grid>
+                            </Border>
+                        </Flyout>
+                    </Button.Flyout>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="1">
+                            <TextBlock
+                                Classes="muted"
+                                FontSize="11"
+                                Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.CurrentBranch}}" />
+                            <TextBlock
+                                FontWeight="SemiBold"
+                                Text="{Binding CurrentBranch}"
+                                TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                        <TextBlock
+                            Grid.Column="1"
+                            Margin="10,0,0,0"
+                            VerticalAlignment="Center"
+                            FontWeight="SemiBold"
+                            Text="v" />
+                    </Grid>
+                </Button>
+                <Button
                     Grid.Column="6"
-                    Width="210"
-                    ItemsSource="{Binding Branches}"
-                    SelectedItem="{Binding SelectedBranch, Mode=TwoWay}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate x:DataType="models:GitBranchItem">
-                            <StackPanel Spacing="1">
-                                <TextBlock FontWeight="SemiBold" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
-                                <TextBlock Classes="muted" FontSize="11" Text="{Binding DisplayDetail}" TextTrimming="CharacterEllipsis" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-                <Button
-                    Grid.Column="7"
-                    Classes="toolbar"
-                    Command="{Binding CheckoutBranchCommand}"
-                    Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.Checkout}}"
-                    IsEnabled="{Binding CanCheckoutBranch}" />
-                <Button
-                    Grid.Column="8"
                     Classes="syncToolbar"
                     Command="{Binding SynchronizeRepositoryCommand}"
                     IsEnabled="{Binding CanSynchronize}">
@@ -136,7 +206,7 @@
                     </Grid>
                 </Button>
                 <ComboBox
-                    Grid.Column="9"
+                    Grid.Column="7"
                     Width="150"
                     ItemsSource="{Binding Languages}"
                     SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}">
