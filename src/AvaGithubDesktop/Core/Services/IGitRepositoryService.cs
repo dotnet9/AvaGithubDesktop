@@ -61,10 +61,21 @@ public interface IGitRepositoryService
         IReadOnlyList<string> paths,
         CancellationToken cancellationToken);
 
+    Task<GitFileDiffPreview> LoadWorkingTreeDiffPreviewAsync(
+        string repositoryPath,
+        IReadOnlyList<string> paths,
+        CancellationToken cancellationToken);
+
     Task<string> LoadCommitFileDiffAsync(
         string repositoryPath,
         string sha,
         string path,
+        CancellationToken cancellationToken);
+
+    Task<GitFileDiffPreview> LoadCommitFileDiffPreviewAsync(
+        string repositoryPath,
+        string sha,
+        IReadOnlyList<string> paths,
         CancellationToken cancellationToken);
 
     Task CommitAsync(

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using AvaGithubDesktop.Core.Models;
@@ -10,6 +11,17 @@ public sealed class GitRepositoryService : IGitRepositoryService
     private const char CommitRecordSeparator = '\u001e';
     private const char CommitFieldSeparator = '\u001f';
     private const string DesktopStashEntryMarker = "!!GitHub_Desktop";
+    private static readonly HashSet<string> ImageFileExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".gif",
+        ".ico",
+        ".webp",
+        ".bmp",
+        ".avif"
+    };
     private static readonly Regex DesktopStashEntryMessageRegex = new(
         "!!GitHub_Desktop<(?<branch>.+)>$",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
@@ -326,6 +338,44 @@ public sealed class GitRepositoryService : IGitRepositoryService
         return JoinDiffs(unstaged, staged);
     }
 
+    public async Task<GitFileDiffPreview> LoadWorkingTreeDiffPreviewAsync(
+        string repositoryPath,
+        IReadOnlyList<string> paths,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        var normalizedPaths = NormalizeGitPaths(paths);
+        if (normalizedPaths.Length == 0)
+        {
+            return GitFileDiffPreview.TextDiff(string.Empty);
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        var oldPath = normalizedPaths[0];
+        var currentPath = normalizedPaths[^1];
+        var workingTreePath = ResolveRepositoryItemPath(root, currentPath);
+
+        if (IsImagePath(currentPath) || IsImagePath(oldPath))
+        {
+            // 图片差异需要同时拿到 HEAD 中的旧图和工作区中的新图；旧图写入临时缓存，避免污染仓库。
+            var previousImagePath = await ExportBlobToDiffCacheAsync(root, "HEAD", oldPath, cancellationToken);
+            var currentImagePath = File.Exists(workingTreePath) ? workingTreePath : null;
+            return GitFileDiffPreview.ImageDiff(previousImagePath, currentImagePath, currentImagePath);
+        }
+
+        if (await HasWorkingTreeBinaryDiffAsync(root, normalizedPaths, cancellationToken))
+        {
+            return GitFileDiffPreview.BinaryDiff(File.Exists(workingTreePath) ? workingTreePath : null);
+        }
+
+        var diff = await LoadWorkingTreeDiffAsync(repositoryPath, normalizedPaths, cancellationToken);
+        return GitFileDiffPreview.TextDiff(diff);
+    }
+
     public async Task<string> LoadCommitFileDiffAsync(
         string repositoryPath,
         string sha,
@@ -353,6 +403,54 @@ public sealed class GitRepositoryService : IGitRepositoryService
             sha,
             "--",
             path);
+    }
+
+    public async Task<GitFileDiffPreview> LoadCommitFileDiffPreviewAsync(
+        string repositoryPath,
+        string sha,
+        IReadOnlyList<string> paths,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        if (string.IsNullOrWhiteSpace(sha))
+        {
+            return GitFileDiffPreview.TextDiff(string.Empty);
+        }
+
+        var normalizedPaths = NormalizeGitPaths(paths);
+        if (normalizedPaths.Length == 0)
+        {
+            return GitFileDiffPreview.TextDiff(string.Empty);
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        var oldPath = normalizedPaths[0];
+        var currentPath = normalizedPaths[^1];
+
+        if (IsImagePath(currentPath) || IsImagePath(oldPath))
+        {
+            // 提交历史中的图片来自对象库，必须导出到缓存文件后再交给 Avalonia Image 控件加载。
+            var previousImagePath = await ExportBlobToDiffCacheAsync(root, $"{sha}^", oldPath, cancellationToken);
+            var currentImagePath = await ExportBlobToDiffCacheAsync(root, sha, currentPath, cancellationToken);
+            return GitFileDiffPreview.ImageDiff(previousImagePath, currentImagePath, null);
+        }
+
+        if (await HasCommitBinaryDiffAsync(root, sha, normalizedPaths, cancellationToken))
+        {
+            return GitFileDiffPreview.BinaryDiff(null);
+        }
+
+        var diff = await RunOptionalGitAsync(
+            root,
+            cancellationToken,
+            CreatePathArguments(
+                new[] { "show", "--format=", "--diff-merges=first-parent", "--find-renames", sha },
+                normalizedPaths));
+        return GitFileDiffPreview.TextDiff(diff);
     }
 
     public async Task CommitAsync(
@@ -822,6 +920,128 @@ public sealed class GitRepositoryService : IGitRepositoryService
         return arguments.ToArray();
     }
 
+    private static string[] NormalizeGitPaths(IReadOnlyList<string> paths)
+    {
+        return paths
+            .Where(path => !string.IsNullOrWhiteSpace(path))
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+    }
+
+    private static bool IsImagePath(string path) =>
+        ImageFileExtensions.Contains(Path.GetExtension(path));
+
+    private static async Task<bool> HasWorkingTreeBinaryDiffAsync(
+        string root,
+        IReadOnlyList<string> paths,
+        CancellationToken cancellationToken)
+    {
+        var numstat = await RunOptionalGitAsync(
+            root,
+            cancellationToken,
+            CreatePathArguments(new[] { "diff", "--numstat", "HEAD" }, paths));
+        return ContainsBinaryNumstat(numstat);
+    }
+
+    private static async Task<bool> HasCommitBinaryDiffAsync(
+        string root,
+        string sha,
+        IReadOnlyList<string> paths,
+        CancellationToken cancellationToken)
+    {
+        var numstat = await RunOptionalGitAsync(
+            root,
+            cancellationToken,
+            CreatePathArguments(new[] { "show", "--format=", "--numstat", sha }, paths));
+        return ContainsBinaryNumstat(numstat);
+    }
+
+    private static bool ContainsBinaryNumstat(string numstat)
+    {
+        return numstat
+            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+            .Any(line => line.StartsWith("-\t-\t", StringComparison.Ordinal));
+    }
+
+    private static string ResolveRepositoryItemPath(string root, string gitPath)
+    {
+        if (string.IsNullOrWhiteSpace(gitPath))
+        {
+            return root;
+        }
+
+        if (Path.IsPathFullyQualified(gitPath))
+        {
+            throw new InvalidOperationException($"Refusing to resolve a rooted path: {gitPath}");
+        }
+
+        var fullPath = Path.GetFullPath(Path.Combine(root, gitPath));
+        var relativePath = Path.GetRelativePath(root, fullPath);
+        if (IsOutsideRepository(relativePath))
+        {
+            throw new InvalidOperationException($"Refusing to resolve a path outside the repository: {gitPath}");
+        }
+
+        return fullPath;
+    }
+
+    private static async Task<string?> ExportBlobToDiffCacheAsync(
+        string root,
+        string revision,
+        string gitPath,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(revision) || string.IsNullOrWhiteSpace(gitPath))
+        {
+            return null;
+        }
+
+        var extension = Path.GetExtension(gitPath);
+        var cacheDirectory = GetDiffCacheDirectory(root);
+        Directory.CreateDirectory(cacheDirectory);
+        var outputPath = Path.Combine(cacheDirectory, $"{Guid.NewGuid():N}{extension}");
+        var ok = await RunGitToFileAsync(
+            root,
+            outputPath,
+            cancellationToken,
+            "show",
+            $"{revision}:{gitPath}");
+        if (!ok)
+        {
+            TryDeleteFile(outputPath);
+            return null;
+        }
+
+        return outputPath;
+    }
+
+    private static string GetDiffCacheDirectory(string root)
+    {
+        var cacheRoot = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        if (string.IsNullOrWhiteSpace(cacheRoot))
+        {
+            cacheRoot = Path.GetTempPath();
+        }
+
+        var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(root)))[..16];
+        return Path.Combine(cacheRoot, "AvaGithubDesktop", "DiffCache", hash);
+    }
+
+    private static void TryDeleteFile(string filePath)
+    {
+        try
+        {
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+        }
+        catch
+        {
+            // 清理缓存失败不应打断差异查看，后续缓存目录仍可复用。
+        }
+    }
+
     private static void DeleteUntrackedPath(string root, string gitPath)
     {
         if (string.IsNullOrWhiteSpace(gitPath))
@@ -914,5 +1134,45 @@ public sealed class GitRepositoryService : IGitRepositoryService
         }
 
         return process.ExitCode == 0 ? stdout : string.Empty;
+    }
+
+    private static async Task<bool> RunGitToFileAsync(
+        string workingDirectory,
+        string outputPath,
+        CancellationToken cancellationToken,
+        params string[] arguments)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = "git",
+            WorkingDirectory = workingDirectory,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        foreach (var argument in arguments)
+        {
+            startInfo.ArgumentList.Add(argument);
+        }
+
+        using var process = Process.Start(startInfo)
+            ?? throw new InvalidOperationException("Unable to start git.");
+
+        await using var outputStream = File.Create(outputPath);
+        var stdoutTask = process.StandardOutput.BaseStream.CopyToAsync(outputStream, cancellationToken);
+        var stderrTask = process.StandardError.ReadToEndAsync(cancellationToken);
+        await process.WaitForExitAsync(cancellationToken);
+        await stdoutTask;
+        await outputStream.FlushAsync(cancellationToken);
+        await stderrTask;
+
+        if (process.ExitCode != 0)
+        {
+            return false;
+        }
+
+        return new FileInfo(outputPath).Length > 0;
     }
 }

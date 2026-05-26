@@ -37,6 +37,8 @@ public sealed class GitCommitFileItemViewModel : ReactiveObject
 
     public string GitPath => File.GitPath;
 
+    public IReadOnlyList<string> GitPaths => File.GitPaths;
+
     public string DisplayStatus => File.DisplayStatus;
 
     public string StatusBackground => File.StatusBackground;

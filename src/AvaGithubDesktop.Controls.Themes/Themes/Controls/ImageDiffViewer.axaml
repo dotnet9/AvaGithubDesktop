@@ -1,0 +1,279 @@
+<Styles
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:AvaGithubDesktop.Controls">
+    <Styles.Resources>
+        <ControlTheme x:Key="{x:Type controls:ImageDiffViewer}" TargetType="controls:ImageDiffViewer">
+            <Setter Property="Background" Value="{DynamicResource DiffViewerBackgroundBrush}" />
+            <Setter Property="Template">
+                <ControlTemplate TargetType="{x:Type controls:ImageDiffViewer}">
+                <Border Background="{TemplateBinding Background}">
+                    <Grid RowDefinitions="Auto,*">
+                        <StackPanel
+                            Margin="0,16,0,8"
+                            HorizontalAlignment="Center"
+                            Orientation="Horizontal"
+                            Spacing="0">
+                            <ToggleButton
+                                Classes="imageDiffMode"
+                                Command="{Binding SelectTwoUpCommand, RelativeSource={RelativeSource TemplatedParent}}"
+                                Content="{TemplateBinding TwoUpText}"
+                                IsChecked="{Binding IsTwoUpSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}" />
+                            <ToggleButton
+                                Classes="imageDiffMode"
+                                Command="{Binding SelectSwipeCommand, RelativeSource={RelativeSource TemplatedParent}}"
+                                Content="{TemplateBinding SwipeText}"
+                                IsChecked="{Binding IsSwipeSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}" />
+                            <ToggleButton
+                                Classes="imageDiffMode"
+                                Command="{Binding SelectOnionSkinCommand, RelativeSource={RelativeSource TemplatedParent}}"
+                                Content="{TemplateBinding OnionSkinText}"
+                                IsChecked="{Binding IsOnionSkinSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}" />
+                            <ToggleButton
+                                Classes="imageDiffMode"
+                                Command="{Binding SelectDifferenceCommand, RelativeSource={RelativeSource TemplatedParent}}"
+                                Content="{TemplateBinding DifferenceText}"
+                                IsChecked="{Binding IsDifferenceSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}" />
+                        </StackPanel>
+
+                        <ScrollViewer
+                            Grid.Row="1"
+                            HorizontalScrollBarVisibility="Auto"
+                            VerticalScrollBarVisibility="Auto">
+                            <Grid
+                                MinWidth="640"
+                                MinHeight="320"
+                                Margin="24,12,24,18"
+                                RowDefinitions="*,Auto"
+                                RowSpacing="8">
+                                <Grid
+                                    ColumnDefinitions="*,*"
+                                    ColumnSpacing="12"
+                                    IsVisible="{Binding IsTwoUpSelected, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <StackPanel Classes="imageDiffSide previous" Spacing="8">
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            Classes="imageDiffSideTitle previous"
+                                            Text="{TemplateBinding PreviousLabel}" />
+                                        <Border Classes="imageDiffFrame previous">
+                                            <Grid>
+                                                <Image
+                                                    IsVisible="{Binding HasPreviousImage, RelativeSource={RelativeSource TemplatedParent}}"
+                                                    Source="{Binding PreviousImage, RelativeSource={RelativeSource TemplatedParent}}"
+                                                    Stretch="Uniform" />
+                                                <TextBlock
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    Classes="imageDiffEmpty"
+                                                    IsVisible="{Binding HasNoPreviousImage, RelativeSource={RelativeSource TemplatedParent}}"
+                                                    Text="{TemplateBinding EmptyImageText}" />
+                                            </Grid>
+                                        </Border>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            Classes="imageDiffMeta"
+                                            Text="{Binding PreviousMetadata, RelativeSource={RelativeSource TemplatedParent}}" />
+                                    </StackPanel>
+
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        Classes="imageDiffSide current"
+                                        Spacing="8">
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            Classes="imageDiffSideTitle current"
+                                            Text="{TemplateBinding CurrentLabel}" />
+                                        <Border Classes="imageDiffFrame current">
+                                            <Grid>
+                                                <Image
+                                                    IsVisible="{Binding HasCurrentImage, RelativeSource={RelativeSource TemplatedParent}}"
+                                                    Source="{Binding CurrentImage, RelativeSource={RelativeSource TemplatedParent}}"
+                                                    Stretch="Uniform" />
+                                                <TextBlock
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    Classes="imageDiffEmpty"
+                                                    IsVisible="{Binding HasNoCurrentImage, RelativeSource={RelativeSource TemplatedParent}}"
+                                                    Text="{TemplateBinding EmptyImageText}" />
+                                            </Grid>
+                                        </Border>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            Classes="imageDiffMeta"
+                                            Text="{Binding CurrentMetadata, RelativeSource={RelativeSource TemplatedParent}}" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid
+                                    IsVisible="{Binding IsSwipeSelected, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <Border Classes="imageDiffOverlayFrame">
+                                        <Grid>
+                                            <Image
+                                                IsVisible="{Binding HasPreviousImage, RelativeSource={RelativeSource TemplatedParent}}"
+                                                Source="{Binding PreviousImage, RelativeSource={RelativeSource TemplatedParent}}"
+                                                Stretch="Uniform" />
+                                            <Image
+                                                Opacity="0.72"
+                                                IsVisible="{Binding HasCurrentImage, RelativeSource={RelativeSource TemplatedParent}}"
+                                                Source="{Binding CurrentImage, RelativeSource={RelativeSource TemplatedParent}}"
+                                                Stretch="Uniform" />
+                                            <Border
+                                                Width="2"
+                                                HorizontalAlignment="Center"
+                                                Background="{DynamicResource AccentBrush}" />
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+
+                                <Grid
+                                    IsVisible="{Binding IsOnionSkinSelected, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <Border Classes="imageDiffOverlayFrame">
+                                        <Grid>
+                                            <Image
+                                                Opacity="0.92"
+                                                IsVisible="{Binding HasPreviousImage, RelativeSource={RelativeSource TemplatedParent}}"
+                                                Source="{Binding PreviousImage, RelativeSource={RelativeSource TemplatedParent}}"
+                                                Stretch="Uniform" />
+                                            <Image
+                                                Opacity="0.54"
+                                                IsVisible="{Binding HasCurrentImage, RelativeSource={RelativeSource TemplatedParent}}"
+                                                Source="{Binding CurrentImage, RelativeSource={RelativeSource TemplatedParent}}"
+                                                Stretch="Uniform" />
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+
+                                <Grid
+                                    IsVisible="{Binding IsDifferenceSelected, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <Border Classes="imageDiffOverlayFrame">
+                                        <Grid>
+                                            <Image
+                                                Opacity="0.5"
+                                                IsVisible="{Binding HasPreviousImage, RelativeSource={RelativeSource TemplatedParent}}"
+                                                Source="{Binding PreviousImage, RelativeSource={RelativeSource TemplatedParent}}"
+                                                Stretch="Uniform" />
+                                            <Image
+                                                Opacity="0.85"
+                                                IsVisible="{Binding HasCurrentImage, RelativeSource={RelativeSource TemplatedParent}}"
+                                                Source="{Binding CurrentImage, RelativeSource={RelativeSource TemplatedParent}}"
+                                                Stretch="Uniform" />
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+
+                                <TextBlock
+                                    Grid.Row="1"
+                                    HorizontalAlignment="Center"
+                                    Classes="imageDiffSummary"
+                                    Text="{Binding SizeDiffText, RelativeSource={RelativeSource TemplatedParent}}" />
+                            </Grid>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+
+        <ControlTheme x:Key="{x:Type controls:BinaryDiffViewer}" TargetType="controls:BinaryDiffViewer">
+            <Setter Property="Background" Value="{DynamicResource DiffViewerBackgroundBrush}" />
+            <Setter Property="Template">
+                <ControlTemplate TargetType="{x:Type controls:BinaryDiffViewer}">
+                <Border Background="{TemplateBinding Background}">
+                    <StackPanel
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="10">
+                        <TextBlock
+                            Classes="binaryDiffMessage"
+                            Text="{TemplateBinding Message}" />
+                        <Button
+                            HorizontalAlignment="Center"
+                            Classes="inlineAction"
+                            Command="{TemplateBinding OpenCommand}"
+                            Content="{TemplateBinding OpenText}"
+                            IsEnabled="{TemplateBinding CanOpen}" />
+                    </StackPanel>
+                </Border>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+    </Styles.Resources>
+
+    <Style Selector="ToggleButton.imageDiffMode">
+        <Setter Property="MinWidth" Value="86" />
+        <Setter Property="MinHeight" Value="27" />
+        <Setter Property="Padding" Value="10,3" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style Selector="ToggleButton.imageDiffMode:checked">
+        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="Foreground" Value="White" />
+    </Style>
+
+    <Style Selector="TextBlock.imageDiffSideTitle">
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="TextBlock.imageDiffSideTitle.previous">
+        <Setter Property="Foreground" Value="{DynamicResource DiffRemovedTextBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.imageDiffSideTitle.current">
+        <Setter Property="Foreground" Value="{DynamicResource DiffAddedTextBrush}" />
+    </Style>
+
+    <Style Selector="Border.imageDiffFrame">
+        <Setter Property="Width" Value="300" />
+        <Setter Property="Height" Value="260" />
+        <Setter Property="Padding" Value="10" />
+        <Setter Property="Background" Value="{DynamicResource PanelAltBackgroundBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="2" />
+    </Style>
+
+    <Style Selector="Border.imageDiffFrame.previous">
+        <Setter Property="BorderBrush" Value="{DynamicResource DiffRemovedTextBrush}" />
+    </Style>
+
+    <Style Selector="Border.imageDiffFrame.current">
+        <Setter Property="BorderBrush" Value="{DynamicResource DiffAddedTextBrush}" />
+    </Style>
+
+    <Style Selector="Border.imageDiffOverlayFrame">
+        <Setter Property="Width" Value="640" />
+        <Setter Property="Height" Value="320" />
+        <Setter Property="Padding" Value="12" />
+        <Setter Property="Background" Value="{DynamicResource PanelAltBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="2" />
+    </Style>
+
+    <Style Selector="TextBlock.imageDiffMeta">
+        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style Selector="TextBlock.imageDiffEmpty">
+        <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style Selector="TextBlock.imageDiffSummary">
+        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style Selector="TextBlock.binaryDiffMessage">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+</Styles>

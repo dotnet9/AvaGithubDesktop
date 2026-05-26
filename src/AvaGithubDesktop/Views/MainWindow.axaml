@@ -848,9 +848,33 @@
                                         TextTrimming="CharacterEllipsis" />
                                 </Grid>
                             </Border>
-                            <controls:UnifiedDiffViewer
-                                Grid.Row="1"
-                                Text="{Binding DiffText}" />
+                            <Grid Grid.Row="1">
+                                <controls:UnifiedDiffViewer
+                                    IsVisible="{Binding IsTextDiffVisible}"
+                                    Text="{Binding DiffText}" />
+                                <controls:ImageDiffViewer
+                                    CurrentImagePath="{Binding CurrentDiffImagePath}"
+                                    CurrentLabel="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffAdded}}"
+                                    DifferenceText="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffDifference}}"
+                                    DiffLabel="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffSizeDiff}}"
+                                    EmptyImageText="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffEmpty}}"
+                                    HeightLabel="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffHeight}}"
+                                    IsVisible="{Binding IsImageDiffVisible}"
+                                    NoSizeDifferenceText="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffNoSizeDifference}}"
+                                    OnionSkinText="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffOnionSkin}}"
+                                    PreviousImagePath="{Binding PreviousDiffImagePath}"
+                                    PreviousLabel="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffDeleted}}"
+                                    SizeLabel="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffSize}}"
+                                    SwipeText="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffSwipe}}"
+                                    TwoUpText="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffTwoUp}}"
+                                    WidthLabel="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffWidth}}" />
+                                <controls:BinaryDiffViewer
+                                    CanOpen="{Binding CanOpenDiffFileInExternalEditor}"
+                                    IsVisible="{Binding IsBinaryDiffVisible}"
+                                    Message="{Binding BinaryDiffMessage}"
+                                    OpenCommand="{Binding OpenDiffFileInExternalEditorCommand}"
+                                    OpenText="{Binding BinaryDiffOpenText}" />
+                            </Grid>
                         </Grid>
                     </Border>
                 </Grid>
@@ -959,10 +983,35 @@
                                             TextTrimming="CharacterEllipsis" />
                                     </Grid>
                                 </Border>
-                                <controls:UnifiedDiffViewer
+                                <Grid
                                     Grid.Row="1"
-                                    IsVisible="{Binding HasHistory}"
-                                    Text="{Binding DiffText}" />
+                                    IsVisible="{Binding HasHistory}">
+                                    <controls:UnifiedDiffViewer
+                                        IsVisible="{Binding IsTextDiffVisible}"
+                                        Text="{Binding DiffText}" />
+                                    <controls:ImageDiffViewer
+                                        CurrentImagePath="{Binding CurrentDiffImagePath}"
+                                        CurrentLabel="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffAdded}}"
+                                        DifferenceText="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffDifference}}"
+                                        DiffLabel="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffSizeDiff}}"
+                                        EmptyImageText="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffEmpty}}"
+                                        HeightLabel="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffHeight}}"
+                                        IsVisible="{Binding IsImageDiffVisible}"
+                                        NoSizeDifferenceText="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffNoSizeDifference}}"
+                                        OnionSkinText="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffOnionSkin}}"
+                                        PreviousImagePath="{Binding PreviousDiffImagePath}"
+                                        PreviousLabel="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffDeleted}}"
+                                        SizeLabel="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffSize}}"
+                                        SwipeText="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffSwipe}}"
+                                        TwoUpText="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffTwoUp}}"
+                                        WidthLabel="{i18n:I18n {x:Static l:AvaGithubDesktopL.ImageDiffWidth}}" />
+                                    <controls:BinaryDiffViewer
+                                        CanOpen="{Binding CanOpenDiffFileInExternalEditor}"
+                                        IsVisible="{Binding IsBinaryDiffVisible}"
+                                        Message="{Binding BinaryDiffMessage}"
+                                        OpenCommand="{Binding OpenDiffFileInExternalEditorCommand}"
+                                        OpenText="{Binding BinaryDiffOpenText}" />
+                                </Grid>
                                 <StackPanel
                                     Grid.Row="1"
                                     Margin="14"

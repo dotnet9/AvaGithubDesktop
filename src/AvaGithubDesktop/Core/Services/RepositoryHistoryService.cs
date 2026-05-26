@@ -81,7 +81,9 @@ public sealed class RepositoryHistoryService : IRepositoryHistoryService
         {
             await using var stream = File.OpenRead(StorePath);
             var entries = await JsonSerializer.DeserializeAsync<List<RepositoryHistoryEntry>>(stream, JsonOptions, cancellationToken);
-            return entries ?? [];
+            return (entries ?? [])
+                .Where(IsValidStoredEntry)
+                .ToList();
         }
         catch (JsonException)
         {
@@ -91,6 +93,15 @@ public sealed class RepositoryHistoryService : IRepositoryHistoryService
         {
             return [];
         }
+    }
+
+    private static bool IsValidStoredEntry(RepositoryHistoryEntry? entry)
+    {
+        // 用户数据文件可能被旧版本、手动编辑或异常退出写坏；这里丢弃不完整记录，避免影响当前仓库打开。
+        return entry is not null
+               && !string.IsNullOrWhiteSpace(entry.Name)
+               && !string.IsNullOrWhiteSpace(entry.Path)
+               && !string.IsNullOrWhiteSpace(entry.GroupName);
     }
 
     private static IEnumerable<string> DiscoverDevelopmentRepositories()

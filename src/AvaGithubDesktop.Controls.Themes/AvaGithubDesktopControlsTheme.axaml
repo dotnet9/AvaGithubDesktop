@@ -12,6 +12,7 @@
         </ResourceDictionary>
     </Styles.Resources>
 
+    <StyleInclude Source="Themes/Controls/ImageDiffViewer.axaml" />
     <StyleInclude Source="Themes/Shell/Text.axaml" />
     <StyleInclude Source="Themes/Shell/Panels.axaml" />
     <StyleInclude Source="Themes/Shell/Inputs.axaml" />

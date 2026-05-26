@@ -37,9 +37,10 @@
 16. 添加CodeWF.LogViewer NuGet包，本地仓库目录D:\github\CodeWF.LogViewer可参考用法，用于操作日志展示，默认展示在状态栏上方，高度150~200，便于使用者了解git提交步骤学习、关键操作记录，菜单Menu提供显示或隐藏日志栏，需要记录在App.config
 17. 将国际化也放菜单Menu提供切换，需要记录在App.config
 18. 添加Semi 6、7种主题切换，也放菜单Menu提供切换，需要记录在App.config，参考D:\github\Vex
-19. 桌面运行了Github Desktop程序，你可运行它，截取我们正在做的功能截图与它对比，但主要功能和样式还是参考它的源码D:\github\desktop
-20. 尽量做到使用AvaGithubDesktop软件替换git功能，常用git命令都能在当前软件上实现，且不需要安装git
-21. 开发过程中将功能点简单列在本文档中，不列详细，只简单列功能
+19. 一个代码文件不要写太长，特别是6、700行这行，要按逻辑拆分UserControl及ViewModel，尽量不要用partial，拆分要有实际意义，也不能为了拆分耍拆分
+20. 桌面运行了Github Desktop程序，你可运行它，截取我们正在做的功能截图与它对比，但主要功能和样式还是参考它的源码D:\github\desktop
+21. 尽量做到使用AvaGithubDesktop软件替换git功能，常用git命令都能在当前软件上实现，且不需要安装git
+22. 开发过程中将功能点简单列在本文档中，不列详细，只简单列功能，整个需求文档你按实际开发调整，按正常人可理解的完善
 
 ## 功能点
 
@@ -78,3 +79,4 @@
 - Desktop 风格统一 Diff 预览，支持行号、区块、增删行分色
 - 操作日志栏级别与菜单文本支持 i18n
 - 菜单提供 Semi 主题切换并将当前主题写入 App.config
+- Desktop 风格图片与二进制文件 Diff 预览

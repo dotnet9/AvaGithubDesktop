@@ -76,6 +76,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isDiffLoading;
     private string _diffTitle = string.Empty;
     private string _diffText = string.Empty;
+    private GitFileDiffPreview _diffPreview = GitFileDiffPreview.TextDiff(string.Empty);
     private RepositorySyncOperation _activeSyncOperation = RepositorySyncOperation.None;
     private CompositeDisposable _changeSubscriptions = new();
     private IReadOnlyList<RepositoryListItemViewModel> _knownRepositories = [];
@@ -181,6 +182,9 @@ public sealed class MainWindowViewModel : ViewModelBase
                 model => model.IsSignedIn,
                 model => model.IsSigningIn,
                 (isSignedIn, isSigningIn) => isSignedIn && !isSigningIn));
+        OpenDiffFileInExternalEditorCommand = ReactiveCommand.CreateFromTask(
+            OpenDiffFileInExternalEditorAsync,
+            this.WhenAnyValue(model => model.CanOpenDiffFileInExternalEditor));
 
         _localizer.CultureChanged += (_, _) =>
         {
@@ -272,6 +276,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> SignInCommand { get; }
 
     public ReactiveCommand<Unit, Unit> SignOutCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> OpenDiffFileInExternalEditorCommand { get; }
 
     public string RepositoryPath
     {
@@ -859,6 +865,36 @@ public sealed class MainWindowViewModel : ViewModelBase
         get => _diffText;
         private set => this.RaiseAndSetIfChanged(ref _diffText, value);
     }
+
+    public GitFileDiffPreview DiffPreview
+    {
+        get => _diffPreview;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _diffPreview, value);
+            DiffText = value.Text;
+            RaiseDiffPreviewStateChanged();
+        }
+    }
+
+    public bool IsTextDiffVisible => DiffPreview.Kind == GitDiffPreviewKind.Text;
+
+    public bool IsImageDiffVisible => DiffPreview.Kind == GitDiffPreviewKind.Image;
+
+    public bool IsBinaryDiffVisible => DiffPreview.Kind == GitDiffPreviewKind.Binary;
+
+    public string? PreviousDiffImagePath => DiffPreview.PreviousImagePath;
+
+    public string? CurrentDiffImagePath => DiffPreview.CurrentImagePath;
+
+    public string BinaryDiffMessage => _localizer.Get(AvaGithubDesktopL.BinaryFileChanged);
+
+    public string BinaryDiffOpenText => _localizer.Get(AvaGithubDesktopL.OpenBinaryFileInExternalProgram);
+
+    public bool CanOpenDiffFileInExternalEditor =>
+        CanRunRepositoryCommand &&
+        !string.IsNullOrWhiteSpace(DiffPreview.WorkingTreePath) &&
+        File.Exists(DiffPreview.WorkingTreePath);
 
     public string CommitSummary
     {
@@ -2239,6 +2275,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private void RaiseOperationStateChanged()
     {
         this.RaisePropertyChanged(nameof(CanRunRepositoryCommand));
+        this.RaisePropertyChanged(nameof(CanOpenDiffFileInExternalEditor));
         RaiseCommitStateChanged();
         RaiseBranchStateChanged();
         RaiseSyncStateChanged();
@@ -2268,7 +2305,19 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(StashDescriptionText));
         this.RaisePropertyChanged(nameof(RepositorySelectorTitle));
         this.RaisePropertyChanged(nameof(RepositorySelectorDetail));
+        this.RaisePropertyChanged(nameof(BinaryDiffMessage));
+        this.RaisePropertyChanged(nameof(BinaryDiffOpenText));
         RaiseAccountStateChanged();
+    }
+
+    private void RaiseDiffPreviewStateChanged()
+    {
+        this.RaisePropertyChanged(nameof(IsTextDiffVisible));
+        this.RaisePropertyChanged(nameof(IsImageDiffVisible));
+        this.RaisePropertyChanged(nameof(IsBinaryDiffVisible));
+        this.RaisePropertyChanged(nameof(PreviousDiffImagePath));
+        this.RaisePropertyChanged(nameof(CurrentDiffImagePath));
+        this.RaisePropertyChanged(nameof(CanOpenDiffFileInExternalEditor));
     }
 
     private void RaiseSyncStateChanged()
@@ -2377,11 +2426,11 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         var requestVersion = ++_diffRequestVersion;
         IsDiffLoading = true;
-        DiffText = _localizer.Get(AvaGithubDesktopL.LoadingDiff);
+        DiffPreview = GitFileDiffPreview.TextDiff(_localizer.Get(AvaGithubDesktopL.LoadingDiff));
 
         try
         {
-            var (title, diff) = IsHistorySelected
+            var (title, preview) = IsHistorySelected
                 ? await LoadSelectedHistoryDiffAsync()
                 : await LoadSelectedWorkingTreeDiffAsync();
 
@@ -2391,15 +2440,14 @@ public sealed class MainWindowViewModel : ViewModelBase
             }
 
             DiffTitle = title;
-            DiffText = string.IsNullOrWhiteSpace(diff)
-                ? _localizer.Get(AvaGithubDesktopL.NoDiffAvailable)
-                : diff;
+            DiffPreview = NormalizeDiffPreview(preview);
         }
         catch (Exception ex)
         {
             if (requestVersion == _diffRequestVersion)
             {
-                DiffText = _localizer.Format(AvaGithubDesktopL.StatusRepositoryLoadFailedFormat, ex.Message);
+                DiffPreview = GitFileDiffPreview.TextDiff(
+                    _localizer.Format(AvaGithubDesktopL.StatusRepositoryLoadFailedFormat, ex.Message));
             }
         }
         finally
@@ -2411,33 +2459,73 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private async Task<(string Title, string Diff)> LoadSelectedWorkingTreeDiffAsync()
+    private async Task<(string Title, GitFileDiffPreview Preview)> LoadSelectedWorkingTreeDiffAsync()
     {
         if (SelectedChange is null || !HasRepository)
         {
-            return (_localizer.Get(AvaGithubDesktopL.NoFileSelected), _localizer.Get(AvaGithubDesktopL.NoFileSelected));
+            var message = _localizer.Get(AvaGithubDesktopL.NoFileSelected);
+            return (message, GitFileDiffPreview.TextDiff(message));
         }
 
-        var diff = await _gitRepositoryService.LoadWorkingTreeDiffAsync(
+        var preview = await _gitRepositoryService.LoadWorkingTreeDiffPreviewAsync(
             RootPath,
             SelectedChange.GitPaths,
             CancellationToken.None);
-        return (SelectedChange.Path, diff);
+        return (SelectedChange.Path, preview);
     }
 
-    private async Task<(string Title, string Diff)> LoadSelectedHistoryDiffAsync()
+    private async Task<(string Title, GitFileDiffPreview Preview)> LoadSelectedHistoryDiffAsync()
     {
         if (SelectedCommit is null || SelectedCommitFile is null || !HasRepository)
         {
-            return (_localizer.Get(AvaGithubDesktopL.NoFileSelected), _localizer.Get(AvaGithubDesktopL.NoFileSelected));
+            var message = _localizer.Get(AvaGithubDesktopL.NoFileSelected);
+            return (message, GitFileDiffPreview.TextDiff(message));
         }
 
-        var diff = await _gitRepositoryService.LoadCommitFileDiffAsync(
+        var preview = await _gitRepositoryService.LoadCommitFileDiffPreviewAsync(
             RootPath,
             SelectedCommit.Sha,
-            SelectedCommitFile.GitPath,
+            SelectedCommitFile.GitPaths,
             CancellationToken.None);
-        return (SelectedCommitFile.Path, diff);
+        return (SelectedCommitFile.Path, preview);
+    }
+
+    private GitFileDiffPreview NormalizeDiffPreview(GitFileDiffPreview preview)
+    {
+        if (preview.Kind == GitDiffPreviewKind.Text && string.IsNullOrWhiteSpace(preview.Text))
+        {
+            return GitFileDiffPreview.TextDiff(_localizer.Get(AvaGithubDesktopL.NoDiffAvailable));
+        }
+
+        if (preview.Kind == GitDiffPreviewKind.Image
+            && string.IsNullOrWhiteSpace(preview.PreviousImagePath)
+            && string.IsNullOrWhiteSpace(preview.CurrentImagePath))
+        {
+            return GitFileDiffPreview.TextDiff(_localizer.Get(AvaGithubDesktopL.NoDiffAvailable));
+        }
+
+        return preview;
+    }
+
+    private async Task OpenDiffFileInExternalEditorAsync()
+    {
+        if (!CanOpenDiffFileInExternalEditor || string.IsNullOrWhiteSpace(DiffPreview.WorkingTreePath))
+        {
+            return;
+        }
+
+        try
+        {
+            await _repositoryShellService.OpenItemAsync(DiffPreview.WorkingTreePath);
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Get(AvaGithubDesktopL.StatusOpenedChangeInExternalEditor)));
+        }
+        catch (Exception ex)
+        {
+            var message = _localizer.Format(AvaGithubDesktopL.StatusOpenChangeInExternalEditorFailedFormat, ex.Message);
+            ErrorMessage = message;
+            _eventBus.Publish(new StatusMessageChangedCommand(message));
+        }
     }
 
     private static string ResolveDefaultRepositoryPath()
