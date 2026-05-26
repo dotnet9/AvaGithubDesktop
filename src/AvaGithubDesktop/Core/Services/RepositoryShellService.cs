@@ -1,4 +1,8 @@
 using System.Diagnostics;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Input.Platform;
 
 namespace AvaGithubDesktop.Core.Services;
 
@@ -70,6 +74,54 @@ public sealed class RepositoryShellService : IRepositoryShellService
             UseShellExecute = false
         });
         return Task.CompletedTask;
+    }
+
+    public Task OpenUrlAsync(string url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            throw new InvalidOperationException($"Url '{url}' is invalid.");
+        }
+
+        if (OperatingSystem.IsWindows())
+        {
+            StartProcess(new ProcessStartInfo(uri.AbsoluteUri)
+            {
+                UseShellExecute = true
+            });
+            return Task.CompletedTask;
+        }
+
+        if (OperatingSystem.IsMacOS())
+        {
+            StartProcess(new ProcessStartInfo("open")
+            {
+                ArgumentList = { uri.AbsoluteUri },
+                UseShellExecute = false
+            });
+            return Task.CompletedTask;
+        }
+
+        StartProcess(new ProcessStartInfo("xdg-open")
+        {
+            ArgumentList = { uri.AbsoluteUri },
+            UseShellExecute = false
+        });
+        return Task.CompletedTask;
+    }
+
+    public async Task CopyTextAsync(string text)
+    {
+        var window = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: { } mainWindow }
+            ? mainWindow
+            : null;
+        var clipboard = window is null ? null : TopLevel.GetTopLevel(window)?.Clipboard;
+        if (clipboard is null)
+        {
+            throw new InvalidOperationException("Clipboard is not available.");
+        }
+
+        await clipboard.SetTextAsync(text);
     }
 
     private static string ResolveExistingDirectory(string repositoryPath)

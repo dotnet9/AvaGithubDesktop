@@ -107,6 +107,13 @@ public sealed class MainWindowViewModel : ViewModelBase
             (hasRepository, canRunRepositoryCommand) => hasRepository && canRunRepositoryCommand);
         OpenRepositoryInShellCommand = ReactiveCommand.CreateFromTask(OpenRepositoryInShellAsync, canUseCurrentRepository);
         ShowRepositoryInFileManagerCommand = ReactiveCommand.CreateFromTask(ShowRepositoryInFileManagerAsync, canUseCurrentRepository);
+        var canViewCurrentRepositoryOnGitHub = this.WhenAnyValue(
+            model => model.HasRepository,
+            model => model.RemoteUrl,
+            model => model.CanRunRepositoryCommand,
+            (hasRepository, remoteUrl, canRunRepositoryCommand) =>
+                hasRepository && canRunRepositoryCommand && RepositoryRemoteUrlHelper.TryGetGitHubWebUrl(remoteUrl, out _));
+        ViewRepositoryOnGitHubCommand = ReactiveCommand.CreateFromTask(ViewRepositoryOnGitHubAsync, canViewCurrentRepositoryOnGitHub);
         ShowChangesCommand = ReactiveCommand.Create(ShowChanges);
         ShowHistoryCommand = ReactiveCommand.Create(ShowHistory);
 
@@ -164,6 +171,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> OpenRepositoryInShellCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ShowRepositoryInFileManagerCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ViewRepositoryOnGitHubCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CommitCommand { get; }
 
@@ -896,6 +905,11 @@ public sealed class MainWindowViewModel : ViewModelBase
         await ShowRepositoryPathInFileManagerAsync(RootPath);
     }
 
+    private async Task ViewRepositoryOnGitHubAsync()
+    {
+        await ViewRepositoryRemoteOnGitHubAsync(RemoteUrl);
+    }
+
     private async Task OpenRepositoryItemInShellAsync(RepositoryListItemViewModel repository)
     {
         await OpenRepositoryPathInShellAsync(repository.Path);
@@ -904,6 +918,56 @@ public sealed class MainWindowViewModel : ViewModelBase
     private async Task ShowRepositoryItemInFileManagerAsync(RepositoryListItemViewModel repository)
     {
         await ShowRepositoryPathInFileManagerAsync(repository.Path);
+    }
+
+    private async Task CopyRepositoryNameAsync(RepositoryListItemViewModel repository)
+    {
+        await CopyRepositoryTextAsync(repository.Name, AvaGithubDesktopL.StatusCopiedRepositoryName);
+    }
+
+    private async Task CopyRepositoryPathAsync(RepositoryListItemViewModel repository)
+    {
+        await CopyRepositoryTextAsync(repository.Path, AvaGithubDesktopL.StatusCopiedRepositoryPath);
+    }
+
+    private async Task ViewRepositoryItemOnGitHubAsync(RepositoryListItemViewModel repository)
+    {
+        await ViewRepositoryRemoteOnGitHubAsync(repository.Entry.RemoteUrl);
+    }
+
+    private async Task CopyRepositoryTextAsync(string text, string successKey)
+    {
+        try
+        {
+            await _repositoryShellService.CopyTextAsync(text);
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(successKey)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusCopyRepositoryTextFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+    }
+
+    private async Task ViewRepositoryRemoteOnGitHubAsync(string? remoteUrl)
+    {
+        if (!RepositoryRemoteUrlHelper.TryGetGitHubWebUrl(remoteUrl, out var webUrl))
+        {
+            ErrorMessage = _localizer.Get(AvaGithubDesktopL.StatusRepositoryHasNoGitHubRemote);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+            return;
+        }
+
+        try
+        {
+            await _repositoryShellService.OpenUrlAsync(webUrl);
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedRepositoryOnGitHub)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenRepositoryOnGitHubFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
     }
 
     private async Task OpenRepositoryPathInShellAsync(string repositoryPath)
@@ -1267,7 +1331,10 @@ public sealed class MainWindowViewModel : ViewModelBase
                 entry,
                 OpenKnownRepositoryAsync,
                 OpenRepositoryItemInShellAsync,
-                ShowRepositoryItemInFileManagerAsync))
+                ShowRepositoryItemInFileManagerAsync,
+                CopyRepositoryNameAsync,
+                CopyRepositoryPathAsync,
+                ViewRepositoryItemOnGitHubAsync))
             .ToArray();
         UpdateCurrentRepositoryIndicators();
         RebuildRepositoryGroups();

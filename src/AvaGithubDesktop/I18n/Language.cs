@@ -21,6 +21,9 @@ public static class AvaGithubDesktopL
     public static readonly string MenuFetch = "AvaGithubDesktop.AvaGithubDesktopL.MenuFetch";
     public static readonly string MenuOpenInShell = "AvaGithubDesktop.AvaGithubDesktopL.MenuOpenInShell";
     public static readonly string MenuShowInFileManager = "AvaGithubDesktop.AvaGithubDesktopL.MenuShowInFileManager";
+    public static readonly string MenuViewOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.MenuViewOnGitHub";
+    public static readonly string MenuCopyRepositoryName = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyRepositoryName";
+    public static readonly string MenuCopyRepositoryPath = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyRepositoryPath";
     public static readonly string MenuStashAllChanges = "AvaGithubDesktop.AvaGithubDesktopL.MenuStashAllChanges";
     public static readonly string MenuRestoreStash = "AvaGithubDesktop.AvaGithubDesktopL.MenuRestoreStash";
     public static readonly string MenuDiscardStash = "AvaGithubDesktop.AvaGithubDesktopL.MenuDiscardStash";
@@ -113,6 +116,12 @@ public static class AvaGithubDesktopL
     public static readonly string StatusOpenRepositoryShellFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenRepositoryShellFailedFormat";
     public static readonly string StatusShowedRepositoryInFileManager = "AvaGithubDesktop.AvaGithubDesktopL.StatusShowedRepositoryInFileManager";
     public static readonly string StatusShowRepositoryInFileManagerFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusShowRepositoryInFileManagerFailedFormat";
+    public static readonly string StatusOpenedRepositoryOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedRepositoryOnGitHub";
+    public static readonly string StatusOpenRepositoryOnGitHubFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenRepositoryOnGitHubFailedFormat";
+    public static readonly string StatusRepositoryHasNoGitHubRemote = "AvaGithubDesktop.AvaGithubDesktopL.StatusRepositoryHasNoGitHubRemote";
+    public static readonly string StatusCopiedRepositoryName = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopiedRepositoryName";
+    public static readonly string StatusCopiedRepositoryPath = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopiedRepositoryPath";
+    public static readonly string StatusCopyRepositoryTextFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopyRepositoryTextFailedFormat";
     public static readonly string ChangedFileCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.ChangedFileCountFormat";
     public static readonly string ChangedFilesCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.ChangedFilesCountFormat";
     public static readonly string ChangedFilesFilteredCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.ChangedFilesFilteredCountFormat";

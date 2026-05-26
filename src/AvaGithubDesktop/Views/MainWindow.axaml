@@ -45,6 +45,7 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Open}}" Command="{Binding OpenRepositoryCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Refresh}}" Command="{Binding RefreshRepositoryCommand}" />
                     <Separator />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuViewOnGitHub}}" Command="{Binding ViewRepositoryOnGitHubCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuOpenInShell}}" Command="{Binding OpenRepositoryInShellCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowInFileManager}}" Command="{Binding ShowRepositoryInFileManagerCommand}" />
                 </MenuItem>
@@ -118,6 +119,10 @@
                                                                             ToolTip.Tip="{Binding Path}">
                                                                             <Button.ContextFlyout>
                                                                                 <MenuFlyout>
+                                                                                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyRepositoryName}}" Command="{Binding CopyNameCommand}" />
+                                                                                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyRepositoryPath}}" Command="{Binding CopyPathCommand}" />
+                                                                                    <Separator />
+                                                                                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuViewOnGitHub}}" Command="{Binding ViewOnGitHubCommand}" />
                                                                                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Open}}" Command="{Binding OpenCommand}" />
                                                                                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuOpenInShell}}" Command="{Binding OpenInShellCommand}" />
                                                                                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowInFileManager}}" Command="{Binding ShowInFileManagerCommand}" />

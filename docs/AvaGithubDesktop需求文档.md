@@ -53,3 +53,5 @@
 - Desktop 风格 Current repository 仓库选择器、最近仓库和仓库过滤
 - Desktop 风格 Repository 菜单当前仓库终端与文件管理器入口
 - Desktop 风格仓库选择器列表项右键菜单
+- Desktop 风格仓库复制名称/路径与 View on GitHub 操作
+- `Directory.Build.props` 使用统一版本变量驱动 `Version`、`FileVersion` 等属性
