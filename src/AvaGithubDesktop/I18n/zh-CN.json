@@ -46,7 +46,21 @@
       "ErrorInvalidRepository": "请输入有效的仓库路径。",
       "DialogOpenRepositoryTitle": "打开本地 Git 仓库",
       "AheadBehindFormat": "领先 {0}，落后 {1}",
-      "CleanWorkingTree": "工作区干净"
+      "CleanWorkingTree": "工作区干净",
+      "CommitSummaryPlaceholder": "摘要（必填）",
+      "CommitDescriptionPlaceholder": "描述",
+      "CommitFileToBranchFormat": "提交 {0} 个文件到 {1}",
+      "CommitFilesToBranchFormat": "提交 {0} 个文件到 {1}",
+      "SelectFilesToCommit": "选择要提交的文件",
+      "CommitSummaryRequired": "提交摘要为必填项。",
+      "NoFilesSelected": "请选择一个或多个文件提交。",
+      "StatusCommittingFormat": "正在提交 {0} 个文件到 {1}...",
+      "StatusCommittedFormat": "已提交：{0}",
+      "StatusCommitFailedFormat": "提交失败：{0}",
+      "Committing": "正在提交...",
+      "ChangedFileCountFormat": "{0} 个变更文件",
+      "ChangedFilesCountFormat": "{0} 个变更文件",
+      "SelectedFilesCountFormat": "已选择 {0}/{1}"
     }
   }
 }

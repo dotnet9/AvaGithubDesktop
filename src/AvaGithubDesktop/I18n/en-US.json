@@ -46,7 +46,21 @@
       "ErrorInvalidRepository": "Enter a valid repository path.",
       "DialogOpenRepositoryTitle": "Open local Git repository",
       "AheadBehindFormat": "Ahead {0}, behind {1}",
-      "CleanWorkingTree": "Clean working tree"
+      "CleanWorkingTree": "Clean working tree",
+      "CommitSummaryPlaceholder": "Summary (required)",
+      "CommitDescriptionPlaceholder": "Description",
+      "CommitFileToBranchFormat": "Commit {0} file to {1}",
+      "CommitFilesToBranchFormat": "Commit {0} files to {1}",
+      "SelectFilesToCommit": "Select files to commit",
+      "CommitSummaryRequired": "A commit summary is required.",
+      "NoFilesSelected": "Select one or more files to commit.",
+      "StatusCommittingFormat": "Committing {0} file(s) to {1}...",
+      "StatusCommittedFormat": "Committed: {0}",
+      "StatusCommitFailedFormat": "Commit failed: {0}",
+      "Committing": "Committing...",
+      "ChangedFileCountFormat": "{0} changed file",
+      "ChangedFilesCountFormat": "{0} changed files",
+      "SelectedFilesCountFormat": "{0} of {1} selected"
     }
   }
 }

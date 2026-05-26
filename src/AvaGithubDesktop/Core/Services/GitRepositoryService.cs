@@ -36,6 +36,59 @@ public sealed class GitRepositoryService : IGitRepositoryService
             Changes: changes);
     }
 
+    public async Task CommitAsync(
+        string repositoryPath,
+        IReadOnlyList<string> includedPaths,
+        string summary,
+        string description,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        if (string.IsNullOrWhiteSpace(summary))
+        {
+            throw new ArgumentException("A commit summary is required.", nameof(summary));
+        }
+
+        var normalizedIncludedPaths = includedPaths
+            .Where(path => !string.IsNullOrWhiteSpace(path))
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+
+        if (normalizedIncludedPaths.Length == 0)
+        {
+            throw new InvalidOperationException("Select one or more files to commit.");
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        var status = await RunRequiredGitAsync(root, cancellationToken, "status", "--porcelain=v1");
+        var trackedPaths = ParseChanges(status)
+            .Where(change => change.Kind != GitChangeKind.Untracked)
+            .SelectMany(change => change.GitPaths)
+            .Where(path => !string.IsNullOrWhiteSpace(path))
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+
+        if (trackedPaths.Length > 0)
+        {
+            await RunRequiredGitAsync(root, cancellationToken, CreatePathArguments("reset", trackedPaths));
+        }
+
+        await RunRequiredGitAsync(root, cancellationToken, CreatePathArguments("add", normalizedIncludedPaths));
+
+        var commitArguments = new List<string> { "commit", "-m", summary.Trim() };
+        if (!string.IsNullOrWhiteSpace(description))
+        {
+            commitArguments.Add("-m");
+            commitArguments.Add(description.Trim());
+        }
+
+        await RunRequiredGitAsync(root, cancellationToken, commitArguments.ToArray());
+    }
+
     private static async Task<string> ResolveBranchAsync(string root, CancellationToken cancellationToken)
     {
         var branch = await RunRequiredGitAsync(root, cancellationToken, "rev-parse", "--abbrev-ref", "HEAD");
@@ -123,6 +176,13 @@ public sealed class GitRepositoryService : IGitRepositoryService
         params string[] arguments)
     {
         return RunGitAsync(workingDirectory, arguments, cancellationToken, allowFailure: true);
+    }
+
+    private static string[] CreatePathArguments(string command, IReadOnlyList<string> paths)
+    {
+        var arguments = new List<string>(paths.Count + 2) { command, "--" };
+        arguments.AddRange(paths);
+        return arguments.ToArray();
     }
 
     private static async Task<string> RunGitAsync(

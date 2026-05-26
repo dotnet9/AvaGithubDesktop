@@ -2,6 +2,8 @@ namespace AvaGithubDesktop.Core.Models;
 
 public sealed record GitChangeItem(string StatusCode, string Path, GitChangeKind Kind)
 {
+    public IReadOnlyList<string> GitPaths => ResolveGitPaths(Path);
+
     public string DisplayStatus => StatusCode.Trim() switch
     {
         "??" => "Untracked",
@@ -28,4 +30,24 @@ public sealed record GitChangeItem(string StatusCode, string Path, GitChangeKind
         GitChangeKind.Untracked => "#8A5A00",
         _ => "#0757A8"
     };
+
+    private static IReadOnlyList<string> ResolveGitPaths(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return Array.Empty<string>();
+        }
+
+        var renameSeparatorIndex = path.IndexOf(" -> ", StringComparison.Ordinal);
+        if (renameSeparatorIndex < 0)
+        {
+            return new[] { path };
+        }
+
+        var oldPath = path[..renameSeparatorIndex];
+        var newPath = path[(renameSeparatorIndex + 4)..];
+        return string.IsNullOrWhiteSpace(oldPath) || string.IsNullOrWhiteSpace(newPath)
+            ? new[] { path }
+            : new[] { oldPath, newPath };
+    }
 }

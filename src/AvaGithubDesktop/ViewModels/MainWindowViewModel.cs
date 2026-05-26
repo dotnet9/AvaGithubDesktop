@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using AvaGithubDesktop.Core.Messaging;
 using AvaGithubDesktop.Core.Models;
 using AvaGithubDesktop.Core.Services;
@@ -23,16 +25,23 @@ public sealed class MainWindowViewModel : ViewModelBase
     private string _lastCommit = "-";
     private string _aheadBehindText = "-";
     private string _errorMessage = string.Empty;
+    private string _commitSummary = string.Empty;
+    private string _commitDescription = string.Empty;
     private bool _hasRepository;
     private bool _isLoading;
+    private bool _isCommitting;
     private bool _isInitialized;
+    private bool _isBulkUpdatingIncludedChanges;
     private int _changedFilesCount;
     private int _stagedCount;
     private int _unstagedCount;
     private int _untrackedCount;
+    private int _includedChangesCount;
     private int _ahead;
     private int _behind;
+    private bool? _areAllChangesIncluded = false;
     private LanguageOption? _selectedLanguage;
+    private CompositeDisposable _changeSubscriptions = new();
 
     public MainWindowViewModel(
         IGitRepositoryService gitRepositoryService,
@@ -55,16 +64,38 @@ public sealed class MainWindowViewModel : ViewModelBase
         };
         _selectedLanguage = Languages.FirstOrDefault(option => option.CultureName == _localizer.Culture.Name) ?? Languages[0];
 
-        var canExecuteRepositoryCommand = this.WhenAnyValue(model => model.IsLoading, loading => !loading);
+        var canExecuteRepositoryCommand = this.WhenAnyValue(
+            model => model.IsLoading,
+            model => model.IsCommitting,
+            (loading, committing) => !loading && !committing);
         BrowseRepositoryCommand = ReactiveCommand.CreateFromTask(BrowseRepositoryAsync, canExecuteRepositoryCommand);
         OpenRepositoryCommand = ReactiveCommand.CreateFromTask(OpenRepositoryAsync, canExecuteRepositoryCommand);
         RefreshRepositoryCommand = ReactiveCommand.CreateFromTask(OpenRepositoryAsync, canExecuteRepositoryCommand);
-        _localizer.CultureChanged += (_, _) => UpdateAheadBehindText();
+
+        var canCommit = this.WhenAnyValue(
+            model => model.HasRepository,
+            model => model.IsLoading,
+            model => model.IsCommitting,
+            model => model.CommitSummary,
+            model => model.IncludedChangesCount,
+            (hasRepository, isLoading, isCommitting, summary, includedChangesCount) =>
+                hasRepository &&
+                !isLoading &&
+                !isCommitting &&
+                includedChangesCount > 0 &&
+                !string.IsNullOrWhiteSpace(summary));
+        CommitCommand = ReactiveCommand.CreateFromTask(CommitChangesAsync, canCommit);
+
+        _localizer.CultureChanged += (_, _) =>
+        {
+            UpdateAheadBehindText();
+            RaiseLocalizedDerivedText();
+        };
     }
 
     public ObservableCollection<LanguageOption> Languages { get; }
 
-    public ObservableCollection<GitChangeItem> ChangedFiles { get; } = new();
+    public ObservableCollection<GitChangeItemViewModel> ChangedFiles { get; } = new();
 
     public ShellStatusViewModel StatusBar { get; }
 
@@ -73,6 +104,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> OpenRepositoryCommand { get; }
 
     public ReactiveCommand<Unit, Unit> RefreshRepositoryCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> CommitCommand { get; }
 
     public string RepositoryPath
     {
@@ -95,7 +128,11 @@ public sealed class MainWindowViewModel : ViewModelBase
     public string CurrentBranch
     {
         get => _currentBranch;
-        private set => this.RaiseAndSetIfChanged(ref _currentBranch, value);
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _currentBranch, value);
+            this.RaisePropertyChanged(nameof(CommitButtonText));
+        }
     }
 
     public string Upstream
@@ -141,6 +178,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             this.RaiseAndSetIfChanged(ref _hasRepository, value);
             this.RaisePropertyChanged(nameof(ShowEmptyRepository));
+            RaiseCommitStateChanged();
         }
     }
 
@@ -153,6 +191,17 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             this.RaiseAndSetIfChanged(ref _isLoading, value);
             this.RaisePropertyChanged(nameof(ShowEmptyRepository));
+            RaiseCommitStateChanged();
+        }
+    }
+
+    public bool IsCommitting
+    {
+        get => _isCommitting;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isCommitting, value);
+            RaiseCommitStateChanged();
         }
     }
 
@@ -164,6 +213,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             this.RaiseAndSetIfChanged(ref _changedFilesCount, value);
             this.RaisePropertyChanged(nameof(HasChanges));
             this.RaisePropertyChanged(nameof(HasNoChanges));
+            this.RaisePropertyChanged(nameof(ChangedFilesHeaderText));
         }
     }
 
@@ -188,6 +238,89 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool HasChanges => ChangedFilesCount > 0;
 
     public bool HasNoChanges => HasRepository && !IsLoading && ChangedFilesCount == 0;
+
+    public string CommitSummary
+    {
+        get => _commitSummary;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _commitSummary, value);
+            RaiseCommitStateChanged();
+        }
+    }
+
+    public string CommitDescription
+    {
+        get => _commitDescription;
+        set => this.RaiseAndSetIfChanged(ref _commitDescription, value);
+    }
+
+    public int IncludedChangesCount
+    {
+        get => _includedChangesCount;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _includedChangesCount, value);
+            RaiseCommitStateChanged();
+        }
+    }
+
+    public bool? AreAllChangesIncluded
+    {
+        get => _areAllChangesIncluded;
+        set
+        {
+            if (value is null)
+            {
+                this.RaiseAndSetIfChanged(ref _areAllChangesIncluded, value);
+                return;
+            }
+
+            SetAllChangesIncluded(value.Value);
+        }
+    }
+
+    public bool CanCommit =>
+        HasRepository &&
+        !IsLoading &&
+        !IsCommitting &&
+        IncludedChangesCount > 0 &&
+        !string.IsNullOrWhiteSpace(CommitSummary);
+
+    public string CommitButtonText
+    {
+        get
+        {
+            if (IsCommitting)
+            {
+                return _localizer.Get(AvaGithubDesktopL.Committing);
+            }
+
+            if (IncludedChangesCount <= 0)
+            {
+                return _localizer.Get(AvaGithubDesktopL.SelectFilesToCommit);
+            }
+
+            var formatKey = IncludedChangesCount == 1
+                ? AvaGithubDesktopL.CommitFileToBranchFormat
+                : AvaGithubDesktopL.CommitFilesToBranchFormat;
+            return _localizer.Format(formatKey, IncludedChangesCount, CurrentBranch);
+        }
+    }
+
+    public string ChangedFilesHeaderText
+    {
+        get
+        {
+            var formatKey = ChangedFilesCount == 1
+                ? AvaGithubDesktopL.ChangedFileCountFormat
+                : AvaGithubDesktopL.ChangedFilesCountFormat;
+            return _localizer.Format(formatKey, ChangedFilesCount);
+        }
+    }
+
+    public string SelectedChangesStatusText =>
+        _localizer.Format(AvaGithubDesktopL.SelectedFilesCountFormat, IncludedChangesCount, ChangedFilesCount);
 
     public LanguageOption? SelectedLanguage
     {
@@ -266,6 +399,57 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private async Task CommitChangesAsync()
+    {
+        if (!CanCommit)
+        {
+            ErrorMessage = string.IsNullOrWhiteSpace(CommitSummary)
+                ? _localizer.Get(AvaGithubDesktopL.CommitSummaryRequired)
+                : _localizer.Get(AvaGithubDesktopL.NoFilesSelected);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+            return;
+        }
+
+        var includedPaths = ChangedFiles
+            .Where(change => change.IsIncluded)
+            .SelectMany(change => change.GitPaths)
+            .Where(path => !string.IsNullOrWhiteSpace(path))
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+        var committedSummary = CommitSummary.Trim();
+
+        IsCommitting = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(
+            _localizer.Format(AvaGithubDesktopL.StatusCommittingFormat, IncludedChangesCount, CurrentBranch)));
+
+        try
+        {
+            await _gitRepositoryService.CommitAsync(
+                RootPath,
+                includedPaths,
+                CommitSummary,
+                CommitDescription,
+                CancellationToken.None);
+
+            CommitSummary = string.Empty;
+            CommitDescription = string.Empty;
+            var snapshot = await _gitRepositoryService.LoadRepositoryAsync(RootPath, CancellationToken.None);
+            ApplySnapshot(snapshot);
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusCommittedFormat, committedSummary)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusCommitFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsCommitting = false;
+        }
+    }
+
     private void ApplySnapshot(GitRepositorySnapshot snapshot)
     {
         HasRepository = true;
@@ -283,11 +467,27 @@ public sealed class MainWindowViewModel : ViewModelBase
         _behind = snapshot.Behind;
         UpdateAheadBehindText();
 
+        _changeSubscriptions.Dispose();
+        _changeSubscriptions = new CompositeDisposable();
         ChangedFiles.Clear();
         foreach (var change in snapshot.Changes)
         {
-            ChangedFiles.Add(change);
+            var changeViewModel = new GitChangeItemViewModel(change);
+            var subscription = changeViewModel
+                .WhenAnyValue(model => model.IsIncluded)
+                .Skip(1)
+                .Subscribe(_ =>
+                {
+                    if (!_isBulkUpdatingIncludedChanges)
+                    {
+                        UpdateIncludedState();
+                    }
+                });
+            _changeSubscriptions.Add(subscription);
+            ChangedFiles.Add(changeViewModel);
         }
+
+        UpdateIncludedState();
     }
 
     private void UpdateAheadBehindText()
@@ -295,6 +495,51 @@ public sealed class MainWindowViewModel : ViewModelBase
         AheadBehindText = HasRepository
             ? _localizer.Format(AvaGithubDesktopL.AheadBehindFormat, _ahead, _behind)
             : "-";
+    }
+
+    private void SetAllChangesIncluded(bool include)
+    {
+        _isBulkUpdatingIncludedChanges = true;
+        try
+        {
+            foreach (var change in ChangedFiles)
+            {
+                change.IsIncluded = include;
+            }
+        }
+        finally
+        {
+            _isBulkUpdatingIncludedChanges = false;
+        }
+
+        UpdateIncludedState();
+    }
+
+    private void UpdateIncludedState()
+    {
+        IncludedChangesCount = ChangedFiles.Count(change => change.IsIncluded);
+        var allIncluded = ChangedFiles.Count == 0
+            ? false
+            : IncludedChangesCount == ChangedFiles.Count
+                ? true
+                : IncludedChangesCount == 0
+                    ? false
+                    : (bool?)null;
+        this.RaiseAndSetIfChanged(ref _areAllChangesIncluded, allIncluded, nameof(AreAllChangesIncluded));
+    }
+
+    private void RaiseCommitStateChanged()
+    {
+        this.RaisePropertyChanged(nameof(CanCommit));
+        this.RaisePropertyChanged(nameof(CommitButtonText));
+        this.RaisePropertyChanged(nameof(SelectedChangesStatusText));
+    }
+
+    private void RaiseLocalizedDerivedText()
+    {
+        this.RaisePropertyChanged(nameof(CommitButtonText));
+        this.RaisePropertyChanged(nameof(ChangedFilesHeaderText));
+        this.RaisePropertyChanged(nameof(SelectedChangesStatusText));
     }
 
     private static string ResolveDefaultRepositoryPath()

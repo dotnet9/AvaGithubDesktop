@@ -45,4 +45,18 @@ public static class AvaGithubDesktopL
     public const string DialogOpenRepositoryTitle = "AvaGithubDesktop.AvaGithubDesktopL.DialogOpenRepositoryTitle";
     public const string AheadBehindFormat = "AvaGithubDesktop.AvaGithubDesktopL.AheadBehindFormat";
     public const string CleanWorkingTree = "AvaGithubDesktop.AvaGithubDesktopL.CleanWorkingTree";
+    public const string CommitSummaryPlaceholder = "AvaGithubDesktop.AvaGithubDesktopL.CommitSummaryPlaceholder";
+    public const string CommitDescriptionPlaceholder = "AvaGithubDesktop.AvaGithubDesktopL.CommitDescriptionPlaceholder";
+    public const string CommitFileToBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.CommitFileToBranchFormat";
+    public const string CommitFilesToBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.CommitFilesToBranchFormat";
+    public const string SelectFilesToCommit = "AvaGithubDesktop.AvaGithubDesktopL.SelectFilesToCommit";
+    public const string CommitSummaryRequired = "AvaGithubDesktop.AvaGithubDesktopL.CommitSummaryRequired";
+    public const string NoFilesSelected = "AvaGithubDesktop.AvaGithubDesktopL.NoFilesSelected";
+    public const string StatusCommittingFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCommittingFormat";
+    public const string StatusCommittedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCommittedFormat";
+    public const string StatusCommitFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCommitFailedFormat";
+    public const string Committing = "AvaGithubDesktop.AvaGithubDesktopL.Committing";
+    public const string ChangedFileCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.ChangedFileCountFormat";
+    public const string ChangedFilesCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.ChangedFilesCountFormat";
+    public const string SelectedFilesCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.SelectedFilesCountFormat";
 }
