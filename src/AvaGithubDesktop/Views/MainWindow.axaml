@@ -433,6 +433,12 @@
                                     <Border
                                         Height="42"
                                         Padding="10,0">
+                                        <Border.ContextFlyout>
+                                            <MenuFlyout>
+                                                <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyRelativePath}}" Command="{Binding CopyRelativePathCommand}" />
+                                                <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowInFileManager}}" Command="{Binding ShowInFileManagerCommand}" />
+                                            </MenuFlyout>
+                                        </Border.ContextFlyout>
                                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
                                             <CheckBox
                                                 VerticalAlignment="Center"

@@ -24,6 +24,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuViewOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.MenuViewOnGitHub";
     public static readonly string MenuCopyRepositoryName = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyRepositoryName";
     public static readonly string MenuCopyRepositoryPath = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyRepositoryPath";
+    public static readonly string MenuCopyRelativePath = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyRelativePath";
     public static readonly string MenuStashAllChanges = "AvaGithubDesktop.AvaGithubDesktopL.MenuStashAllChanges";
     public static readonly string MenuRestoreStash = "AvaGithubDesktop.AvaGithubDesktopL.MenuRestoreStash";
     public static readonly string MenuDiscardStash = "AvaGithubDesktop.AvaGithubDesktopL.MenuDiscardStash";
@@ -122,6 +123,10 @@ public static class AvaGithubDesktopL
     public static readonly string StatusCopiedRepositoryName = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopiedRepositoryName";
     public static readonly string StatusCopiedRepositoryPath = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopiedRepositoryPath";
     public static readonly string StatusCopyRepositoryTextFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopyRepositoryTextFailedFormat";
+    public static readonly string StatusCopiedChangePath = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopiedChangePath";
+    public static readonly string StatusCopyChangePathFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopyChangePathFailedFormat";
+    public static readonly string StatusShowedChangeInFileManager = "AvaGithubDesktop.AvaGithubDesktopL.StatusShowedChangeInFileManager";
+    public static readonly string StatusShowChangeInFileManagerFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusShowChangeInFileManagerFailedFormat";
     public static readonly string ChangedFileCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.ChangedFileCountFormat";
     public static readonly string ChangedFilesCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.ChangedFilesCountFormat";
     public static readonly string ChangedFilesFilteredCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.ChangedFilesFilteredCountFormat";

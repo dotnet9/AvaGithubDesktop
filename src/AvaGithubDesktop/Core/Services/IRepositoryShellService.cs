@@ -6,6 +6,8 @@ public interface IRepositoryShellService
 
     Task ShowInFileManagerAsync(string repositoryPath);
 
+    Task ShowItemInFileManagerAsync(string itemPath);
+
     Task OpenUrlAsync(string url);
 
     Task CopyTextAsync(string text);

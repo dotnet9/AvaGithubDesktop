@@ -76,6 +76,56 @@ public sealed class RepositoryShellService : IRepositoryShellService
         return Task.CompletedTask;
     }
 
+    public Task ShowItemInFileManagerAsync(string itemPath)
+    {
+        var path = Path.GetFullPath(itemPath);
+        var pathToOpen = File.Exists(path) || Directory.Exists(path)
+            ? path
+            : ResolveExistingParentDirectory(path);
+
+        if (OperatingSystem.IsWindows())
+        {
+            if (File.Exists(pathToOpen))
+            {
+                StartProcess(new ProcessStartInfo("explorer.exe")
+                {
+                    Arguments = $"/select,\"{pathToOpen}\"",
+                    UseShellExecute = true
+                });
+            }
+            else
+            {
+                StartProcess(new ProcessStartInfo("explorer.exe")
+                {
+                    ArgumentList = { pathToOpen },
+                    UseShellExecute = true
+                });
+            }
+
+            return Task.CompletedTask;
+        }
+
+        if (OperatingSystem.IsMacOS())
+        {
+            StartProcess(new ProcessStartInfo("open")
+            {
+                ArgumentList = { "-R", pathToOpen },
+                UseShellExecute = false
+            });
+            return Task.CompletedTask;
+        }
+
+        var folder = Directory.Exists(pathToOpen)
+            ? pathToOpen
+            : Path.GetDirectoryName(pathToOpen) ?? pathToOpen;
+        StartProcess(new ProcessStartInfo("xdg-open")
+        {
+            ArgumentList = { folder },
+            UseShellExecute = false
+        });
+        return Task.CompletedTask;
+    }
+
     public Task OpenUrlAsync(string url)
     {
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
@@ -133,6 +183,22 @@ public sealed class RepositoryShellService : IRepositoryShellService
         }
 
         return path;
+    }
+
+    private static string ResolveExistingParentDirectory(string path)
+    {
+        var current = Path.GetDirectoryName(path);
+        while (!string.IsNullOrWhiteSpace(current))
+        {
+            if (Directory.Exists(current))
+            {
+                return current;
+            }
+
+            current = Path.GetDirectoryName(current);
+        }
+
+        throw new DirectoryNotFoundException(path);
     }
 
     private static void StartProcess(ProcessStartInfo startInfo)

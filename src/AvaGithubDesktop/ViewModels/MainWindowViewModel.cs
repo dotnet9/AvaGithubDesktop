@@ -922,12 +922,18 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private async Task CopyRepositoryNameAsync(RepositoryListItemViewModel repository)
     {
-        await CopyRepositoryTextAsync(repository.Name, AvaGithubDesktopL.StatusCopiedRepositoryName);
+        await CopyTextAsync(
+            repository.Name,
+            AvaGithubDesktopL.StatusCopiedRepositoryName,
+            AvaGithubDesktopL.StatusCopyRepositoryTextFailedFormat);
     }
 
     private async Task CopyRepositoryPathAsync(RepositoryListItemViewModel repository)
     {
-        await CopyRepositoryTextAsync(repository.Path, AvaGithubDesktopL.StatusCopiedRepositoryPath);
+        await CopyTextAsync(
+            repository.Path,
+            AvaGithubDesktopL.StatusCopiedRepositoryPath,
+            AvaGithubDesktopL.StatusCopyRepositoryTextFailedFormat);
     }
 
     private async Task ViewRepositoryItemOnGitHubAsync(RepositoryListItemViewModel repository)
@@ -935,7 +941,32 @@ public sealed class MainWindowViewModel : ViewModelBase
         await ViewRepositoryRemoteOnGitHubAsync(repository.Entry.RemoteUrl);
     }
 
-    private async Task CopyRepositoryTextAsync(string text, string successKey)
+    private async Task CopyChangeRelativePathAsync(GitChangeItemViewModel change)
+    {
+        await CopyTextAsync(
+            change.Path,
+            AvaGithubDesktopL.StatusCopiedChangePath,
+            AvaGithubDesktopL.StatusCopyChangePathFailedFormat);
+    }
+
+    private async Task ShowChangeInFileManagerAsync(GitChangeItemViewModel change)
+    {
+        var relativePath = change.GitPaths.LastOrDefault() ?? change.Path;
+        var fullPath = Path.Combine(RootPath, relativePath);
+
+        try
+        {
+            await _repositoryShellService.ShowItemInFileManagerAsync(fullPath);
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusShowedChangeInFileManager)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusShowChangeInFileManagerFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+    }
+
+    private async Task CopyTextAsync(string text, string successKey, string failureFormatKey)
     {
         try
         {
@@ -944,7 +975,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusCopyRepositoryTextFailedFormat, ex.Message);
+            ErrorMessage = _localizer.Format(failureFormatKey, ex.Message);
             _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
         }
     }
@@ -1447,7 +1478,10 @@ public sealed class MainWindowViewModel : ViewModelBase
         ChangedFiles.Clear();
         foreach (var change in snapshot.Changes)
         {
-            var changeViewModel = new GitChangeItemViewModel(change);
+            var changeViewModel = new GitChangeItemViewModel(
+                change,
+                CopyChangeRelativePathAsync,
+                ShowChangeInFileManagerAsync);
             // 单个文件勾选变化会影响提交按钮、全选三态和“已选择”文案，需要集中刷新派生状态。
             var subscription = changeViewModel
                 .WhenAnyValue(model => model.IsIncluded)
