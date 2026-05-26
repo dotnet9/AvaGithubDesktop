@@ -36,6 +36,9 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isCommitting;
     private bool _isCheckingOutBranch;
     private bool _isSyncing;
+    private bool _isStashing;
+    private bool _isRestoringStash;
+    private bool _isDiscardingStash;
     private bool _isInitialized;
     private bool _isBulkUpdatingIncludedChanges;
     private int _changedFilesCount;
@@ -52,6 +55,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private GitCommitItem? _selectedCommit;
     private GitCommitFileItem? _selectedCommitFile;
     private GitBranchItem? _selectedBranch;
+    private GitStashEntry? _currentBranchStash;
     private RepositorySection _selectedSection = RepositorySection.Changes;
     private int _historyCommitCount;
     private int _diffRequestVersion;
@@ -82,71 +86,27 @@ public sealed class MainWindowViewModel : ViewModelBase
         };
         _selectedLanguage = Languages.FirstOrDefault(option => option.CultureName == _localizer.Culture.Name) ?? Languages[0];
 
-        var canExecuteRepositoryCommand = this.WhenAnyValue(
-            model => model.IsLoading,
-            model => model.IsCommitting,
-            model => model.IsCheckingOutBranch,
-            model => model.IsSyncing,
-            (loading, committing, checkingOutBranch, syncing) =>
-                !loading && !committing && !checkingOutBranch && !syncing);
+        var canExecuteRepositoryCommand = this.WhenAnyValue(model => model.CanRunRepositoryCommand);
         BrowseRepositoryCommand = ReactiveCommand.CreateFromTask(BrowseRepositoryAsync, canExecuteRepositoryCommand);
         OpenRepositoryCommand = ReactiveCommand.CreateFromTask(OpenRepositoryAsync, canExecuteRepositoryCommand);
         RefreshRepositoryCommand = ReactiveCommand.CreateFromTask(OpenRepositoryAsync, canExecuteRepositoryCommand);
         ShowChangesCommand = ReactiveCommand.Create(ShowChanges);
         ShowHistoryCommand = ReactiveCommand.Create(ShowHistory);
 
-        var canSynchronize = this.WhenAnyValue(
-            model => model.HasRepository,
-            model => model.IsLoading,
-            model => model.IsCommitting,
-            model => model.IsCheckingOutBranch,
-            model => model.IsSyncing,
-            model => model.RemoteName,
-            (hasRepository, isLoading, isCommitting, isCheckingOutBranch, isSyncing, remoteName) =>
-                hasRepository &&
-                !string.IsNullOrWhiteSpace(remoteName) &&
-                remoteName != "-" &&
-                !isLoading &&
-                !isCommitting &&
-                !isCheckingOutBranch &&
-                !isSyncing);
+        var canSynchronize = this.WhenAnyValue(model => model.CanSynchronize);
         SynchronizeRepositoryCommand = ReactiveCommand.CreateFromTask(SynchronizeRepositoryAsync, canSynchronize);
         FetchRepositoryCommand = ReactiveCommand.CreateFromTask(FetchRepositoryAsync, canSynchronize);
         PullRepositoryCommand = ReactiveCommand.CreateFromTask(PullRepositoryAsync, canSynchronize);
         PushRepositoryCommand = ReactiveCommand.CreateFromTask(PushRepositoryAsync, canSynchronize);
 
-        var canCommit = this.WhenAnyValue(
-            model => model.HasRepository,
-            model => model.IsLoading,
-            model => model.IsCommitting,
-            model => model.IsSyncing,
-            model => model.CommitSummary,
-            model => model.IncludedChangesCount,
-            (hasRepository, isLoading, isCommitting, isSyncing, summary, includedChangesCount) =>
-                hasRepository &&
-                !isLoading &&
-                !isCommitting &&
-                !isSyncing &&
-                includedChangesCount > 0 &&
-                !string.IsNullOrWhiteSpace(summary));
+        var canCommit = this.WhenAnyValue(model => model.CanCommit);
         CommitCommand = ReactiveCommand.CreateFromTask(CommitChangesAsync, canCommit);
 
-        var canCheckoutBranch = this.WhenAnyValue(
-            model => model.HasRepository,
-            model => model.IsLoading,
-            model => model.IsCommitting,
-            model => model.IsCheckingOutBranch,
-            model => model.IsSyncing,
-            model => model.SelectedBranch,
-            (hasRepository, isLoading, isCommitting, isCheckingOutBranch, isSyncing, selectedBranch) =>
-                hasRepository &&
-                !isLoading &&
-                !isCommitting &&
-                !isCheckingOutBranch &&
-                !isSyncing &&
-                selectedBranch is not null &&
-                !selectedBranch.IsCurrent);
+        var canCheckoutBranch = this.WhenAnyValue(model => model.CanCheckoutBranch);
         CheckoutBranchCommand = ReactiveCommand.CreateFromTask(CheckoutSelectedBranchAsync, canCheckoutBranch);
+        StashAllChangesCommand = ReactiveCommand.CreateFromTask(StashAllChangesAsync, this.WhenAnyValue(model => model.CanStashChanges));
+        RestoreStashCommand = ReactiveCommand.CreateFromTask(RestoreStashAsync, this.WhenAnyValue(model => model.CanRestoreStash));
+        DiscardStashCommand = ReactiveCommand.CreateFromTask(DiscardStashAsync, this.WhenAnyValue(model => model.CanDiscardStash));
 
         _localizer.CultureChanged += (_, _) =>
         {
@@ -192,6 +152,12 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ShowHistoryCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CheckoutBranchCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> StashAllChangesCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> RestoreStashCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> DiscardStashCommand { get; }
 
     public string RepositoryPath
     {
@@ -285,13 +251,20 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             this.RaiseAndSetIfChanged(ref _hasRepository, value);
             this.RaisePropertyChanged(nameof(ShowEmptyRepository));
-            RaiseCommitStateChanged();
-            RaiseBranchStateChanged();
-            RaiseSyncStateChanged();
+            RaiseOperationStateChanged();
         }
     }
 
     public bool ShowEmptyRepository => !HasRepository && !IsLoading;
+
+    public bool CanRunRepositoryCommand =>
+        !IsLoading &&
+        !IsCommitting &&
+        !IsCheckingOutBranch &&
+        !IsSyncing &&
+        !IsStashing &&
+        !IsRestoringStash &&
+        !IsDiscardingStash;
 
     public bool IsLoading
     {
@@ -300,9 +273,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             this.RaiseAndSetIfChanged(ref _isLoading, value);
             this.RaisePropertyChanged(nameof(ShowEmptyRepository));
-            RaiseCommitStateChanged();
-            RaiseBranchStateChanged();
-            RaiseSyncStateChanged();
+            RaiseOperationStateChanged();
         }
     }
 
@@ -312,9 +283,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         private set
         {
             this.RaiseAndSetIfChanged(ref _isCommitting, value);
-            RaiseCommitStateChanged();
-            RaiseBranchStateChanged();
-            RaiseSyncStateChanged();
+            RaiseOperationStateChanged();
         }
     }
 
@@ -324,8 +293,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         private set
         {
             this.RaiseAndSetIfChanged(ref _isCheckingOutBranch, value);
-            RaiseBranchStateChanged();
-            RaiseSyncStateChanged();
+            RaiseOperationStateChanged();
         }
     }
 
@@ -335,9 +303,37 @@ public sealed class MainWindowViewModel : ViewModelBase
         private set
         {
             this.RaiseAndSetIfChanged(ref _isSyncing, value);
-            RaiseCommitStateChanged();
-            RaiseBranchStateChanged();
-            RaiseSyncStateChanged();
+            RaiseOperationStateChanged();
+        }
+    }
+
+    public bool IsStashing
+    {
+        get => _isStashing;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isStashing, value);
+            RaiseOperationStateChanged();
+        }
+    }
+
+    public bool IsRestoringStash
+    {
+        get => _isRestoringStash;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isRestoringStash, value);
+            RaiseOperationStateChanged();
+        }
+    }
+
+    public bool IsDiscardingStash
+    {
+        get => _isDiscardingStash;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isDiscardingStash, value);
+            RaiseOperationStateChanged();
         }
     }
 
@@ -350,6 +346,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(HasChanges));
             this.RaisePropertyChanged(nameof(HasNoChanges));
             this.RaisePropertyChanged(nameof(ChangedFilesHeaderText));
+            RaiseStashStateChanged();
         }
     }
 
@@ -475,10 +472,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public bool CanCheckoutBranch =>
         HasRepository &&
-        !IsLoading &&
-        !IsCommitting &&
-        !IsSyncing &&
-        !IsCheckingOutBranch &&
+        CanRunRepositoryCommand &&
         SelectedBranch is not null &&
         !SelectedBranch.IsCurrent;
 
@@ -487,6 +481,53 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool HasActiveBranchFilter => !string.IsNullOrWhiteSpace(BranchFilterText);
 
     public bool HasNoFilteredBranches => HasRepository && !IsLoading && FilteredBranches.Count == 0;
+
+    public GitStashEntry? CurrentBranchStash
+    {
+        get => _currentBranchStash;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _currentBranchStash, value);
+            RaiseStashStateChanged();
+        }
+    }
+
+    public bool HasCurrentBranchStash => CurrentBranchStash is not null;
+
+    public bool CanStashChanges =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        ChangedFilesCount > 0 &&
+        !HasCurrentBranchStash;
+
+    public bool CanRestoreStash =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        CurrentBranchStash is not null;
+
+    public bool CanDiscardStash => CanRestoreStash;
+
+    public string StashAllChangesButtonText
+    {
+        get
+        {
+            if (IsStashing)
+            {
+                return _localizer.Get(AvaGithubDesktopL.StashingChanges);
+            }
+
+            return HasCurrentBranchStash
+                ? _localizer.Get(AvaGithubDesktopL.CurrentBranchAlreadyHasStash)
+                : _localizer.Get(AvaGithubDesktopL.StashAllChanges);
+        }
+    }
+
+    public string StashDescriptionText => CurrentBranchStash is null
+        ? string.Empty
+        : _localizer.Format(
+            AvaGithubDesktopL.StashedChangesDescriptionFormat,
+            CurrentBranchStash.BranchName,
+            CurrentBranchStash.ShortSha);
 
     public string BranchesHeaderText
     {
@@ -512,10 +553,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool CanSynchronize =>
         HasRepository &&
         HasRemote &&
-        !IsLoading &&
-        !IsCommitting &&
-        !IsCheckingOutBranch &&
-        !IsSyncing;
+        CanRunRepositoryCommand;
 
     public string SyncActionTitle
     {
@@ -683,9 +721,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public bool CanCommit =>
         HasRepository &&
-        !IsLoading &&
-        !IsCommitting &&
-        !IsSyncing &&
+        CanRunRepositoryCommand &&
         IncludedChangesCount > 0 &&
         !string.IsNullOrWhiteSpace(CommitSummary);
 
@@ -811,6 +847,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             RemoteName = "-";
             RemoteUrl = "-";
             LastFetchedAt = null;
+            CurrentBranchStash = null;
             ApplyBranches(Array.Empty<GitBranchItem>());
             ApplyHistory(Array.Empty<GitCommitItem>());
             ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusRepositoryLoadFailedFormat, ex.Message);
@@ -975,6 +1012,106 @@ public sealed class MainWindowViewModel : ViewModelBase
             _ => AvaGithubDesktopL.StatusFetchFailedFormat
         };
 
+    private async Task StashAllChangesAsync()
+    {
+        if (!CanStashChanges)
+        {
+            return;
+        }
+
+        IsStashing = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Format(AvaGithubDesktopL.StatusStashingChangesFormat, CurrentBranch)));
+
+        try
+        {
+            // Stash all changes 是工作区级操作，不读取文件勾选状态，避免用户误以为只会 stash 已勾选文件。
+            var stashed = await _gitRepositoryService.CreateStashAsync(RootPath, CurrentBranch, CancellationToken.None);
+            await ReloadRepositoryWorkspaceAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                stashed
+                    ? _localizer.Format(AvaGithubDesktopL.StatusStashedChangesFormat, CurrentBranch)
+                    : _localizer.Get(AvaGithubDesktopL.StatusNoChangesToStash)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusStashFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsStashing = false;
+        }
+    }
+
+    private async Task RestoreStashAsync()
+    {
+        if (!CanRestoreStash || CurrentBranchStash is null)
+        {
+            return;
+        }
+
+        var stashName = CurrentBranchStash.Name;
+        IsRestoringStash = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusRestoringStash)));
+
+        try
+        {
+            await _gitRepositoryService.RestoreStashAsync(RootPath, stashName, CancellationToken.None);
+            await ReloadRepositoryWorkspaceAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusRestoredStash)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusRestoreStashFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsRestoringStash = false;
+        }
+    }
+
+    private async Task DiscardStashAsync()
+    {
+        if (!CanDiscardStash || CurrentBranchStash is null)
+        {
+            return;
+        }
+
+        var stashName = CurrentBranchStash.Name;
+        IsDiscardingStash = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusDiscardingStash)));
+
+        try
+        {
+            await _gitRepositoryService.DiscardStashAsync(RootPath, stashName, CancellationToken.None);
+            await ReloadRepositoryWorkspaceAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusDiscardedStash)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusDiscardStashFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsDiscardingStash = false;
+        }
+    }
+
+    private async Task ReloadRepositoryWorkspaceAsync()
+    {
+        var snapshot = await _gitRepositoryService.LoadRepositoryAsync(RootPath, CancellationToken.None);
+        ApplySnapshot(snapshot);
+        var branches = await _gitRepositoryService.LoadBranchesAsync(snapshot.RootPath, CancellationToken.None);
+        ApplyBranches(branches);
+        var history = await _gitRepositoryService.LoadHistoryAsync(snapshot.RootPath, HistoryCommitLimit, CancellationToken.None);
+        ApplyHistory(history);
+    }
+
     private void ApplySnapshot(GitRepositorySnapshot snapshot)
     {
         // 每次打开、提交、切分支、同步后都从 Git 重新读取快照，避免 UI 自己推断仓库状态。
@@ -991,6 +1128,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         StagedCount = snapshot.StagedCount;
         UnstagedCount = snapshot.UnstagedCount;
         UntrackedCount = snapshot.UntrackedCount;
+        CurrentBranchStash = snapshot.CurrentBranchStash;
         _ahead = snapshot.Ahead;
         _behind = snapshot.Behind;
         UpdateAheadBehindText();
@@ -1193,6 +1331,15 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(ChangedFilesHeaderText));
     }
 
+    private void RaiseOperationStateChanged()
+    {
+        this.RaisePropertyChanged(nameof(CanRunRepositoryCommand));
+        RaiseCommitStateChanged();
+        RaiseBranchStateChanged();
+        RaiseSyncStateChanged();
+        RaiseStashStateChanged();
+    }
+
     private void RaiseCommitStateChanged()
     {
         this.RaisePropertyChanged(nameof(CanCommit));
@@ -1210,6 +1357,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(HistoryHeaderText));
         this.RaisePropertyChanged(nameof(SelectedCommitChangedFilesHeader));
         this.RaisePropertyChanged(nameof(BranchesHeaderText));
+        this.RaisePropertyChanged(nameof(StashAllChangesButtonText));
+        this.RaisePropertyChanged(nameof(StashDescriptionText));
     }
 
     private void RaiseSyncStateChanged()
@@ -1250,6 +1399,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(HasActiveBranchFilter));
         this.RaisePropertyChanged(nameof(HasNoFilteredBranches));
         this.RaisePropertyChanged(nameof(BranchesHeaderText));
+    }
+
+    private void RaiseStashStateChanged()
+    {
+        this.RaisePropertyChanged(nameof(HasCurrentBranchStash));
+        this.RaisePropertyChanged(nameof(CanStashChanges));
+        this.RaisePropertyChanged(nameof(CanRestoreStash));
+        this.RaisePropertyChanged(nameof(CanDiscardStash));
+        this.RaisePropertyChanged(nameof(StashAllChangesButtonText));
+        this.RaisePropertyChanged(nameof(StashDescriptionText));
     }
 
     private async Task CheckoutSelectedBranchAsync()

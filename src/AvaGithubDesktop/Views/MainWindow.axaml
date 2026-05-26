@@ -45,7 +45,11 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Open}}" Command="{Binding OpenRepositoryCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Refresh}}" Command="{Binding RefreshRepositoryCommand}" />
                 </MenuItem>
-                <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuBranch}}" />
+                <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuBranch}}">
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuStashAllChanges}}" Command="{Binding StashAllChangesCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRestoreStash}}" Command="{Binding RestoreStashCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuDiscardStash}}" Command="{Binding DiscardStashCommand}" />
+                </MenuItem>
                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuHelp}}">
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAbout}}" />
                 </MenuItem>
@@ -403,6 +407,37 @@
                             <TextBlock Classes="section" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.NoRepositoryTitle}}" />
                             <TextBlock Classes="muted" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.NoRepositoryDetail}}" />
                         </StackPanel>
+                        <Border
+                            Grid.Row="1"
+                            Margin="12,8,12,12"
+                            Classes="stashBanner"
+                            IsVisible="{Binding HasCurrentBranchStash}">
+                            <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="3">
+                                <TextBlock
+                                    FontWeight="SemiBold"
+                                    Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.StashedChanges}}" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Classes="muted"
+                                    FontSize="12"
+                                    Text="{Binding StashDescriptionText}"
+                                    TextTrimming="CharacterEllipsis" />
+                                <Button
+                                    Grid.Column="1"
+                                    Grid.RowSpan="2"
+                                    Classes="stashAction"
+                                    Command="{Binding RestoreStashCommand}"
+                                    Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.RestoreStash}}"
+                                    IsEnabled="{Binding CanRestoreStash}" />
+                                <Button
+                                    Grid.Column="2"
+                                    Grid.RowSpan="2"
+                                    Classes="stashAction"
+                                    Command="{Binding DiscardStashCommand}"
+                                    Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.DiscardStash}}"
+                                    IsEnabled="{Binding CanDiscardStash}" />
+                            </Grid>
+                        </Border>
                     </Grid>
 
                     <Border
@@ -426,6 +461,12 @@
                                 PlaceholderText="{i18n:I18n {x:Static l:AvaGithubDesktopL.CommitDescriptionPlaceholder}}"
                                 Text="{Binding CommitDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 TextWrapping="Wrap" />
+                            <Button
+                                HorizontalAlignment="Stretch"
+                                Classes="stashButton"
+                                Command="{Binding StashAllChangesCommand}"
+                                Content="{Binding StashAllChangesButtonText}"
+                                IsEnabled="{Binding CanStashChanges}" />
                             <Button
                                 HorizontalAlignment="Stretch"
                                 Classes="commitButton"

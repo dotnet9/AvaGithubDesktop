@@ -36,6 +36,21 @@ public interface IGitRepositoryService
         string branchName,
         CancellationToken cancellationToken);
 
+    Task<bool> CreateStashAsync(
+        string repositoryPath,
+        string branchName,
+        CancellationToken cancellationToken);
+
+    Task RestoreStashAsync(
+        string repositoryPath,
+        string stashName,
+        CancellationToken cancellationToken);
+
+    Task DiscardStashAsync(
+        string repositoryPath,
+        string stashName,
+        CancellationToken cancellationToken);
+
     Task<string> LoadWorkingTreeDiffAsync(
         string repositoryPath,
         IReadOnlyList<string> paths,

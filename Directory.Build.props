@@ -5,10 +5,10 @@
       第一位：架构级调整；第二位：功能新增或行为修改；第三/四位：日常开发迭代与修复。
       当前版本必须和 docs/更新日志.md 的最新版本号保持一致，方便后续更新日志窗口直接关联展示。
     -->
-    <Version>0.3.0.0</Version>
-    <AssemblyVersion>0.3.0.0</AssemblyVersion>
-    <FileVersion>0.3.0.0</FileVersion>
-    <InformationalVersion>0.3.0.0</InformationalVersion>
+    <Version>0.4.0.0</Version>
+    <AssemblyVersion>0.4.0.0</AssemblyVersion>
+    <FileVersion>0.4.0.0</FileVersion>
+    <InformationalVersion>0.4.0.0</InformationalVersion>
     <Authors>沙漠尽头的狼</Authors>
     <Company>CodeWF</Company>
     <Title>AvaGithubDesktop</Title>

@@ -11,6 +11,7 @@ public sealed record GitRepositorySnapshot(
     string LastCommit,
     int Ahead,
     int Behind,
+    GitStashEntry? CurrentBranchStash,
     IReadOnlyList<GitChangeItem> Changes)
 {
     public int ChangedFilesCount => Changes.Count;

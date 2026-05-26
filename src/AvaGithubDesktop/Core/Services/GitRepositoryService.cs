@@ -8,6 +8,10 @@ public sealed class GitRepositoryService : IGitRepositoryService
 {
     private const char CommitRecordSeparator = '\u001e';
     private const char CommitFieldSeparator = '\u001f';
+    private const string DesktopStashEntryMarker = "!!GitHub_Desktop";
+    private static readonly Regex DesktopStashEntryMessageRegex = new(
+        "!!GitHub_Desktop<(?<branch>.+)>$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     public async Task<GitRepositorySnapshot> LoadRepositoryAsync(
         string repositoryPath,
@@ -31,6 +35,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
         var changes = ParseChanges(status);
         var (ahead, behind) = ParseAheadBehind(status);
         var lastFetchedAt = await ResolveLastFetchedAtAsync(root, cancellationToken);
+        var currentBranchStash = await LoadCurrentBranchStashAsync(root, branch, cancellationToken);
 
         return new GitRepositorySnapshot(
             RepositoryName: new DirectoryInfo(root).Name,
@@ -43,6 +48,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
             LastCommit: FormatLastCommit(lastCommit),
             Ahead: ahead,
             Behind: behind,
+            CurrentBranchStash: currentBranchStash,
             Changes: changes);
     }
 
@@ -180,6 +186,68 @@ public sealed class GitRepositoryService : IGitRepositoryService
         }
 
         await RunRequiredGitAsync(root, cancellationToken, "push", remoteName, branchName);
+    }
+
+    public async Task<bool> CreateStashAsync(
+        string repositoryPath,
+        string branchName,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        if (string.IsNullOrWhiteSpace(branchName) || branchName.StartsWith("HEAD", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("A local branch is required.", nameof(branchName));
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        // Desktop 使用特殊 marker 识别自己创建的 stash；这里保持兼容，后续才能只显示当前分支相关的 stash。
+        var message = CreateDesktopStashMessage(branchName);
+        // 使用 --include-untracked，避免未跟踪文件被遗留在工作区，符合“Stash all changes”的用户预期。
+        var result = await RunRequiredGitAsync(root, cancellationToken, "stash", "push", "--include-untracked", "-m", message);
+        return !string.Equals(result, "No local changes to save", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public async Task RestoreStashAsync(
+        string repositoryPath,
+        string stashName,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        if (string.IsNullOrWhiteSpace(stashName))
+        {
+            throw new ArgumentException("A stash name is required.", nameof(stashName));
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        // pop 会恢复文件并删除 stash；如果发生冲突，Git 会保留未成功删除的 stash 并把错误返回给上层 UI。
+        await RunRequiredGitAsync(root, cancellationToken, "stash", "pop", "--quiet", stashName);
+    }
+
+    public async Task DiscardStashAsync(
+        string repositoryPath,
+        string stashName,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        if (string.IsNullOrWhiteSpace(stashName))
+        {
+            throw new ArgumentException("A stash name is required.", nameof(stashName));
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        await RunRequiredGitAsync(root, cancellationToken, "stash", "drop", stashName);
     }
 
     public async Task<string> LoadWorkingTreeDiffAsync(
@@ -519,6 +587,68 @@ public sealed class GitRepositoryService : IGitRepositoryService
 
         return $"{parts[0]} {parts[1]} ({parts[2]})";
     }
+
+    private static async Task<GitStashEntry?> LoadCurrentBranchStashAsync(
+        string root,
+        string branchName,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(branchName) || branchName.StartsWith("HEAD", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var stashLog = await RunOptionalGitAsync(
+            root,
+            cancellationToken,
+            "log",
+            "-g",
+            "--format=%gd%x09%H%x09%gs",
+            "refs/stash",
+            "--");
+
+        return ParseDesktopStashes(stashLog)
+            .FirstOrDefault(stash => string.Equals(stash.BranchName, branchName, StringComparison.Ordinal));
+    }
+
+    private static IReadOnlyList<GitStashEntry> ParseDesktopStashes(string stashLog)
+    {
+        if (string.IsNullOrWhiteSpace(stashLog))
+        {
+            return Array.Empty<GitStashEntry>();
+        }
+
+        return stashLog
+            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(ParseDesktopStash)
+            .Where(stash => stash is not null)
+            .Cast<GitStashEntry>()
+            .ToArray();
+    }
+
+    private static GitStashEntry? ParseDesktopStash(string line)
+    {
+        var fields = line.Split('\t', 3);
+        if (fields.Length < 3)
+        {
+            return null;
+        }
+
+        var match = DesktopStashEntryMessageRegex.Match(fields[2]);
+        if (!match.Success)
+        {
+            return null;
+        }
+
+        return new GitStashEntry(
+            Name: fields[0],
+            StashSha: fields[1],
+            BranchName: match.Groups["branch"].Value,
+            Message: fields[2]);
+    }
+
+    private static string CreateDesktopStashMessage(string branchName) =>
+        $"{DesktopStashEntryMarker}<{branchName}>";
 
     private static Task<string> RunRequiredGitAsync(
         string workingDirectory,

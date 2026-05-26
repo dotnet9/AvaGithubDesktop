@@ -65,6 +65,18 @@
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
+    <Style Selector="Button.stashButton">
+        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Button.stashAction">
+        <Setter Property="MinHeight" Value="28" />
+        <Setter Property="Padding" Value="10,4" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+
     <Style Selector="Button.repositoryTab">
         <Setter Property="BorderThickness" Value="0,0,0,1" />
         <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
