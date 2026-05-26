@@ -71,6 +71,59 @@
                         IsChecked="{Binding IsOperationLogVisible}"
                         ToggleType="CheckBox" />
                     <Separator />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Theme}}">
+                        <MenuItem
+                            Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.ThemeSystem}}"
+                            Command="{Binding SelectThemeCommand}"
+                            CommandParameter="system"
+                            GroupName="Theme"
+                            IsChecked="{Binding IsSystemThemeSelected}"
+                            ToggleType="Radio" />
+                        <MenuItem
+                            Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.ThemeLight}}"
+                            Command="{Binding SelectThemeCommand}"
+                            CommandParameter="light"
+                            GroupName="Theme"
+                            IsChecked="{Binding IsLightThemeSelected}"
+                            ToggleType="Radio" />
+                        <MenuItem
+                            Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.ThemeDark}}"
+                            Command="{Binding SelectThemeCommand}"
+                            CommandParameter="dark"
+                            GroupName="Theme"
+                            IsChecked="{Binding IsDarkThemeSelected}"
+                            ToggleType="Radio" />
+                        <Separator />
+                        <MenuItem
+                            Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.ThemeAquatic}}"
+                            Command="{Binding SelectThemeCommand}"
+                            CommandParameter="aquatic"
+                            GroupName="Theme"
+                            IsChecked="{Binding IsAquaticThemeSelected}"
+                            ToggleType="Radio" />
+                        <MenuItem
+                            Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.ThemeDesert}}"
+                            Command="{Binding SelectThemeCommand}"
+                            CommandParameter="desert"
+                            GroupName="Theme"
+                            IsChecked="{Binding IsDesertThemeSelected}"
+                            ToggleType="Radio" />
+                        <MenuItem
+                            Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.ThemeDusk}}"
+                            Command="{Binding SelectThemeCommand}"
+                            CommandParameter="dusk"
+                            GroupName="Theme"
+                            IsChecked="{Binding IsDuskThemeSelected}"
+                            ToggleType="Radio" />
+                        <MenuItem
+                            Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.ThemeNightSky}}"
+                            Command="{Binding SelectThemeCommand}"
+                            CommandParameter="night-sky"
+                            GroupName="Theme"
+                            IsChecked="{Binding IsNightSkyThemeSelected}"
+                            ToggleType="Radio" />
+                    </MenuItem>
+                    <Separator />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Language}}">
                         <MenuItem
                             Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.SimplifiedChinese}}"

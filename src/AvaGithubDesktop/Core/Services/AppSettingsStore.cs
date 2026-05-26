@@ -7,6 +7,7 @@ public sealed class AppSettingsStore : IAppSettingsStore
 {
     private const string IsOperationLogVisibleKey = nameof(AppSettings.IsOperationLogVisible);
     private const string CultureNameKey = nameof(AppSettings.CultureName);
+    private const string ThemeKey = nameof(AppSettings.ThemeKey);
     private readonly object _syncRoot = new();
     private AppSettings? _settings;
 
@@ -38,7 +39,8 @@ public sealed class AppSettingsStore : IAppSettingsStore
         return new AppSettings
         {
             IsOperationLogVisible = Get<bool?>(configPath, IsOperationLogVisibleKey),
-            CultureName = Get<string>(configPath, CultureNameKey)
+            CultureName = Get<string>(configPath, CultureNameKey),
+            ThemeKey = Get<string>(configPath, ThemeKey)
         };
     }
 
@@ -49,6 +51,7 @@ public sealed class AppSettingsStore : IAppSettingsStore
             var configPath = AppConfigHelper.GetDefaultConfigPath();
             AppConfigHelper.Set(configPath, IsOperationLogVisibleKey, settings.IsOperationLogVisible);
             AppConfigHelper.Set(configPath, CultureNameKey, settings.CultureName);
+            AppConfigHelper.Set(configPath, ThemeKey, settings.ThemeKey);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Xml.XmlException)
         {

@@ -43,6 +43,7 @@ public partial class App : PrismApplication
         containerRegistry.RegisterSingleton<IEventBus, EventBus>();
         containerRegistry.RegisterSingleton<IAppSettingsStore, AppSettingsStore>();
         containerRegistry.RegisterSingleton<IAppLocalizer, AppLocalizer>();
+        containerRegistry.RegisterSingleton<IThemeService, ThemeService>();
         containerRegistry.RegisterSingleton<IGitRepositoryService, GitRepositoryService>();
         containerRegistry.RegisterSingleton<IRepositoryPickerService, RepositoryPickerService>();
         containerRegistry.RegisterSingleton<IRepositoryHistoryService, RepositoryHistoryService>();

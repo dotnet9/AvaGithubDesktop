@@ -22,6 +22,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly IHelpService _helpService;
     private readonly IConfirmationDialogService _confirmationDialogService;
     private readonly IAppSettingsStore _settingsStore;
+    private readonly IThemeService _themeService;
     private readonly IAppLocalizer _localizer;
     private readonly IEventBus _eventBus;
     private string _repositoryPath;
@@ -62,6 +63,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private DateTimeOffset? _lastFetchedAt;
     private bool? _areAllChangesIncluded = false;
     private LanguageOption? _selectedLanguage;
+    private ThemeOption? _selectedTheme;
     private GitChangeItemViewModel? _selectedChange;
     private GitCommitItem? _selectedCommit;
     private GitCommitFileItemViewModel? _selectedCommitFile;
@@ -88,6 +90,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         IHelpService helpService,
         IConfirmationDialogService confirmationDialogService,
         IAppSettingsStore settingsStore,
+        IThemeService themeService,
         IAppLocalizer localizer,
         IEventBus eventBus,
         ShellStatusViewModel statusBar)
@@ -101,6 +104,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _helpService = helpService;
         _confirmationDialogService = confirmationDialogService;
         _settingsStore = settingsStore;
+        _themeService = themeService;
         _localizer = localizer;
         _eventBus = eventBus;
         StatusBar = statusBar;
@@ -113,6 +117,14 @@ public sealed class MainWindowViewModel : ViewModelBase
             new("en-US", _localizer.Get(AvaGithubDesktopL.English))
         };
         _selectedLanguage = Languages.FirstOrDefault(option => option.CultureName == _localizer.Culture.Name) ?? Languages[0];
+        ThemeOptions = new ObservableCollection<ThemeOption>(_themeService.GetThemeOptions());
+        _selectedTheme = FindTheme(_settingsStore.Current.ThemeKey)
+                         ?? FindTheme("system")
+                         ?? ThemeOptions.FirstOrDefault();
+        if (_selectedTheme is not null)
+        {
+            _themeService.ApplyTheme(_selectedTheme);
+        }
 
         var canExecuteRepositoryCommand = this.WhenAnyValue(model => model.CanRunRepositoryCommand);
         BrowseRepositoryCommand = ReactiveCommand.CreateFromTask(BrowseRepositoryAsync, canExecuteRepositoryCommand);
@@ -139,6 +151,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             ViewSelectedCommitOnGitHubAsync,
             this.WhenAnyValue(model => model.CanViewSelectedCommitOnGitHub));
         ToggleOperationLogCommand = ReactiveCommand.Create(ToggleOperationLog);
+        SelectThemeCommand = ReactiveCommand.Create<string?>(SelectThemeByKey);
         SelectSimplifiedChineseCommand = ReactiveCommand.Create(() => SelectLanguageByCulture("zh-CN"));
         SelectEnglishCommand = ReactiveCommand.Create(() => SelectLanguageByCulture("en-US"));
 
@@ -183,6 +196,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     }
 
     public ObservableCollection<LanguageOption> Languages { get; }
+
+    public ObservableCollection<ThemeOption> ThemeOptions { get; }
 
     public ObservableCollection<GitChangeItemViewModel> ChangedFiles { get; } = new();
 
@@ -233,6 +248,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ViewSelectedCommitOnGitHubCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ToggleOperationLogCommand { get; }
+
+    public ReactiveCommand<string?, Unit> SelectThemeCommand { get; }
 
     public ReactiveCommand<Unit, Unit> SelectSimplifiedChineseCommand { get; }
 
@@ -972,6 +989,44 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    public ThemeOption? SelectedTheme
+    {
+        get => _selectedTheme;
+        private set
+        {
+            if (EqualityComparer<ThemeOption?>.Default.Equals(_selectedTheme, value))
+            {
+                return;
+            }
+
+            this.RaiseAndSetIfChanged(ref _selectedTheme, value);
+            if (value is null)
+            {
+                return;
+            }
+
+            _themeService.ApplyTheme(value);
+            _settingsStore.Update(settings => settings with { ThemeKey = value.Key });
+            RaiseThemeSelectionChanged();
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusThemeSwitchedFormat, _localizer.Get(value.DisplayNameResourceKey))));
+        }
+    }
+
+    public bool IsSystemThemeSelected => IsThemeSelected("system");
+
+    public bool IsLightThemeSelected => IsThemeSelected("light");
+
+    public bool IsDarkThemeSelected => IsThemeSelected("dark");
+
+    public bool IsAquaticThemeSelected => IsThemeSelected("aquatic");
+
+    public bool IsDesertThemeSelected => IsThemeSelected("desert");
+
+    public bool IsDuskThemeSelected => IsThemeSelected("dusk");
+
+    public bool IsNightSkyThemeSelected => IsThemeSelected("night-sky");
+
     public LanguageOption? SelectedLanguage
     {
         get => _selectedLanguage;
@@ -1141,6 +1196,38 @@ public sealed class MainWindowViewModel : ViewModelBase
             ? AvaGithubDesktopL.StatusOperationLogShown
             : AvaGithubDesktopL.StatusOperationLogHidden;
         _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(messageKey)));
+    }
+
+    private void SelectThemeByKey(string? key)
+    {
+        var theme = FindTheme(key);
+        if (theme is not null)
+        {
+            SelectedTheme = theme;
+        }
+    }
+
+    private ThemeOption? FindTheme(string? key)
+    {
+        return string.IsNullOrWhiteSpace(key)
+            ? null
+            : ThemeOptions.FirstOrDefault(option => option.Key.Equals(key, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private bool IsThemeSelected(string key)
+    {
+        return string.Equals(SelectedTheme?.Key, key, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void RaiseThemeSelectionChanged()
+    {
+        this.RaisePropertyChanged(nameof(IsSystemThemeSelected));
+        this.RaisePropertyChanged(nameof(IsLightThemeSelected));
+        this.RaisePropertyChanged(nameof(IsDarkThemeSelected));
+        this.RaisePropertyChanged(nameof(IsAquaticThemeSelected));
+        this.RaisePropertyChanged(nameof(IsDesertThemeSelected));
+        this.RaisePropertyChanged(nameof(IsDuskThemeSelected));
+        this.RaisePropertyChanged(nameof(IsNightSkyThemeSelected));
     }
 
     private void SelectLanguageByCulture(string cultureName)

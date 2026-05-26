@@ -87,6 +87,14 @@ public static class AvaGithubDesktopL
     public static readonly string Untracked = "AvaGithubDesktop.AvaGithubDesktopL.Untracked";
     public static readonly string Status = "AvaGithubDesktop.AvaGithubDesktopL.Status";
     public static readonly string Path = "AvaGithubDesktop.AvaGithubDesktopL.Path";
+    public static readonly string Theme = "AvaGithubDesktop.AvaGithubDesktopL.Theme";
+    public static readonly string ThemeSystem = "AvaGithubDesktop.AvaGithubDesktopL.ThemeSystem";
+    public static readonly string ThemeLight = "AvaGithubDesktop.AvaGithubDesktopL.ThemeLight";
+    public static readonly string ThemeDark = "AvaGithubDesktop.AvaGithubDesktopL.ThemeDark";
+    public static readonly string ThemeAquatic = "AvaGithubDesktop.AvaGithubDesktopL.ThemeAquatic";
+    public static readonly string ThemeDesert = "AvaGithubDesktop.AvaGithubDesktopL.ThemeDesert";
+    public static readonly string ThemeDusk = "AvaGithubDesktop.AvaGithubDesktopL.ThemeDusk";
+    public static readonly string ThemeNightSky = "AvaGithubDesktop.AvaGithubDesktopL.ThemeNightSky";
     public static readonly string Language = "AvaGithubDesktop.AvaGithubDesktopL.Language";
     public static readonly string OperationLog = "AvaGithubDesktop.AvaGithubDesktopL.OperationLog";
     public static readonly string LogLevelDebug = "AvaGithubDesktop.AvaGithubDesktopL.LogLevelDebug";
@@ -150,6 +158,7 @@ public static class AvaGithubDesktopL
     public static readonly string StatusOperationLogShown = "AvaGithubDesktop.AvaGithubDesktopL.StatusOperationLogShown";
     public static readonly string StatusOperationLogHidden = "AvaGithubDesktop.AvaGithubDesktopL.StatusOperationLogHidden";
     public static readonly string StatusLanguageSwitchedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusLanguageSwitchedFormat";
+    public static readonly string StatusThemeSwitchedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusThemeSwitchedFormat";
     public static readonly string StatusLoadAccountFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusLoadAccountFailedFormat";
     public static readonly string StatusSigningInGitHub = "AvaGithubDesktop.AvaGithubDesktopL.StatusSigningInGitHub";
     public static readonly string StatusSignedInGitHubFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusSignedInGitHubFormat";
