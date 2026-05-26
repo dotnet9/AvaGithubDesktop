@@ -813,6 +813,11 @@
                                             Command="{Binding CopySelectedCommitShaCommand}"
                                             Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.CopyCommitSha}}"
                                             IsEnabled="{Binding CanCopySelectedCommitSha}" />
+                                        <Button
+                                            Classes="inlineAction"
+                                            Command="{Binding ViewSelectedCommitOnGitHubCommand}"
+                                            Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.ViewCommitOnGitHub}}"
+                                            IsEnabled="{Binding CanViewSelectedCommitOnGitHub}" />
                                     </StackPanel>
                                 </Grid>
                             </Grid>

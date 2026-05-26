@@ -25,6 +25,19 @@ public static class RepositoryRemoteUrlHelper
         return TryBuildGitHubUrl(uri.AbsolutePath.TrimStart('/'), out webUrl);
     }
 
+    public static bool TryGetGitHubCommitUrl(string? remoteUrl, string? sha, out string webUrl)
+    {
+        webUrl = string.Empty;
+        if (string.IsNullOrWhiteSpace(sha) || !TryGetGitHubWebUrl(remoteUrl, out var repositoryUrl))
+        {
+            return false;
+        }
+
+        // GitHub Desktop 的 History 提交操作会直接跳转到仓库提交页，这里只拼接稳定的 commit 路由。
+        webUrl = $"{repositoryUrl}/commit/{Uri.EscapeDataString(sha.Trim())}";
+        return true;
+    }
+
     private static bool TryBuildGitHubUrl(string ownerAndRepository, out string webUrl)
     {
         webUrl = string.Empty;

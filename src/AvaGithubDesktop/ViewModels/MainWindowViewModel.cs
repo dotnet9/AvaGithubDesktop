@@ -130,6 +130,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         ShowChangesCommand = ReactiveCommand.Create(ShowChanges);
         ShowHistoryCommand = ReactiveCommand.Create(ShowHistory);
         CopySelectedCommitShaCommand = ReactiveCommand.CreateFromTask(CopySelectedCommitShaAsync, this.WhenAnyValue(model => model.CanCopySelectedCommitSha));
+        ViewSelectedCommitOnGitHubCommand = ReactiveCommand.CreateFromTask(
+            ViewSelectedCommitOnGitHubAsync,
+            this.WhenAnyValue(model => model.CanViewSelectedCommitOnGitHub));
 
         var canSynchronize = this.WhenAnyValue(model => model.CanSynchronize);
         SynchronizeRepositoryCommand = ReactiveCommand.CreateFromTask(SynchronizeRepositoryAsync, canSynchronize);
@@ -218,6 +221,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ShowHistoryCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CopySelectedCommitShaCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ViewSelectedCommitOnGitHubCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CheckoutBranchCommand { get; }
 
@@ -311,7 +316,11 @@ public sealed class MainWindowViewModel : ViewModelBase
     public string RemoteUrl
     {
         get => _remoteUrl;
-        private set => this.RaiseAndSetIfChanged(ref _remoteUrl, value);
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _remoteUrl, value);
+            this.RaisePropertyChanged(nameof(CanViewSelectedCommitOnGitHub));
+        }
     }
 
     public DateTimeOffset? LastFetchedAt
@@ -576,6 +585,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(HasSelectedCommit));
             this.RaisePropertyChanged(nameof(SelectedCommitChangedFilesHeader));
             this.RaisePropertyChanged(nameof(CanCopySelectedCommitSha));
+            this.RaisePropertyChanged(nameof(CanViewSelectedCommitOnGitHub));
             ApplySelectedCommitFiles(value, selectedFilePath);
         }
     }
@@ -586,6 +596,12 @@ public sealed class MainWindowViewModel : ViewModelBase
         HasRepository &&
         CanRunRepositoryCommand &&
         SelectedCommit is not null;
+
+    public bool CanViewSelectedCommitOnGitHub =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        SelectedCommit is not null &&
+        RepositoryRemoteUrlHelper.TryGetGitHubCommitUrl(RemoteUrl, SelectedCommit.Sha, out _);
 
     public string HistoryHeaderText
     {
@@ -1080,6 +1096,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         await ViewRepositoryRemoteOnGitHubAsync(RemoteUrl);
     }
 
+    private async Task ViewSelectedCommitOnGitHubAsync()
+    {
+        if (SelectedCommit is null)
+        {
+            return;
+        }
+
+        await ViewCommitOnGitHubAsync(RemoteUrl, SelectedCommit.Sha);
+    }
+
     private async Task OpenRepositoryItemInShellAsync(RepositoryListItemViewModel repository)
     {
         await OpenRepositoryPathInShellAsync(repository.Path);
@@ -1328,6 +1354,27 @@ public sealed class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenRepositoryOnGitHubFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+    }
+
+    private async Task ViewCommitOnGitHubAsync(string? remoteUrl, string sha)
+    {
+        if (!RepositoryRemoteUrlHelper.TryGetGitHubCommitUrl(remoteUrl, sha, out var webUrl))
+        {
+            ErrorMessage = _localizer.Get(AvaGithubDesktopL.StatusRepositoryHasNoGitHubRemote);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+            return;
+        }
+
+        try
+        {
+            await _repositoryShellService.OpenUrlAsync(webUrl);
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedCommitOnGitHub)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenCommitOnGitHubFailedFormat, ex.Message);
             _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
         }
     }
@@ -2059,6 +2106,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         this.RaisePropertyChanged(nameof(CanCommit));
         this.RaisePropertyChanged(nameof(CanCopySelectedCommitSha));
+        this.RaisePropertyChanged(nameof(CanViewSelectedCommitOnGitHub));
         this.RaisePropertyChanged(nameof(CommitButtonText));
         this.RaisePropertyChanged(nameof(SelectedChangesStatusText));
     }
