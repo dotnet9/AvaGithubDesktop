@@ -888,9 +888,29 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private async Task OpenRepositoryInShellAsync()
     {
+        await OpenRepositoryPathInShellAsync(RootPath);
+    }
+
+    private async Task ShowRepositoryInFileManagerAsync()
+    {
+        await ShowRepositoryPathInFileManagerAsync(RootPath);
+    }
+
+    private async Task OpenRepositoryItemInShellAsync(RepositoryListItemViewModel repository)
+    {
+        await OpenRepositoryPathInShellAsync(repository.Path);
+    }
+
+    private async Task ShowRepositoryItemInFileManagerAsync(RepositoryListItemViewModel repository)
+    {
+        await ShowRepositoryPathInFileManagerAsync(repository.Path);
+    }
+
+    private async Task OpenRepositoryPathInShellAsync(string repositoryPath)
+    {
         try
         {
-            await _repositoryShellService.OpenInShellAsync(RootPath);
+            await _repositoryShellService.OpenInShellAsync(repositoryPath);
             _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedRepositoryShell)));
         }
         catch (Exception ex)
@@ -900,11 +920,11 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private async Task ShowRepositoryInFileManagerAsync()
+    private async Task ShowRepositoryPathInFileManagerAsync(string repositoryPath)
     {
         try
         {
-            await _repositoryShellService.ShowInFileManagerAsync(RootPath);
+            await _repositoryShellService.ShowInFileManagerAsync(repositoryPath);
             _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusShowedRepositoryInFileManager)));
         }
         catch (Exception ex)
@@ -1243,7 +1263,11 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         var entries = await _repositoryHistoryService.LoadKnownRepositoriesAsync(CancellationToken.None);
         _knownRepositories = entries
-            .Select(entry => new RepositoryListItemViewModel(entry, OpenKnownRepositoryAsync))
+            .Select(entry => new RepositoryListItemViewModel(
+                entry,
+                OpenKnownRepositoryAsync,
+                OpenRepositoryItemInShellAsync,
+                ShowRepositoryItemInFileManagerAsync))
             .ToArray();
         UpdateCurrentRepositoryIndicators();
         RebuildRepositoryGroups();

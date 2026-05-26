@@ -116,6 +116,13 @@
                                                                             Classes="repositoryListItem"
                                                                             Command="{Binding OpenCommand}"
                                                                             ToolTip.Tip="{Binding Path}">
+                                                                            <Button.ContextFlyout>
+                                                                                <MenuFlyout>
+                                                                                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Open}}" Command="{Binding OpenCommand}" />
+                                                                                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuOpenInShell}}" Command="{Binding OpenInShellCommand}" />
+                                                                                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowInFileManager}}" Command="{Binding ShowInFileManagerCommand}" />
+                                                                                </MenuFlyout>
+                                                                            </Button.ContextFlyout>
                                                                             <Grid ColumnDefinitions="20,*,Auto" ColumnSpacing="8">
                                                                                 <TextBlock
                                                                                     VerticalAlignment="Center"
