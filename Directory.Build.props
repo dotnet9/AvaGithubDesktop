@@ -1,0 +1,16 @@
+<Project>
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <LocalCodeWFAvaloniaControlsPackages>$(MSBuildThisFileDirectory)..\CodeWF.AvaloniaControls\artifacts\packages</LocalCodeWFAvaloniaControlsPackages>
+    <LocalCodeWFMarkdownPackages>$(MSBuildThisFileDirectory)..\CodeWF.Markdown\artifacts\packages</LocalCodeWFMarkdownPackages>
+  </PropertyGroup>
+  <PropertyGroup Condition="Exists('$(LocalCodeWFAvaloniaControlsPackages)')">
+    <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources);$(LocalCodeWFAvaloniaControlsPackages)</RestoreAdditionalProjectSources>
+  </PropertyGroup>
+  <PropertyGroup Condition="Exists('$(LocalCodeWFMarkdownPackages)')">
+    <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources);$(LocalCodeWFMarkdownPackages)</RestoreAdditionalProjectSources>
+  </PropertyGroup>
+</Project>
