@@ -36,3 +36,4 @@
 - Desktop 风格 Changes 文件选择与提交面板
 - Desktop 风格 History 提交列表与提交文件清单
 - Desktop 风格选中文件文本 Diff 预览
+- 本地分支列表与分支 Checkout

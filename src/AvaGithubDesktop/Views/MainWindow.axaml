@@ -56,7 +56,7 @@
             Background="{DynamicResource PanelBackgroundBrush}"
             BorderBrush="{DynamicResource PanelBorderBrush}"
             BorderThickness="0,0,0,1">
-            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto" ColumnSpacing="8">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="8">
                 <TextBlock
                     VerticalAlignment="Center"
                     Classes="section"
@@ -82,8 +82,33 @@
                     Classes="toolbar"
                     Command="{Binding RefreshRepositoryCommand}"
                     Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.Refresh}}" />
-                <ComboBox
+                <TextBlock
                     Grid.Column="5"
+                    VerticalAlignment="Center"
+                    Classes="section"
+                    Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Branch}}" />
+                <ComboBox
+                    Grid.Column="6"
+                    Width="210"
+                    ItemsSource="{Binding Branches}"
+                    SelectedItem="{Binding SelectedBranch, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="models:GitBranchItem">
+                            <StackPanel Spacing="1">
+                                <TextBlock FontWeight="SemiBold" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Classes="muted" FontSize="11" Text="{Binding DisplayDetail}" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <Button
+                    Grid.Column="7"
+                    Classes="toolbar"
+                    Command="{Binding CheckoutBranchCommand}"
+                    Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.Checkout}}"
+                    IsEnabled="{Binding CanCheckoutBranch}" />
+                <ComboBox
+                    Grid.Column="8"
                     Width="150"
                     ItemsSource="{Binding Languages}"
                     SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}">

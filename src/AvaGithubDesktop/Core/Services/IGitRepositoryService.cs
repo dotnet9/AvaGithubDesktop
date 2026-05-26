@@ -11,6 +11,15 @@ public interface IGitRepositoryService
         int maxCount,
         CancellationToken cancellationToken);
 
+    Task<IReadOnlyList<GitBranchItem>> LoadBranchesAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken);
+
+    Task CheckoutBranchAsync(
+        string repositoryPath,
+        string branchName,
+        CancellationToken cancellationToken);
+
     Task<string> LoadWorkingTreeDiffAsync(
         string repositoryPath,
         IReadOnlyList<string> paths,

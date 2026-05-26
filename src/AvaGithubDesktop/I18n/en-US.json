@@ -21,6 +21,7 @@
       "Changes": "Changes",
       "History": "History",
       "Branches": "Branches",
+      "Branch": "Branch",
       "Summary": "Summary",
       "CurrentBranch": "Current branch",
       "Upstream": "Upstream",
@@ -75,7 +76,11 @@
       "Diff": "Diff",
       "NoFileSelected": "No file selected",
       "NoDiffAvailable": "No diff available.",
-      "LoadingDiff": "Loading diff..."
+      "LoadingDiff": "Loading diff...",
+      "Checkout": "Checkout",
+      "StatusCheckingOutBranchFormat": "Checking out {0}...",
+      "StatusCheckedOutBranchFormat": "Checked out {0}.",
+      "StatusCheckoutBranchFailedFormat": "Checkout failed: {0}"
     }
   }
 }

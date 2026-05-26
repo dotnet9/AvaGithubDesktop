@@ -19,6 +19,7 @@ public static class AvaGithubDesktopL
     public const string Changes = "AvaGithubDesktop.AvaGithubDesktopL.Changes";
     public const string History = "AvaGithubDesktop.AvaGithubDesktopL.History";
     public const string Branches = "AvaGithubDesktop.AvaGithubDesktopL.Branches";
+    public const string Branch = "AvaGithubDesktop.AvaGithubDesktopL.Branch";
     public const string Summary = "AvaGithubDesktop.AvaGithubDesktopL.Summary";
     public const string CurrentBranch = "AvaGithubDesktop.AvaGithubDesktopL.CurrentBranch";
     public const string Upstream = "AvaGithubDesktop.AvaGithubDesktopL.Upstream";
@@ -74,4 +75,8 @@ public static class AvaGithubDesktopL
     public const string NoFileSelected = "AvaGithubDesktop.AvaGithubDesktopL.NoFileSelected";
     public const string NoDiffAvailable = "AvaGithubDesktop.AvaGithubDesktopL.NoDiffAvailable";
     public const string LoadingDiff = "AvaGithubDesktop.AvaGithubDesktopL.LoadingDiff";
+    public const string Checkout = "AvaGithubDesktop.AvaGithubDesktopL.Checkout";
+    public const string StatusCheckingOutBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckingOutBranchFormat";
+    public const string StatusCheckedOutBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckedOutBranchFormat";
+    public const string StatusCheckoutBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckoutBranchFailedFormat";
 }

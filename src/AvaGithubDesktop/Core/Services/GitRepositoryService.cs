@@ -63,6 +63,45 @@ public sealed class GitRepositoryService : IGitRepositoryService
         return ParseHistory(history);
     }
 
+    public async Task<IReadOnlyList<GitBranchItem>> LoadBranchesAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        var branches = await RunOptionalGitAsync(
+            root,
+            cancellationToken,
+            "for-each-ref",
+            "--format=%(refname:short)%09%(upstream:short)%09%(committerdate:relative)%09%(HEAD)",
+            "--sort=-committerdate",
+            "refs/heads");
+        return ParseBranches(branches);
+    }
+
+    public async Task CheckoutBranchAsync(
+        string repositoryPath,
+        string branchName,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        if (string.IsNullOrWhiteSpace(branchName))
+        {
+            throw new ArgumentException("A branch name is required.", nameof(branchName));
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        await RunRequiredGitAsync(root, cancellationToken, "checkout", branchName);
+    }
+
     public async Task<string> LoadWorkingTreeDiffAsync(
         string repositoryPath,
         IReadOnlyList<string> paths,
@@ -287,6 +326,37 @@ public sealed class GitRepositoryService : IGitRepositoryService
             Date: string.Empty,
             RelativeDate: string.Empty,
             Files: Array.Empty<GitCommitFileItem>());
+    }
+
+    private static IReadOnlyList<GitBranchItem> ParseBranches(string branches)
+    {
+        if (string.IsNullOrWhiteSpace(branches))
+        {
+            return Array.Empty<GitBranchItem>();
+        }
+
+        return branches
+            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(ParseBranch)
+            .Where(branch => !string.IsNullOrWhiteSpace(branch.Name))
+            .ToArray();
+    }
+
+    private static GitBranchItem ParseBranch(string line)
+    {
+        var fields = line.Split('\t');
+        if (fields.Length < 1)
+        {
+            return new GitBranchItem(string.Empty, "-", string.Empty, false);
+        }
+
+        var upstream = fields.Length >= 2 && !string.IsNullOrWhiteSpace(fields[1]) ? fields[1] : "-";
+        var relativeDate = fields.Length >= 3 ? fields[2] : string.Empty;
+        return new GitBranchItem(
+            Name: fields[0],
+            Upstream: upstream,
+            RelativeDate: relativeDate,
+            IsCurrent: fields.Length >= 4 && fields[3].Trim() == "*");
     }
 
     private static (int Ahead, int Behind) ParseAheadBehind(string status)

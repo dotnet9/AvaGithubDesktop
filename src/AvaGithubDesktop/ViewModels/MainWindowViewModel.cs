@@ -31,6 +31,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _hasRepository;
     private bool _isLoading;
     private bool _isCommitting;
+    private bool _isCheckingOutBranch;
     private bool _isInitialized;
     private bool _isBulkUpdatingIncludedChanges;
     private int _changedFilesCount;
@@ -45,6 +46,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private GitChangeItemViewModel? _selectedChange;
     private GitCommitItem? _selectedCommit;
     private GitCommitFileItem? _selectedCommitFile;
+    private GitBranchItem? _selectedBranch;
     private RepositorySection _selectedSection = RepositorySection.Changes;
     private int _historyCommitCount;
     private int _diffRequestVersion;
@@ -98,6 +100,21 @@ public sealed class MainWindowViewModel : ViewModelBase
                 !string.IsNullOrWhiteSpace(summary));
         CommitCommand = ReactiveCommand.CreateFromTask(CommitChangesAsync, canCommit);
 
+        var canCheckoutBranch = this.WhenAnyValue(
+            model => model.HasRepository,
+            model => model.IsLoading,
+            model => model.IsCommitting,
+            model => model.IsCheckingOutBranch,
+            model => model.SelectedBranch,
+            (hasRepository, isLoading, isCommitting, isCheckingOutBranch, selectedBranch) =>
+                hasRepository &&
+                !isLoading &&
+                !isCommitting &&
+                !isCheckingOutBranch &&
+                selectedBranch is not null &&
+                !selectedBranch.IsCurrent);
+        CheckoutBranchCommand = ReactiveCommand.CreateFromTask(CheckoutSelectedBranchAsync, canCheckoutBranch);
+
         _localizer.CultureChanged += (_, _) =>
         {
             UpdateAheadBehindText();
@@ -112,6 +129,8 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public ObservableCollection<GitCommitItem> HistoryCommits { get; } = new();
 
+    public ObservableCollection<GitBranchItem> Branches { get; } = new();
+
     public ShellStatusViewModel StatusBar { get; }
 
     public ReactiveCommand<Unit, Unit> BrowseRepositoryCommand { get; }
@@ -125,6 +144,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ShowChangesCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ShowHistoryCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> CheckoutBranchCommand { get; }
 
     public string RepositoryPath
     {
@@ -198,6 +219,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             this.RaiseAndSetIfChanged(ref _hasRepository, value);
             this.RaisePropertyChanged(nameof(ShowEmptyRepository));
             RaiseCommitStateChanged();
+            RaiseBranchStateChanged();
         }
     }
 
@@ -211,6 +233,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             this.RaiseAndSetIfChanged(ref _isLoading, value);
             this.RaisePropertyChanged(nameof(ShowEmptyRepository));
             RaiseCommitStateChanged();
+            RaiseBranchStateChanged();
         }
     }
 
@@ -221,6 +244,17 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             this.RaiseAndSetIfChanged(ref _isCommitting, value);
             RaiseCommitStateChanged();
+            RaiseBranchStateChanged();
+        }
+    }
+
+    public bool IsCheckingOutBranch
+    {
+        get => _isCheckingOutBranch;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isCheckingOutBranch, value);
+            RaiseBranchStateChanged();
         }
     }
 
@@ -345,6 +379,24 @@ public sealed class MainWindowViewModel : ViewModelBase
             return _localizer.Format(formatKey, count);
         }
     }
+
+    public GitBranchItem? SelectedBranch
+    {
+        get => _selectedBranch;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedBranch, value);
+            RaiseBranchStateChanged();
+        }
+    }
+
+    public bool CanCheckoutBranch =>
+        HasRepository &&
+        !IsLoading &&
+        !IsCommitting &&
+        !IsCheckingOutBranch &&
+        SelectedBranch is not null &&
+        !SelectedBranch.IsCurrent;
 
     public GitChangeItemViewModel? SelectedChange
     {
@@ -536,6 +588,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             var snapshot = await _gitRepositoryService.LoadRepositoryAsync(path, CancellationToken.None);
             ApplySnapshot(snapshot);
+            var branches = await _gitRepositoryService.LoadBranchesAsync(snapshot.RootPath, CancellationToken.None);
+            ApplyBranches(branches);
             var history = await _gitRepositoryService.LoadHistoryAsync(snapshot.RootPath, HistoryCommitLimit, CancellationToken.None);
             ApplyHistory(history);
             _eventBus.Publish(new RepositoryOpenedCommand(snapshot.RepositoryName, snapshot.ChangedFilesCount));
@@ -543,6 +597,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             HasRepository = false;
+            ApplyBranches(Array.Empty<GitBranchItem>());
             ApplyHistory(Array.Empty<GitCommitItem>());
             ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusRepositoryLoadFailedFormat, ex.Message);
             _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
@@ -590,6 +645,8 @@ public sealed class MainWindowViewModel : ViewModelBase
             CommitDescription = string.Empty;
             var snapshot = await _gitRepositoryService.LoadRepositoryAsync(RootPath, CancellationToken.None);
             ApplySnapshot(snapshot);
+            var branches = await _gitRepositoryService.LoadBranchesAsync(snapshot.RootPath, CancellationToken.None);
+            ApplyBranches(branches);
             var history = await _gitRepositoryService.LoadHistoryAsync(snapshot.RootPath, HistoryCommitLimit, CancellationToken.None);
             ApplyHistory(history);
             _eventBus.Publish(new StatusMessageChangedCommand(
@@ -663,6 +720,22 @@ public sealed class MainWindowViewModel : ViewModelBase
         SelectedCommit = !string.IsNullOrWhiteSpace(selectedSha)
             ? HistoryCommits.FirstOrDefault(commit => commit.Sha == selectedSha) ?? HistoryCommits.FirstOrDefault()
             : HistoryCommits.FirstOrDefault();
+    }
+
+    private void ApplyBranches(IReadOnlyList<GitBranchItem> branches)
+    {
+        var selectedName = SelectedBranch?.Name;
+        Branches.Clear();
+        foreach (var branch in branches)
+        {
+            Branches.Add(branch);
+        }
+
+        SelectedBranch = Branches.FirstOrDefault(branch => branch.IsCurrent)
+            ?? (!string.IsNullOrWhiteSpace(selectedName)
+                ? Branches.FirstOrDefault(branch => branch.Name == selectedName)
+                : null)
+            ?? Branches.FirstOrDefault();
     }
 
     private void UpdateAheadBehindText()
@@ -739,6 +812,47 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(HistoryTabBackground));
         this.RaisePropertyChanged(nameof(ChangesTabForeground));
         this.RaisePropertyChanged(nameof(HistoryTabForeground));
+    }
+
+    private void RaiseBranchStateChanged()
+    {
+        this.RaisePropertyChanged(nameof(CanCheckoutBranch));
+    }
+
+    private async Task CheckoutSelectedBranchAsync()
+    {
+        if (!CanCheckoutBranch || SelectedBranch is null)
+        {
+            return;
+        }
+
+        var targetBranch = SelectedBranch.Name;
+        IsCheckingOutBranch = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(
+            _localizer.Format(AvaGithubDesktopL.StatusCheckingOutBranchFormat, targetBranch)));
+
+        try
+        {
+            await _gitRepositoryService.CheckoutBranchAsync(RootPath, targetBranch, CancellationToken.None);
+            var snapshot = await _gitRepositoryService.LoadRepositoryAsync(RootPath, CancellationToken.None);
+            ApplySnapshot(snapshot);
+            var branches = await _gitRepositoryService.LoadBranchesAsync(snapshot.RootPath, CancellationToken.None);
+            ApplyBranches(branches);
+            var history = await _gitRepositoryService.LoadHistoryAsync(snapshot.RootPath, HistoryCommitLimit, CancellationToken.None);
+            ApplyHistory(history);
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusCheckedOutBranchFormat, targetBranch)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusCheckoutBranchFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsCheckingOutBranch = false;
+        }
     }
 
     private void QueueDiffLoad()
