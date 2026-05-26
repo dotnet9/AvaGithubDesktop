@@ -51,3 +51,4 @@
 - Desktop 风格 Stash all changes、Stashed Changes、Restore stash、Discard stash
 - 使用 CodeWF.Markdown 展示更新日志与关于信息
 - Desktop 风格 Current repository 仓库选择器、最近仓库和仓库过滤
+- Desktop 风格 Repository 菜单当前仓库终端与文件管理器入口

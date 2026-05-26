@@ -16,6 +16,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly IGitRepositoryService _gitRepositoryService;
     private readonly IRepositoryPickerService _repositoryPickerService;
     private readonly IRepositoryHistoryService _repositoryHistoryService;
+    private readonly IRepositoryShellService _repositoryShellService;
     private readonly IHelpService _helpService;
     private readonly IAppLocalizer _localizer;
     private readonly IEventBus _eventBus;
@@ -73,6 +74,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         IGitRepositoryService gitRepositoryService,
         IRepositoryPickerService repositoryPickerService,
         IRepositoryHistoryService repositoryHistoryService,
+        IRepositoryShellService repositoryShellService,
         IHelpService helpService,
         IAppLocalizer localizer,
         IEventBus eventBus,
@@ -81,6 +83,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _gitRepositoryService = gitRepositoryService;
         _repositoryPickerService = repositoryPickerService;
         _repositoryHistoryService = repositoryHistoryService;
+        _repositoryShellService = repositoryShellService;
         _helpService = helpService;
         _localizer = localizer;
         _eventBus = eventBus;
@@ -98,6 +101,12 @@ public sealed class MainWindowViewModel : ViewModelBase
         BrowseRepositoryCommand = ReactiveCommand.CreateFromTask(BrowseRepositoryAsync, canExecuteRepositoryCommand);
         OpenRepositoryCommand = ReactiveCommand.CreateFromTask(OpenRepositoryAsync, canExecuteRepositoryCommand);
         RefreshRepositoryCommand = ReactiveCommand.CreateFromTask(OpenRepositoryAsync, canExecuteRepositoryCommand);
+        var canUseCurrentRepository = this.WhenAnyValue(
+            model => model.HasRepository,
+            model => model.CanRunRepositoryCommand,
+            (hasRepository, canRunRepositoryCommand) => hasRepository && canRunRepositoryCommand);
+        OpenRepositoryInShellCommand = ReactiveCommand.CreateFromTask(OpenRepositoryInShellAsync, canUseCurrentRepository);
+        ShowRepositoryInFileManagerCommand = ReactiveCommand.CreateFromTask(ShowRepositoryInFileManagerAsync, canUseCurrentRepository);
         ShowChangesCommand = ReactiveCommand.Create(ShowChanges);
         ShowHistoryCommand = ReactiveCommand.Create(ShowHistory);
 
@@ -151,6 +160,10 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> OpenRepositoryCommand { get; }
 
     public ReactiveCommand<Unit, Unit> RefreshRepositoryCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> OpenRepositoryInShellCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ShowRepositoryInFileManagerCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CommitCommand { get; }
 
@@ -871,6 +884,34 @@ public sealed class MainWindowViewModel : ViewModelBase
         RepositoryFilterText = string.Empty;
         RepositoryPath = repository.Path;
         await OpenRepositoryAsync();
+    }
+
+    private async Task OpenRepositoryInShellAsync()
+    {
+        try
+        {
+            await _repositoryShellService.OpenInShellAsync(RootPath);
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedRepositoryShell)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenRepositoryShellFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+    }
+
+    private async Task ShowRepositoryInFileManagerAsync()
+    {
+        try
+        {
+            await _repositoryShellService.ShowInFileManagerAsync(RootPath);
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusShowedRepositoryInFileManager)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusShowRepositoryInFileManagerFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
     }
 
     private async Task ShowChangelogAsync()

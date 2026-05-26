@@ -44,6 +44,9 @@
                     <Separator />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Open}}" Command="{Binding OpenRepositoryCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Refresh}}" Command="{Binding RefreshRepositoryCommand}" />
+                    <Separator />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuOpenInShell}}" Command="{Binding OpenRepositoryInShellCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowInFileManager}}" Command="{Binding ShowRepositoryInFileManagerCommand}" />
                 </MenuItem>
                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuBranch}}">
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuStashAllChanges}}" Command="{Binding StashAllChangesCommand}" />
