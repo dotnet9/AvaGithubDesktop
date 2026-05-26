@@ -63,3 +63,6 @@
 - Desktop 风格 History 选中提交复制完整 SHA
 - Desktop 风格 History 提交文件项右键菜单
 - Desktop 风格 Repository 菜单和仓库列表项打开外部编辑器
+- Desktop 风格 GitHub 账号登录入口、账户状态展示和退出登录
+- 软件专属 Logo 资产与应用图标
+- 弹窗按钮交互使用 MVVM 命令绑定，业务逻辑保持在 ViewModel

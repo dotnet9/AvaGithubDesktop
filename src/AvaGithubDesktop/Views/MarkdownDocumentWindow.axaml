@@ -10,6 +10,7 @@
     MinHeight="420"
     Background="{DynamicResource PanelBackgroundBrush}"
     CanResize="True"
+    Icon="/Assets/app-logo.ico"
     ShowInTaskbar="False"
     TitleBarBackground="#24292F"
     TitleBarBorderBrush="#11161C"

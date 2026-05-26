@@ -38,6 +38,8 @@ public partial class App : PrismApplication
         containerRegistry.RegisterSingleton<IRepositoryPickerService, RepositoryPickerService>();
         containerRegistry.RegisterSingleton<IRepositoryHistoryService, RepositoryHistoryService>();
         containerRegistry.RegisterSingleton<IRepositoryShellService, RepositoryShellService>();
+        containerRegistry.RegisterSingleton<IGitHubAccountService, GitHubAccountService>();
+        containerRegistry.RegisterSingleton<IAccountDialogService, AccountDialogService>();
         containerRegistry.RegisterSingleton<IHelpService, HelpService>();
         containerRegistry.RegisterSingleton<IConfirmationDialogService, ConfirmationDialogService>();
         containerRegistry.RegisterSingleton<ShellStatusViewModel>();

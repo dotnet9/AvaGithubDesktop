@@ -1,0 +1,88 @@
+<codewf:CodeWFWindow
+    x:Class="AvaGithubDesktop.Views.SignInWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:codewf="https://codewf.com"
+    xmlns:vm="using:AvaGithubDesktop.ViewModels"
+    x:DataType="vm:SignInWindowViewModel"
+    Width="520"
+    Height="430"
+    MinWidth="500"
+    MinHeight="400"
+    Background="{DynamicResource PanelBackgroundBrush}"
+    CanMaximize="False"
+    CanMinimize="False"
+    CanResize="False"
+    Icon="/Assets/app-logo.ico"
+    ShowInTaskbar="False"
+    TitleBarBackground="#24292F"
+    TitleBarBorderBrush="#11161C"
+    TitleBarForeground="#F3F4F6"
+    TitleBarHeight="34"
+    WindowStartupLocation="CenterOwner">
+
+    <codewf:CodeWFWindow.LeftContent>
+        <TextBlock
+            Margin="12,0,0,0"
+            VerticalAlignment="Center"
+            FontSize="13"
+            FontWeight="SemiBold"
+            Foreground="#F3F4F6"
+            Text="{Binding Title}" />
+    </codewf:CodeWFWindow.LeftContent>
+
+    <Border Padding="24" Background="{DynamicResource PanelBackgroundBrush}">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="14">
+            <TextBlock Classes="heading" Text="{Binding Title}" />
+            <TextBlock
+                Grid.Row="1"
+                Classes="muted"
+                Text="{Binding Description}"
+                TextWrapping="Wrap" />
+
+            <StackPanel Grid.Row="2" Spacing="6">
+                <TextBlock Classes="formLabel" Text="{Binding EndpointLabel}" />
+                <TextBox
+                    Classes="signInInput"
+                    PlaceholderText="{Binding EndpointWatermark}"
+                    Text="{Binding Endpoint, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="3" Spacing="6">
+                <TextBlock Classes="formLabel" Text="{Binding TokenLabel}" />
+                <TextBox
+                    Classes="signInInput"
+                    PasswordChar="*"
+                    PlaceholderText="{Binding TokenWatermark}"
+                    Text="{Binding Token, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="4" Spacing="8">
+                <TextBlock Classes="muted" Text="{Binding TokenHelp}" TextWrapping="Wrap" />
+                <TextBlock
+                    Classes="warning"
+                    IsVisible="{Binding HasError}"
+                    Text="{Binding ErrorText}"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+
+            <Grid Grid.Row="5" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
+                <Button
+                    Classes="inlineAction"
+                    Command="{Binding OpenTokenPageCommand}"
+                    Content="{Binding OpenTokenPageText}" />
+                <Button
+                    Grid.Column="2"
+                    MinWidth="86"
+                    Command="{Binding CancelCommand}"
+                    Content="{Binding CancelText}" />
+                <Button
+                    Grid.Column="3"
+                    Classes="signInPrimary"
+                    MinWidth="96"
+                    Command="{Binding SignInCommand}"
+                    Content="{Binding SignInText}" />
+            </Grid>
+        </Grid>
+    </Border>
+</codewf:CodeWFWindow>

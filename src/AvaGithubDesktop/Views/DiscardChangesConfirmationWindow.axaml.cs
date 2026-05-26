@@ -1,4 +1,4 @@
-using Avalonia.Interactivity;
+using AvaGithubDesktop.ViewModels;
 using CodeWF.AvaloniaControls.Controls;
 
 namespace AvaGithubDesktop.Views;
@@ -20,35 +20,22 @@ public partial class DiscardChangesConfirmationWindow : CodeWFWindow
         : this()
     {
         Title = title;
-        var pathItems = paths
-            .Select(path => new DiscardChangesPathItem(path))
-            .ToArray();
-        DataContext = new DiscardChangesConfirmationWindowModel(
+        var viewModel = new DiscardChangesConfirmationWindowViewModel(
             title,
             message,
             warning,
-            pathItems,
+            paths,
             cancelText,
             discardText);
+        viewModel.CloseRequested += ViewModel_OnCloseRequested;
+        Closed += (_, _) => viewModel.CloseRequested -= ViewModel_OnCloseRequested;
+        DataContext = viewModel;
     }
 
-    private void Cancel_OnClick(object? sender, RoutedEventArgs e)
+    private void ViewModel_OnCloseRequested(
+        object? sender,
+        DialogCloseRequestedEventArgs<bool> e)
     {
-        Close(false);
-    }
-
-    private void Discard_OnClick(object? sender, RoutedEventArgs e)
-    {
-        Close(true);
+        Close(e.Result);
     }
 }
-
-public sealed record DiscardChangesConfirmationWindowModel(
-    string Title,
-    string Message,
-    string Warning,
-    IReadOnlyList<DiscardChangesPathItem> Paths,
-    string CancelText,
-    string DiscardText);
-
-public sealed record DiscardChangesPathItem(string Path);

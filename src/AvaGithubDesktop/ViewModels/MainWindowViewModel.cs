@@ -17,6 +17,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly IRepositoryPickerService _repositoryPickerService;
     private readonly IRepositoryHistoryService _repositoryHistoryService;
     private readonly IRepositoryShellService _repositoryShellService;
+    private readonly IGitHubAccountService _gitHubAccountService;
+    private readonly IAccountDialogService _accountDialogService;
     private readonly IHelpService _helpService;
     private readonly IConfirmationDialogService _confirmationDialogService;
     private readonly IAppLocalizer _localizer;
@@ -45,6 +47,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isRestoringStash;
     private bool _isDiscardingStash;
     private bool _isDiscardingChanges;
+    private bool _isSigningIn;
     private bool _isInitialized;
     private bool _isBulkUpdatingIncludedChanges;
     private int _changedFilesCount;
@@ -61,6 +64,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private GitCommitItem? _selectedCommit;
     private GitCommitFileItemViewModel? _selectedCommitFile;
     private GitBranchItem? _selectedBranch;
+    private GitHubAccount? _currentAccount;
     private GitStashEntry? _currentBranchStash;
     private RepositorySection _selectedSection = RepositorySection.Changes;
     private int _historyCommitCount;
@@ -77,6 +81,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         IRepositoryPickerService repositoryPickerService,
         IRepositoryHistoryService repositoryHistoryService,
         IRepositoryShellService repositoryShellService,
+        IGitHubAccountService gitHubAccountService,
+        IAccountDialogService accountDialogService,
         IHelpService helpService,
         IConfirmationDialogService confirmationDialogService,
         IAppLocalizer localizer,
@@ -87,6 +93,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         _repositoryPickerService = repositoryPickerService;
         _repositoryHistoryService = repositoryHistoryService;
         _repositoryShellService = repositoryShellService;
+        _gitHubAccountService = gitHubAccountService;
+        _accountDialogService = accountDialogService;
         _helpService = helpService;
         _confirmationDialogService = confirmationDialogService;
         _localizer = localizer;
@@ -140,6 +148,15 @@ public sealed class MainWindowViewModel : ViewModelBase
         DiscardAllChangesCommand = ReactiveCommand.CreateFromTask(DiscardAllChangesAsync, this.WhenAnyValue(model => model.CanDiscardChanges));
         ShowChangelogCommand = ReactiveCommand.CreateFromTask(ShowChangelogAsync);
         ShowAboutCommand = ReactiveCommand.CreateFromTask(ShowAboutAsync);
+        SignInCommand = ReactiveCommand.CreateFromTask(
+            SignInAsync,
+            this.WhenAnyValue(model => model.IsSigningIn, isSigningIn => !isSigningIn));
+        SignOutCommand = ReactiveCommand.CreateFromTask(
+            SignOutAsync,
+            this.WhenAnyValue(
+                model => model.IsSignedIn,
+                model => model.IsSigningIn,
+                (isSignedIn, isSigningIn) => isSignedIn && !isSigningIn));
 
         _localizer.CultureChanged += (_, _) =>
         {
@@ -149,6 +166,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(RepositorySelectorTitle));
             this.RaisePropertyChanged(nameof(RepositorySelectorDetail));
             RaiseSyncStateChanged();
+            RaiseAccountStateChanged();
             QueueDiffLoad();
         };
     }
@@ -214,6 +232,10 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ShowChangelogCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ShowAboutCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> SignInCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> SignOutCommand { get; }
 
     public string RepositoryPath
     {
@@ -325,6 +347,43 @@ public sealed class MainWindowViewModel : ViewModelBase
     }
 
     public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
+
+    public GitHubAccount? CurrentAccount
+    {
+        get => _currentAccount;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _currentAccount, value);
+            RaiseAccountStateChanged();
+        }
+    }
+
+    public bool IsSignedIn => CurrentAccount is not null;
+
+    public bool IsSignedOut => !IsSignedIn;
+
+    public bool IsSigningIn
+    {
+        get => _isSigningIn;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isSigningIn, value);
+            RaiseAccountStateChanged();
+        }
+    }
+
+    public string AccountButtonText =>
+        CurrentAccount is null
+            ? _localizer.Get(AvaGithubDesktopL.SignInToGitHub)
+            : $"@{CurrentAccount.Login}";
+
+    public string AccountNameText =>
+        CurrentAccount?.FriendlyName ?? _localizer.Get(AvaGithubDesktopL.NotSignedIn);
+
+    public string AccountEndpointText =>
+        CurrentAccount?.FriendlyEndpoint ?? _localizer.Get(AvaGithubDesktopL.NotSignedIn);
+
+    public string AccountInitials => CurrentAccount?.Initials ?? "GH";
 
     public bool HasRepository
     {
@@ -891,6 +950,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
 
         _isInitialized = true;
+        await LoadAccountsAsync();
         await LoadRepositoryHistoryAsync();
         if (Directory.Exists(RepositoryPath))
         {
@@ -918,6 +978,90 @@ public sealed class MainWindowViewModel : ViewModelBase
         RepositoryFilterText = string.Empty;
         RepositoryPath = repository.Path;
         await OpenRepositoryAsync();
+    }
+
+    private async Task LoadAccountsAsync()
+    {
+        try
+        {
+            var accounts = await _gitHubAccountService.LoadAsync(CancellationToken.None);
+            CurrentAccount = accounts.FirstOrDefault();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusLoadAccountFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+    }
+
+    private async Task SignInAsync()
+    {
+        if (IsSigningIn)
+        {
+            return;
+        }
+
+        IsSigningIn = true;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            var request = await _accountDialogService.ShowSignInDialogAsync(
+                CurrentAccount?.Endpoint ?? GitHubAccountEndpoints.DotComApiEndpoint,
+                CancellationToken.None);
+            if (request is null)
+            {
+                _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusSignInCanceled)));
+                return;
+            }
+
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusSigningInGitHub)));
+            var account = await _gitHubAccountService.SignInWithTokenAsync(
+                request.Endpoint,
+                request.Token,
+                CancellationToken.None);
+            CurrentAccount = account;
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusSignedInGitHubFormat, account.Login, account.FriendlyEndpoint)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusSignInFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsSigningIn = false;
+        }
+    }
+
+    private async Task SignOutAsync()
+    {
+        if (CurrentAccount is null || IsSigningIn)
+        {
+            return;
+        }
+
+        IsSigningIn = true;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            // 退出登录只移除本地保存的账户和令牌，不会撤销 GitHub 站点上的 PAT。
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusSigningOutGitHub)));
+            await _gitHubAccountService.SignOutAsync(CurrentAccount, CancellationToken.None);
+            CurrentAccount = _gitHubAccountService.CurrentAccount;
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusSignedOutGitHub)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusSignOutFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsSigningIn = false;
+        }
     }
 
     private async Task OpenRepositoryInShellAsync()
@@ -1937,6 +2081,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(StashDescriptionText));
         this.RaisePropertyChanged(nameof(RepositorySelectorTitle));
         this.RaisePropertyChanged(nameof(RepositorySelectorDetail));
+        RaiseAccountStateChanged();
     }
 
     private void RaiseSyncStateChanged()
@@ -1988,6 +2133,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(CanDiscardChanges));
         this.RaisePropertyChanged(nameof(StashAllChangesButtonText));
         this.RaisePropertyChanged(nameof(StashDescriptionText));
+    }
+
+    private void RaiseAccountStateChanged()
+    {
+        this.RaisePropertyChanged(nameof(IsSignedIn));
+        this.RaisePropertyChanged(nameof(IsSignedOut));
+        this.RaisePropertyChanged(nameof(AccountButtonText));
+        this.RaisePropertyChanged(nameof(AccountNameText));
+        this.RaisePropertyChanged(nameof(AccountEndpointText));
+        this.RaisePropertyChanged(nameof(AccountInitials));
     }
 
     private async Task CheckoutSelectedBranchAsync()

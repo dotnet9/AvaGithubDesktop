@@ -3,8 +3,8 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:codewf="https://codewf.com"
-    xmlns:views="using:AvaGithubDesktop.Views"
-    x:DataType="views:DiscardChangesConfirmationWindowModel"
+    xmlns:vm="using:AvaGithubDesktop.ViewModels"
+    x:DataType="vm:DiscardChangesConfirmationWindowViewModel"
     Width="520"
     Height="360"
     MinWidth="460"
@@ -13,6 +13,7 @@
     CanMaximize="False"
     CanMinimize="False"
     CanResize="False"
+    Icon="/Assets/app-logo.ico"
     ShowInTaskbar="False"
     TitleBarBackground="#24292F"
     TitleBarBorderBrush="#11161C"
@@ -46,7 +47,7 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <ItemsControl ItemsSource="{Binding Paths}">
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="views:DiscardChangesPathItem">
+                            <DataTemplate x:DataType="vm:DiscardChangesPathItemViewModel">
                                 <TextBlock
                                     Classes="monospace"
                                     Margin="0,0,0,6"
@@ -71,12 +72,12 @@
                 Spacing="8">
                 <Button
                     MinWidth="86"
-                    Click="Cancel_OnClick"
+                    Command="{Binding CancelCommand}"
                     Content="{Binding CancelText}" />
                 <Button
                     Classes="destructive"
                     MinWidth="112"
-                    Click="Discard_OnClick"
+                    Command="{Binding DiscardCommand}"
                     Content="{Binding DiscardText}" />
             </StackPanel>
         </Grid>
