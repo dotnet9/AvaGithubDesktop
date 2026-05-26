@@ -972,6 +972,15 @@ public sealed class MainWindowViewModel : ViewModelBase
             AvaGithubDesktopL.StatusCopyChangePathFailedFormat);
     }
 
+    private async Task CopyChangeFullPathAsync(GitChangeItemViewModel change)
+    {
+        var relativePath = change.GitPaths.LastOrDefault() ?? change.Path;
+        await CopyTextAsync(
+            Path.Combine(RootPath, relativePath),
+            AvaGithubDesktopL.StatusCopiedChangeFullPath,
+            AvaGithubDesktopL.StatusCopyChangeFullPathFailedFormat);
+    }
+
     private async Task ShowChangeInFileManagerAsync(GitChangeItemViewModel change)
     {
         var relativePath = change.GitPaths.LastOrDefault() ?? change.Path;
@@ -1576,6 +1585,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             var changeViewModel = new GitChangeItemViewModel(
                 change,
+                CopyChangeFullPathAsync,
                 CopyChangeRelativePathAsync,
                 ShowChangeInFileManagerAsync,
                 DiscardChangeAsync);

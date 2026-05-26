@@ -6,6 +6,7 @@ namespace AvaGithubDesktop.ViewModels;
 
 public sealed class GitChangeItemViewModel : ReactiveObject
 {
+    private readonly Func<GitChangeItemViewModel, Task> _copyFullPathAsync;
     private readonly Func<GitChangeItemViewModel, Task> _copyRelativePathAsync;
     private readonly Func<GitChangeItemViewModel, Task> _showInFileManagerAsync;
     private readonly Func<GitChangeItemViewModel, Task> _discardChangesAsync;
@@ -13,15 +14,18 @@ public sealed class GitChangeItemViewModel : ReactiveObject
 
     public GitChangeItemViewModel(
         GitChangeItem change,
+        Func<GitChangeItemViewModel, Task> copyFullPathAsync,
         Func<GitChangeItemViewModel, Task> copyRelativePathAsync,
         Func<GitChangeItemViewModel, Task> showInFileManagerAsync,
         Func<GitChangeItemViewModel, Task> discardChangesAsync)
     {
         Change = change;
+        _copyFullPathAsync = copyFullPathAsync;
         _copyRelativePathAsync = copyRelativePathAsync;
         _showInFileManagerAsync = showInFileManagerAsync;
         _discardChangesAsync = discardChangesAsync;
         _isIncluded = true;
+        CopyFullPathCommand = ReactiveCommand.CreateFromTask(CopyFullPathAsync);
         CopyRelativePathCommand = ReactiveCommand.CreateFromTask(CopyRelativePathAsync);
         ShowInFileManagerCommand = ReactiveCommand.CreateFromTask(ShowInFileManagerAsync);
         DiscardChangesCommand = ReactiveCommand.CreateFromTask(DiscardChangesAsync);
@@ -43,6 +47,8 @@ public sealed class GitChangeItemViewModel : ReactiveObject
 
     public string StatusForeground => Change.StatusForeground;
 
+    public ReactiveCommand<Unit, Unit> CopyFullPathCommand { get; }
+
     public ReactiveCommand<Unit, Unit> CopyRelativePathCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ShowInFileManagerCommand { get; }
@@ -53,6 +59,11 @@ public sealed class GitChangeItemViewModel : ReactiveObject
     {
         get => _isIncluded;
         set => this.RaiseAndSetIfChanged(ref _isIncluded, value);
+    }
+
+    private Task CopyFullPathAsync()
+    {
+        return _copyFullPathAsync(this);
     }
 
     private Task CopyRelativePathAsync()

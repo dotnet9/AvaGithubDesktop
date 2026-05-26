@@ -24,6 +24,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuViewOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.MenuViewOnGitHub";
     public static readonly string MenuCopyRepositoryName = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyRepositoryName";
     public static readonly string MenuCopyRepositoryPath = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyRepositoryPath";
+    public static readonly string MenuCopyFilePath = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyFilePath";
     public static readonly string MenuCopyRelativePath = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyRelativePath";
     public static readonly string MenuDiscardChanges = "AvaGithubDesktop.AvaGithubDesktopL.MenuDiscardChanges";
     public static readonly string MenuDiscardAllChanges = "AvaGithubDesktop.AvaGithubDesktopL.MenuDiscardAllChanges";
@@ -131,6 +132,8 @@ public static class AvaGithubDesktopL
     public static readonly string StatusCopiedRepositoryName = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopiedRepositoryName";
     public static readonly string StatusCopiedRepositoryPath = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopiedRepositoryPath";
     public static readonly string StatusCopyRepositoryTextFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopyRepositoryTextFailedFormat";
+    public static readonly string StatusCopiedChangeFullPath = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopiedChangeFullPath";
+    public static readonly string StatusCopyChangeFullPathFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopyChangeFullPathFailedFormat";
     public static readonly string StatusCopiedChangePath = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopiedChangePath";
     public static readonly string StatusCopyChangePathFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopyChangePathFailedFormat";
     public static readonly string StatusShowedChangeInFileManager = "AvaGithubDesktop.AvaGithubDesktopL.StatusShowedChangeInFileManager";
