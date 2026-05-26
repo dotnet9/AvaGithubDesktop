@@ -60,7 +60,18 @@
       "Committing": "Committing...",
       "ChangedFileCountFormat": "{0} changed file",
       "ChangedFilesCountFormat": "{0} changed files",
-      "SelectedFilesCountFormat": "{0} of {1} selected"
+      "SelectedFilesCountFormat": "{0} of {1} selected",
+      "HistoryCommitCountFormat": "{0} commit",
+      "HistoryCommitsCountFormat": "{0} commits",
+      "NoHistoryTitle": "No commits yet",
+      "NoHistoryDetail": "Commit history will appear here after the repository has commits.",
+      "SelectedCommit": "Selected commit",
+      "CommitSha": "Commit SHA",
+      "Author": "Author",
+      "Date": "Date",
+      "CommitChangedFileCountFormat": "{0} changed file",
+      "CommitChangedFilesCountFormat": "{0} changed files",
+      "NoCommitSelected": "No commit selected"
     }
   }
 }

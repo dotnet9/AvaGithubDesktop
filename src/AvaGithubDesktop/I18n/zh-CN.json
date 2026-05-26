@@ -60,7 +60,18 @@
       "Committing": "正在提交...",
       "ChangedFileCountFormat": "{0} 个变更文件",
       "ChangedFilesCountFormat": "{0} 个变更文件",
-      "SelectedFilesCountFormat": "已选择 {0}/{1}"
+      "SelectedFilesCountFormat": "已选择 {0}/{1}",
+      "HistoryCommitCountFormat": "{0} 个提交",
+      "HistoryCommitsCountFormat": "{0} 个提交",
+      "NoHistoryTitle": "暂无提交",
+      "NoHistoryDetail": "仓库产生提交后，提交历史会显示在这里。",
+      "SelectedCommit": "选中的提交",
+      "CommitSha": "提交 SHA",
+      "Author": "作者",
+      "Date": "日期",
+      "CommitChangedFileCountFormat": "{0} 个变更文件",
+      "CommitChangedFilesCountFormat": "{0} 个变更文件",
+      "NoCommitSelected": "未选择提交"
     }
   }
 }

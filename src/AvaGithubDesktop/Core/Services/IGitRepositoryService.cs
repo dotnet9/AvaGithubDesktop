@@ -6,6 +6,11 @@ public interface IGitRepositoryService
 {
     Task<GitRepositorySnapshot> LoadRepositoryAsync(string repositoryPath, CancellationToken cancellationToken);
 
+    Task<IReadOnlyList<GitCommitItem>> LoadHistoryAsync(
+        string repositoryPath,
+        int maxCount,
+        CancellationToken cancellationToken);
+
     Task CommitAsync(
         string repositoryPath,
         IReadOnlyList<string> includedPaths,

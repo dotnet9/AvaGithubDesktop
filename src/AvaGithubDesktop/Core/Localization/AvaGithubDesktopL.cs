@@ -59,4 +59,15 @@ public static class AvaGithubDesktopL
     public const string ChangedFileCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.ChangedFileCountFormat";
     public const string ChangedFilesCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.ChangedFilesCountFormat";
     public const string SelectedFilesCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.SelectedFilesCountFormat";
+    public const string HistoryCommitCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.HistoryCommitCountFormat";
+    public const string HistoryCommitsCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.HistoryCommitsCountFormat";
+    public const string NoHistoryTitle = "AvaGithubDesktop.AvaGithubDesktopL.NoHistoryTitle";
+    public const string NoHistoryDetail = "AvaGithubDesktop.AvaGithubDesktopL.NoHistoryDetail";
+    public const string SelectedCommit = "AvaGithubDesktop.AvaGithubDesktopL.SelectedCommit";
+    public const string CommitSha = "AvaGithubDesktop.AvaGithubDesktopL.CommitSha";
+    public const string Author = "AvaGithubDesktop.AvaGithubDesktopL.Author";
+    public const string Date = "AvaGithubDesktop.AvaGithubDesktopL.Date";
+    public const string CommitChangedFileCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.CommitChangedFileCountFormat";
+    public const string CommitChangedFilesCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.CommitChangedFilesCountFormat";
+    public const string NoCommitSelected = "AvaGithubDesktop.AvaGithubDesktopL.NoCommitSelected";
 }

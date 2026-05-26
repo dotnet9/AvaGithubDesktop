@@ -12,6 +12,7 @@ namespace AvaGithubDesktop.ViewModels;
 
 public sealed class MainWindowViewModel : ViewModelBase
 {
+    private const int HistoryCommitLimit = 50;
     private readonly IGitRepositoryService _gitRepositoryService;
     private readonly IRepositoryPickerService _repositoryPickerService;
     private readonly IAppLocalizer _localizer;
@@ -41,6 +42,9 @@ public sealed class MainWindowViewModel : ViewModelBase
     private int _behind;
     private bool? _areAllChangesIncluded = false;
     private LanguageOption? _selectedLanguage;
+    private GitCommitItem? _selectedCommit;
+    private RepositorySection _selectedSection = RepositorySection.Changes;
+    private int _historyCommitCount;
     private CompositeDisposable _changeSubscriptions = new();
 
     public MainWindowViewModel(
@@ -71,6 +75,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         BrowseRepositoryCommand = ReactiveCommand.CreateFromTask(BrowseRepositoryAsync, canExecuteRepositoryCommand);
         OpenRepositoryCommand = ReactiveCommand.CreateFromTask(OpenRepositoryAsync, canExecuteRepositoryCommand);
         RefreshRepositoryCommand = ReactiveCommand.CreateFromTask(OpenRepositoryAsync, canExecuteRepositoryCommand);
+        ShowChangesCommand = ReactiveCommand.Create(ShowChanges);
+        ShowHistoryCommand = ReactiveCommand.Create(ShowHistory);
 
         var canCommit = this.WhenAnyValue(
             model => model.HasRepository,
@@ -97,6 +103,8 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public ObservableCollection<GitChangeItemViewModel> ChangedFiles { get; } = new();
 
+    public ObservableCollection<GitCommitItem> HistoryCommits { get; } = new();
+
     public ShellStatusViewModel StatusBar { get; }
 
     public ReactiveCommand<Unit, Unit> BrowseRepositoryCommand { get; }
@@ -106,6 +114,10 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> RefreshRepositoryCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CommitCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ShowChangesCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ShowHistoryCommand { get; }
 
     public string RepositoryPath
     {
@@ -238,6 +250,80 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool HasChanges => ChangedFilesCount > 0;
 
     public bool HasNoChanges => HasRepository && !IsLoading && ChangedFilesCount == 0;
+
+    public RepositorySection SelectedSection
+    {
+        get => _selectedSection;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedSection, value);
+            RaiseSectionStateChanged();
+        }
+    }
+
+    public bool IsChangesSelected => SelectedSection == RepositorySection.Changes;
+
+    public bool IsHistorySelected => SelectedSection == RepositorySection.History;
+
+    public string ChangesTabBackground => IsChangesSelected ? "#FFFFFF" : "#F1F4F7";
+
+    public string HistoryTabBackground => IsHistorySelected ? "#FFFFFF" : "#F1F4F7";
+
+    public string ChangesTabForeground => IsChangesSelected ? "#24292F" : "#57606A";
+
+    public string HistoryTabForeground => IsHistorySelected ? "#24292F" : "#57606A";
+
+    public int HistoryCommitCount
+    {
+        get => _historyCommitCount;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _historyCommitCount, value);
+            this.RaisePropertyChanged(nameof(HistoryHeaderText));
+            this.RaisePropertyChanged(nameof(HasHistory));
+            this.RaisePropertyChanged(nameof(HasNoHistory));
+        }
+    }
+
+    public bool HasHistory => HistoryCommitCount > 0;
+
+    public bool HasNoHistory => HasRepository && !IsLoading && HistoryCommitCount == 0;
+
+    public GitCommitItem? SelectedCommit
+    {
+        get => _selectedCommit;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedCommit, value);
+            this.RaisePropertyChanged(nameof(HasSelectedCommit));
+            this.RaisePropertyChanged(nameof(SelectedCommitChangedFilesHeader));
+        }
+    }
+
+    public bool HasSelectedCommit => SelectedCommit is not null;
+
+    public string HistoryHeaderText
+    {
+        get
+        {
+            var formatKey = HistoryCommitCount == 1
+                ? AvaGithubDesktopL.HistoryCommitCountFormat
+                : AvaGithubDesktopL.HistoryCommitsCountFormat;
+            return _localizer.Format(formatKey, HistoryCommitCount);
+        }
+    }
+
+    public string SelectedCommitChangedFilesHeader
+    {
+        get
+        {
+            var count = SelectedCommit?.ChangedFilesCount ?? 0;
+            var formatKey = count == 1
+                ? AvaGithubDesktopL.CommitChangedFileCountFormat
+                : AvaGithubDesktopL.CommitChangedFilesCountFormat;
+            return _localizer.Format(formatKey, count);
+        }
+    }
 
     public string CommitSummary
     {
@@ -385,11 +471,14 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             var snapshot = await _gitRepositoryService.LoadRepositoryAsync(path, CancellationToken.None);
             ApplySnapshot(snapshot);
+            var history = await _gitRepositoryService.LoadHistoryAsync(snapshot.RootPath, HistoryCommitLimit, CancellationToken.None);
+            ApplyHistory(history);
             _eventBus.Publish(new RepositoryOpenedCommand(snapshot.RepositoryName, snapshot.ChangedFilesCount));
         }
         catch (Exception ex)
         {
             HasRepository = false;
+            ApplyHistory(Array.Empty<GitCommitItem>());
             ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusRepositoryLoadFailedFormat, ex.Message);
             _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
         }
@@ -436,6 +525,8 @@ public sealed class MainWindowViewModel : ViewModelBase
             CommitDescription = string.Empty;
             var snapshot = await _gitRepositoryService.LoadRepositoryAsync(RootPath, CancellationToken.None);
             ApplySnapshot(snapshot);
+            var history = await _gitRepositoryService.LoadHistoryAsync(snapshot.RootPath, HistoryCommitLimit, CancellationToken.None);
+            ApplyHistory(history);
             _eventBus.Publish(new StatusMessageChangedCommand(
                 _localizer.Format(AvaGithubDesktopL.StatusCommittedFormat, committedSummary)));
         }
@@ -490,6 +581,21 @@ public sealed class MainWindowViewModel : ViewModelBase
         UpdateIncludedState();
     }
 
+    private void ApplyHistory(IReadOnlyList<GitCommitItem> commits)
+    {
+        var selectedSha = SelectedCommit?.Sha;
+        HistoryCommits.Clear();
+        foreach (var commit in commits)
+        {
+            HistoryCommits.Add(commit);
+        }
+
+        HistoryCommitCount = HistoryCommits.Count;
+        SelectedCommit = !string.IsNullOrWhiteSpace(selectedSha)
+            ? HistoryCommits.FirstOrDefault(commit => commit.Sha == selectedSha) ?? HistoryCommits.FirstOrDefault()
+            : HistoryCommits.FirstOrDefault();
+    }
+
     private void UpdateAheadBehindText()
     {
         AheadBehindText = HasRepository
@@ -540,6 +646,28 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(CommitButtonText));
         this.RaisePropertyChanged(nameof(ChangedFilesHeaderText));
         this.RaisePropertyChanged(nameof(SelectedChangesStatusText));
+        this.RaisePropertyChanged(nameof(HistoryHeaderText));
+        this.RaisePropertyChanged(nameof(SelectedCommitChangedFilesHeader));
+    }
+
+    private void ShowChanges()
+    {
+        SelectedSection = RepositorySection.Changes;
+    }
+
+    private void ShowHistory()
+    {
+        SelectedSection = RepositorySection.History;
+    }
+
+    private void RaiseSectionStateChanged()
+    {
+        this.RaisePropertyChanged(nameof(IsChangesSelected));
+        this.RaisePropertyChanged(nameof(IsHistorySelected));
+        this.RaisePropertyChanged(nameof(ChangesTabBackground));
+        this.RaisePropertyChanged(nameof(HistoryTabBackground));
+        this.RaisePropertyChanged(nameof(ChangesTabForeground));
+        this.RaisePropertyChanged(nameof(HistoryTabForeground));
     }
 
     private static string ResolveDefaultRepositoryPath()
@@ -552,4 +680,10 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         return Directory.GetCurrentDirectory();
     }
+}
+
+public enum RepositorySection
+{
+    Changes,
+    History
 }

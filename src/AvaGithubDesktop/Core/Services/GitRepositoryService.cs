@@ -6,6 +6,9 @@ namespace AvaGithubDesktop.Core.Services;
 
 public sealed class GitRepositoryService : IGitRepositoryService
 {
+    private const char CommitRecordSeparator = '\u001e';
+    private const char CommitFieldSeparator = '\u001f';
+
     public async Task<GitRepositorySnapshot> LoadRepositoryAsync(
         string repositoryPath,
         CancellationToken cancellationToken)
@@ -34,6 +37,30 @@ public sealed class GitRepositoryService : IGitRepositoryService
             Ahead: ahead,
             Behind: behind,
             Changes: changes);
+    }
+
+    public async Task<IReadOnlyList<GitCommitItem>> LoadHistoryAsync(
+        string repositoryPath,
+        int maxCount,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        var history = await RunOptionalGitAsync(
+            root,
+            cancellationToken,
+            "log",
+            $"--max-count={Math.Max(1, maxCount)}",
+            "--date=iso-strict",
+            "--diff-merges=first-parent",
+            $"--pretty=format:%x1e%H%x1f%h%x1f%an%x1f%ae%x1f%ad%x1f%ar%x1f%s",
+            "--name-status");
+
+        return ParseHistory(history);
     }
 
     public async Task CommitAsync(
@@ -122,6 +149,82 @@ public sealed class GitRepositoryService : IGitRepositoryService
                 : GitChangeKind.Unstaged;
 
         return new GitChangeItem(statusCode.Trim(), path, kind);
+    }
+
+    private static IReadOnlyList<GitCommitItem> ParseHistory(string history)
+    {
+        if (string.IsNullOrWhiteSpace(history))
+        {
+            return Array.Empty<GitCommitItem>();
+        }
+
+        return history
+            .Split(CommitRecordSeparator, StringSplitOptions.RemoveEmptyEntries)
+            .Select(ParseCommit)
+            .Where(commit => !string.IsNullOrWhiteSpace(commit.Sha))
+            .ToArray();
+    }
+
+    private static GitCommitItem ParseCommit(string record)
+    {
+        var lines = record
+            .Trim('\r', '\n')
+            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+        if (lines.Length == 0)
+        {
+            return EmptyCommit();
+        }
+
+        var fields = lines[0].Split(CommitFieldSeparator);
+        if (fields.Length < 7)
+        {
+            return EmptyCommit();
+        }
+
+        var files = lines
+            .Skip(1)
+            .Select(ParseCommitFile)
+            .Where(file => !string.IsNullOrWhiteSpace(file.Path))
+            .ToArray();
+
+        return new GitCommitItem(
+            Sha: fields[0],
+            ShortSha: fields[1],
+            AuthorName: fields[2],
+            AuthorEmail: fields[3],
+            Date: fields[4],
+            RelativeDate: fields[5],
+            Summary: string.IsNullOrWhiteSpace(fields[6]) ? "Empty commit message" : fields[6],
+            Files: files);
+    }
+
+    private static GitCommitFileItem ParseCommitFile(string line)
+    {
+        var parts = line.Split('\t', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length < 2)
+        {
+            return new GitCommitFileItem(string.Empty, string.Empty);
+        }
+
+        var statusCode = parts[0];
+        var path = (statusCode.StartsWith('R') || statusCode.StartsWith('C')) && parts.Length >= 3
+            ? $"{parts[1]} -> {parts[2]}"
+            : parts[^1];
+        return new GitCommitFileItem(statusCode, path);
+    }
+
+    private static GitCommitItem EmptyCommit()
+    {
+        return new GitCommitItem(
+            Sha: string.Empty,
+            ShortSha: string.Empty,
+            Summary: string.Empty,
+            AuthorName: string.Empty,
+            AuthorEmail: string.Empty,
+            Date: string.Empty,
+            RelativeDate: string.Empty,
+            Files: Array.Empty<GitCommitFileItem>());
     }
 
     private static (int Ahead, int Behind) ParseAheadBehind(string status)
