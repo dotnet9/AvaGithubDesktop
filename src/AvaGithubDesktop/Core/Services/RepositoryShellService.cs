@@ -126,6 +126,41 @@ public sealed class RepositoryShellService : IRepositoryShellService
         return Task.CompletedTask;
     }
 
+    public Task OpenItemAsync(string itemPath)
+    {
+        var path = Path.GetFullPath(itemPath);
+        if (!File.Exists(path) && !Directory.Exists(path))
+        {
+            throw new FileNotFoundException(path);
+        }
+
+        if (OperatingSystem.IsWindows())
+        {
+            StartProcess(new ProcessStartInfo(path)
+            {
+                UseShellExecute = true
+            });
+            return Task.CompletedTask;
+        }
+
+        if (OperatingSystem.IsMacOS())
+        {
+            StartProcess(new ProcessStartInfo("open")
+            {
+                ArgumentList = { path },
+                UseShellExecute = false
+            });
+            return Task.CompletedTask;
+        }
+
+        StartProcess(new ProcessStartInfo("xdg-open")
+        {
+            ArgumentList = { path },
+            UseShellExecute = false
+        });
+        return Task.CompletedTask;
+    }
+
     public Task OpenUrlAsync(string url)
     {
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))

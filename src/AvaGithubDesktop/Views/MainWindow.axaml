@@ -443,6 +443,8 @@
                                             <MenuFlyout>
                                                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyFilePath}}" Command="{Binding CopyFullPathCommand}" />
                                                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyRelativePath}}" Command="{Binding CopyRelativePathCommand}" />
+                                                <Separator />
+                                                <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuOpenInExternalEditor}}" Command="{Binding OpenInExternalEditorCommand}" IsEnabled="{Binding CanOpenInExternalEditor}" />
                                                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowInFileManager}}" Command="{Binding ShowInFileManagerCommand}" />
                                                 <Separator />
                                                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuDiscardChanges}}" Command="{Binding DiscardChangesCommand}" />

@@ -998,6 +998,23 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private async Task OpenChangeInExternalEditorAsync(GitChangeItemViewModel change)
+    {
+        var relativePath = change.GitPaths.LastOrDefault() ?? change.Path;
+        var fullPath = Path.Combine(RootPath, relativePath);
+
+        try
+        {
+            await _repositoryShellService.OpenItemAsync(fullPath);
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedChangeInExternalEditor)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenChangeInExternalEditorFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+    }
+
     private async Task DiscardChangeAsync(GitChangeItemViewModel change)
     {
         await DiscardChangesAsync(new[] { change });
@@ -1588,6 +1605,7 @@ public sealed class MainWindowViewModel : ViewModelBase
                 CopyChangeFullPathAsync,
                 CopyChangeRelativePathAsync,
                 ShowChangeInFileManagerAsync,
+                OpenChangeInExternalEditorAsync,
                 DiscardChangeAsync);
             // 单个文件勾选变化会影响提交按钮、全选三态和“已选择”文案，需要集中刷新派生状态。
             var subscription = changeViewModel

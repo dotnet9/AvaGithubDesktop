@@ -20,6 +20,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuPull = "AvaGithubDesktop.AvaGithubDesktopL.MenuPull";
     public static readonly string MenuFetch = "AvaGithubDesktop.AvaGithubDesktopL.MenuFetch";
     public static readonly string MenuOpenInShell = "AvaGithubDesktop.AvaGithubDesktopL.MenuOpenInShell";
+    public static readonly string MenuOpenInExternalEditor = "AvaGithubDesktop.AvaGithubDesktopL.MenuOpenInExternalEditor";
     public static readonly string MenuShowInFileManager = "AvaGithubDesktop.AvaGithubDesktopL.MenuShowInFileManager";
     public static readonly string MenuViewOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.MenuViewOnGitHub";
     public static readonly string MenuCopyRepositoryName = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyRepositoryName";
@@ -138,6 +139,8 @@ public static class AvaGithubDesktopL
     public static readonly string StatusCopyChangePathFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopyChangePathFailedFormat";
     public static readonly string StatusShowedChangeInFileManager = "AvaGithubDesktop.AvaGithubDesktopL.StatusShowedChangeInFileManager";
     public static readonly string StatusShowChangeInFileManagerFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusShowChangeInFileManagerFailedFormat";
+    public static readonly string StatusOpenedChangeInExternalEditor = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedChangeInExternalEditor";
+    public static readonly string StatusOpenChangeInExternalEditorFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenChangeInExternalEditorFailedFormat";
     public static readonly string StatusDiscardChangesCanceled = "AvaGithubDesktop.AvaGithubDesktopL.StatusDiscardChangesCanceled";
     public static readonly string StatusDiscardingChangesFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusDiscardingChangesFormat";
     public static readonly string StatusDiscardedChangesFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusDiscardedChangesFormat";
