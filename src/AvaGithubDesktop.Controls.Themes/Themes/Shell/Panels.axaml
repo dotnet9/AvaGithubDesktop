@@ -6,8 +6,8 @@
     </Style>
 
     <Style Selector="Border.metricCard">
-        <Setter Property="Padding" Value="14" />
-        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="12" />
+        <Setter Property="CornerRadius" Value="4" />
         <Setter Property="Background" Value="{DynamicResource PanelBackgroundBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
@@ -47,9 +47,43 @@
 
     <Style Selector="Border.confirmationFileList">
         <Setter Property="Padding" Value="10,8" />
-        <Setter Property="Background" Value="#F6F8FA" />
+        <Setter Property="Background" Value="{DynamicResource PanelAltBackgroundBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="6" />
+    </Style>
+
+    <Style Selector="Border.toolbarBand">
+        <Setter Property="Height" Value="50" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="{DynamicResource ToolbarBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ToolbarBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <Style Selector="Border.tabBand">
+        <Setter Property="Height" Value="29" />
+        <Setter Property="Background" Value="{DynamicResource PanelBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <Style Selector="Grid.tabBand">
+        <Setter Property="Height" Value="29" />
+        <Setter Property="Background" Value="{DynamicResource PanelBackgroundBrush}" />
+    </Style>
+
+    <Style Selector="Border.changesHeader">
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="Background" Value="{DynamicResource PanelAltBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <Style Selector="Border.commitArea">
+        <Setter Property="Padding" Value="10" />
+        <Setter Property="Background" Value="{DynamicResource PanelAltBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,1,0,0" />
     </Style>
 </Styles>

@@ -35,6 +35,27 @@
         <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
+    <Style Selector="Button.toolbarSplit">
+        <Setter Property="MinHeight" Value="50" />
+        <Setter Property="Padding" Value="12,0" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="BorderThickness" Value="0,0,1,0" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ToolbarSplitBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource ToolbarBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ToolbarTextBrush}" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.toolbarSplit:pointerover">
+        <Setter Property="Background" Value="{DynamicResource ToolbarHoverBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ToolbarTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.toolbarSplit:disabled">
+        <Setter Property="Opacity" Value="0.75" />
+    </Style>
+
     <Style Selector="Button.repositoryAdd">
         <Setter Property="MinHeight" Value="30" />
         <Setter Property="Padding" Value="10,4" />
@@ -91,7 +112,7 @@
     </Style>
 
     <Style Selector="Button.commitButton">
-        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="MinHeight" Value="25" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
@@ -103,7 +124,7 @@
     </Style>
 
     <Style Selector="Button.stashButton">
-        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="MinHeight" Value="25" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
@@ -142,8 +163,25 @@
         <Setter Property="BorderThickness" Value="0,0,0,1" />
         <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
         <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="MinHeight" Value="29" />
+        <Setter Property="Padding" Value="0" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Button.repositoryTab:pointerover">
+        <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}" />
+    </Style>
+
+    <Style Selector="ComboBox.toolbarLanguage">
+        <Setter Property="MinHeight" Value="50" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="BorderThickness" Value="0,0,1,0" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ToolbarSplitBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource ToolbarBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ToolbarTextBrush}" />
+        <Setter Property="Padding" Value="10,0" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 </Styles>

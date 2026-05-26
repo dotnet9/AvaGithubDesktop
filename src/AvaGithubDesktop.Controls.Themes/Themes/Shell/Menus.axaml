@@ -6,17 +6,17 @@
     </Style>
 
     <Style Selector="Menu.titleBar > MenuItem">
-        <Setter Property="Foreground" Value="#F3F4F6" />
+        <Setter Property="Foreground" Value="{DynamicResource ToolbarTextBrush}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Padding" Value="8,0" />
         <Setter Property="FontSize" Value="12" />
     </Style>
 
     <Style Selector="Menu.titleBar > MenuItem:pointerover">
-        <Setter Property="Background" Value="#32383F" />
+        <Setter Property="Background" Value="{DynamicResource ToolbarHoverBackgroundBrush}" />
     </Style>
 
     <Style Selector="Menu.titleBar > MenuItem:open">
-        <Setter Property="Background" Value="#3A424B" />
+        <Setter Property="Background" Value="{DynamicResource ToolbarHoverBackgroundBrush}" />
     </Style>
 </Styles>

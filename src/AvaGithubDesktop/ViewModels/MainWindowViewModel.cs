@@ -418,6 +418,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             this.RaiseAndSetIfChanged(ref _isLoading, value);
             this.RaisePropertyChanged(nameof(ShowEmptyRepository));
+            this.RaisePropertyChanged(nameof(HasNoChanges));
             RaiseOperationStateChanged();
         }
     }
@@ -541,9 +542,9 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public bool IsHistorySelected => SelectedSection == RepositorySection.History;
 
-    public string ChangesTabBackground => IsChangesSelected ? "#FFFFFF" : "#F1F4F7";
+    public string ChangesTabBackground => "#FFFFFF";
 
-    public string HistoryTabBackground => IsHistorySelected ? "#FFFFFF" : "#F1F4F7";
+    public string HistoryTabBackground => "#FFFFFF";
 
     public string ChangesTabForeground => IsChangesSelected ? "#24292F" : "#57606A";
 

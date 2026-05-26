@@ -29,6 +29,11 @@
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
 
+    <Style Selector="TextBlock.toolbarMuted">
+        <Setter Property="Foreground" Value="{DynamicResource ToolbarSecondaryTextBrush}" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+    </Style>
+
     <Style Selector="TextBlock.warning">
         <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
         <Setter Property="TextWrapping" Value="Wrap" />
@@ -44,5 +49,13 @@
         <Setter Property="FontSize" Value="22" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.toolbarSplit TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource ToolbarTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.toolbarSplit TextBlock.muted">
+        <Setter Property="Foreground" Value="{DynamicResource ToolbarSecondaryTextBrush}" />
     </Style>
 </Styles>

@@ -16,9 +16,9 @@
     MinHeight="620"
     Background="{DynamicResource AppBackgroundBrush}"
     Icon="/Assets/app-logo.ico"
-    TitleBarBackground="#24292F"
-    TitleBarBorderBrush="#11161C"
-    TitleBarForeground="#F3F4F6"
+    TitleBarBackground="{DynamicResource ToolbarBackgroundBrush}"
+    TitleBarBorderBrush="{DynamicResource ToolbarBorderBrush}"
+    TitleBarForeground="{DynamicResource ToolbarTextBrush}"
     TitleBarHeight="34"
     WindowStartupLocation="CenterScreen"
     x:DataType="vm:MainWindowViewModel"
@@ -35,7 +35,7 @@
                 VerticalAlignment="Center"
                 FontSize="12"
                 FontWeight="SemiBold"
-                Foreground="#F3F4F6"
+                Foreground="{DynamicResource ToolbarTextBrush}"
                 Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.AppTitle}}" />
             <Menu Classes="titleBar">
                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFile}}">
@@ -74,13 +74,10 @@
     <Grid RowDefinitions="Auto,*,Auto">
         <Border
             Grid.Row="0"
-            Padding="12,10"
-            Background="{DynamicResource PanelBackgroundBrush}"
-            BorderBrush="{DynamicResource PanelBorderBrush}"
-            BorderThickness="0,0,0,1">
-            <Grid ColumnDefinitions="280,190,180,*,180,150" ColumnSpacing="8">
+            Classes="toolbarBand">
+            <Grid ColumnDefinitions="360,230,230,*,170,150" ColumnSpacing="0">
                 <Button
-                    Classes="repositorySelector"
+                    Classes="repositorySelector toolbarSplit"
                     HorizontalAlignment="Stretch"
                     ToolTip.Tip="{Binding RepositorySelectorDetail}">
                     <Button.Flyout>
@@ -151,7 +148,7 @@
                                                                                 <TextBlock
                                                                                     Grid.Column="2"
                                                                                     VerticalAlignment="Center"
-                                                                                    Foreground="#0969DA"
+                                                                                    Foreground="{DynamicResource AccentBrush}"
                                                                                     FontSize="18"
                                                                                     IsVisible="{Binding IsCurrent}"
                                                                                     Text="•" />
@@ -201,7 +198,8 @@
                 </Button>
                 <Button
                     Grid.Column="1"
-                    Classes="branchSelector"
+                    Classes="branchSelector toolbarSplit"
+                    HorizontalAlignment="Stretch"
                     IsEnabled="{Binding HasRepository}">
                     <Button.Flyout>
                         <Flyout>
@@ -296,8 +294,9 @@
                 </Button>
                 <Button
                     Grid.Column="2"
-                    Classes="syncToolbar"
+                    Classes="syncToolbar toolbarSplit"
                     Command="{Binding SynchronizeRepositoryCommand}"
+                    HorizontalAlignment="Stretch"
                     IsEnabled="{Binding CanSynchronize}">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                         <TextBlock
@@ -320,6 +319,8 @@
                 </Button>
                 <ComboBox
                     Grid.Column="5"
+                    Classes="toolbarLanguage"
+                    HorizontalAlignment="Stretch"
                     Width="150"
                     ItemsSource="{Binding Languages}"
                     SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}">
@@ -331,22 +332,23 @@
                 </ComboBox>
                 <Button
                     Grid.Column="4"
-                    Classes="accountButton"
+                    Classes="accountButton toolbarSplit"
                     Command="{Binding SignInCommand}"
+                    HorizontalAlignment="Stretch"
                     IsVisible="{Binding IsSignedOut}">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                         <Border
                             Width="26"
                             Height="26"
                             VerticalAlignment="Center"
-                            Background="#0969DA"
+                            Background="{DynamicResource AccentBrush}"
                             CornerRadius="13">
                             <TextBlock
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
                                 FontSize="11"
                                 FontWeight="SemiBold"
-                                Foreground="#FFFFFF"
+                                Foreground="{DynamicResource ToolbarTextBrush}"
                                 Text="GH" />
                         </Border>
                         <StackPanel Grid.Column="1" Spacing="1">
@@ -364,7 +366,8 @@
                 </Button>
                 <Button
                     Grid.Column="4"
-                    Classes="accountButton"
+                    Classes="accountButton toolbarSplit"
+                    HorizontalAlignment="Stretch"
                     IsVisible="{Binding IsSignedIn}">
                     <Button.Flyout>
                         <Flyout>
@@ -375,14 +378,14 @@
                                             Width="32"
                                             Height="32"
                                             VerticalAlignment="Center"
-                                            Background="#0969DA"
+                                            Background="{DynamicResource AccentBrush}"
                                             CornerRadius="16">
                                             <TextBlock
                                                 HorizontalAlignment="Center"
                                                 VerticalAlignment="Center"
                                                 FontSize="12"
                                                 FontWeight="SemiBold"
-                                                Foreground="#FFFFFF"
+                                                Foreground="{DynamicResource ToolbarTextBrush}"
                                                 Text="{Binding AccountInitials}" />
                                         </Border>
                                         <StackPanel Grid.Column="1" Spacing="2">
@@ -409,14 +412,14 @@
                             Width="26"
                             Height="26"
                             VerticalAlignment="Center"
-                            Background="#0969DA"
+                            Background="{DynamicResource AccentBrush}"
                             CornerRadius="13">
                             <TextBlock
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
                                 FontSize="11"
                                 FontWeight="SemiBold"
-                                Foreground="#FFFFFF"
+                                Foreground="{DynamicResource ToolbarTextBrush}"
                                 Text="{Binding AccountInitials}" />
                         </Border>
                         <StackPanel Grid.Column="1" Spacing="1">
@@ -449,45 +452,54 @@
                 <Grid RowDefinitions="Auto,Auto,*,Auto">
                     <Grid
                         Grid.Row="0"
-                        Height="40"
+                        Classes="tabBand"
                         ColumnDefinitions="*,*"
-                        Background="#F1F4F7">
+                        Background="{DynamicResource PanelBackgroundBrush}">
                         <Button
                             Grid.Column="0"
                             Classes="repositoryTab"
                             Background="{Binding ChangesTabBackground}"
                             Command="{Binding ShowChangesCommand}"
-                            Foreground="{Binding ChangesTabForeground}">
-                            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Spacing="6">
-                                <TextBlock Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Changes}}" />
-                                <Border
-                                    MinWidth="18"
-                                    Padding="5,1"
-                                    Background="#DDEBFA"
-                                    CornerRadius="8"
-                                    IsVisible="{Binding HasChanges}">
-                                    <TextBlock
-                                        FontSize="10"
-                                        FontWeight="SemiBold"
-                                        Text="{Binding ChangedFilesCount}" />
-                                </Border>
-                            </StackPanel>
+                            Foreground="{Binding ChangesTabForeground}"
+                            HorizontalAlignment="Stretch">
+                            <Grid RowDefinitions="*,3">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Changes}}" />
+                                    <Border
+                                        MinWidth="18"
+                                        Padding="5,1"
+                                        Background="{DynamicResource PanelAltBackgroundBrush}"
+                                        CornerRadius="8"
+                                        IsVisible="{Binding HasChanges}">
+                                        <TextBlock
+                                            FontSize="10"
+                                            FontWeight="SemiBold"
+                                            Text="{Binding ChangedFilesCount}" />
+                                    </Border>
+                                </StackPanel>
+                                <Border Grid.Row="1" Background="{DynamicResource AccentBrush}" IsVisible="{Binding IsChangesSelected}" />
+                            </Grid>
                         </Button>
                         <Button
                             Grid.Column="1"
                             Classes="repositoryTab"
                             Background="{Binding HistoryTabBackground}"
                             Command="{Binding ShowHistoryCommand}"
-                            Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.History}}"
-                            Foreground="{Binding HistoryTabForeground}" />
+                            Foreground="{Binding HistoryTabForeground}"
+                            HorizontalAlignment="Stretch">
+                            <Grid RowDefinitions="*,3">
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.History}}" />
+                                <Border Grid.Row="1" Background="{DynamicResource AccentBrush}" IsVisible="{Binding IsHistorySelected}" />
+                            </Grid>
+                        </Button>
                     </Grid>
 
                     <Border
                         Grid.Row="1"
-                        Padding="12,8"
-                        Background="{DynamicResource PanelBackgroundBrush}"
-                        BorderBrush="{DynamicResource PanelBorderBrush}"
-                        BorderThickness="0,0,0,1"
+                        Classes="changesHeader"
                         IsVisible="{Binding IsChangesSelected}">
                         <Grid RowDefinitions="Auto,Auto" RowSpacing="7">
                             <TextBox
@@ -521,7 +533,7 @@
                         Grid.Row="1"
                         Height="36"
                         Padding="12,0"
-                        Background="{DynamicResource PanelBackgroundBrush}"
+                        Background="{DynamicResource PanelAltBackgroundBrush}"
                         BorderBrush="{DynamicResource PanelBorderBrush}"
                         BorderThickness="0,0,0,1"
                         IsVisible="{Binding IsHistorySelected}">
@@ -555,7 +567,7 @@
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="vm:GitChangeItemViewModel">
                                     <Border
-                                        Height="42"
+                                        Height="34"
                                         Padding="10,0">
                                         <Border.ContextFlyout>
                                             <MenuFlyout>
@@ -676,12 +688,9 @@
 
                     <Border
                         Grid.Row="3"
-                        Padding="12"
-                        Background="{DynamicResource PanelBackgroundBrush}"
-                        BorderBrush="{DynamicResource PanelBorderBrush}"
-                        BorderThickness="0,1,0,0"
+                        Classes="commitArea"
                         IsVisible="{Binding IsChangesSelected}">
-                        <StackPanel Spacing="8">
+                        <StackPanel Spacing="7">
                             <TextBox
                                 Classes="commitSummary"
                                 IsEnabled="{Binding HasRepository}"
@@ -721,7 +730,7 @@
 
                 <TextBlock
                     Grid.Row="1"
-                    Foreground="#A4262C"
+                    Foreground="{DynamicResource DangerBrush}"
                     IsVisible="{Binding HasError}"
                     Text="{Binding ErrorMessage}"
                     TextWrapping="Wrap" />
@@ -732,7 +741,28 @@
                     RowDefinitions="Auto,*"
                     RowSpacing="14"
                     IsVisible="{Binding IsChangesSelected}">
-                    <UniformGrid Grid.Row="0" Columns="4">
+                    <StackPanel
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                        Width="560"
+                        Margin="0,76,0,0"
+                        HorizontalAlignment="Center"
+                        IsVisible="{Binding HasNoChanges}"
+                        Spacing="10">
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            Classes="heading"
+                            FontSize="28"
+                            Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.NoChangesTitle}}" />
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            Classes="muted"
+                            Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.NoChangesDetail}}"
+                            TextAlignment="Center"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <UniformGrid Grid.Row="0" Columns="4" IsVisible="{Binding HasChanges}">
                         <Border Classes="metricCard" Margin="0,0,8,0">
                             <StackPanel Spacing="4">
                                 <TextBlock Classes="muted" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.ChangedFiles}}" />
@@ -759,7 +789,7 @@
                         </Border>
                     </UniformGrid>
 
-                    <Grid Grid.Row="1" ColumnDefinitions="1.15*,1.45*" ColumnSpacing="14">
+                    <Grid Grid.Row="1" ColumnDefinitions="1.15*,1.45*" ColumnSpacing="14" IsVisible="{Binding HasChanges}">
                         <Border Classes="panel" Padding="14" CornerRadius="6">
                             <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
                                 <TextBlock Classes="section" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Summary}}" />

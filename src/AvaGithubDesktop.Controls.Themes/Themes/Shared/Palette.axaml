@@ -3,19 +3,29 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
-            <SolidColorBrush x:Key="AppBackgroundBrush" Color="#F5F6F8" />
+            <SolidColorBrush x:Key="AppBackgroundBrush" Color="#FFFFFF" />
             <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#FFFFFF" />
-            <SolidColorBrush x:Key="PanelBorderBrush" Color="#D8DEE6" />
+            <SolidColorBrush x:Key="PanelAltBackgroundBrush" Color="#F6F8FA" />
+            <SolidColorBrush x:Key="PanelBorderBrush" Color="#D0D7DE" />
+            <SolidColorBrush x:Key="PanelBorderContrastBrush" Color="#8C959F" />
             <SolidColorBrush x:Key="PrimaryTextBrush" Color="#24292F" />
             <SolidColorBrush x:Key="SecondaryTextBrush" Color="#57606A" />
             <SolidColorBrush x:Key="MutedTextBrush" Color="#6E7781" />
             <SolidColorBrush x:Key="AccentBrush" Color="#0969DA" />
+            <SolidColorBrush x:Key="SelectionBackgroundBrush" Color="#EBEEF1" />
+            <SolidColorBrush x:Key="HoverBackgroundBrush" Color="#F6F8FA" />
             <SolidColorBrush x:Key="DangerBrush" Color="#CF222E" />
             <SolidColorBrush x:Key="DangerSubtleBrush" Color="#FFF5F5" />
             <SolidColorBrush x:Key="DangerBorderBrush" Color="#FFD6D6" />
-            <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#EBEEF2" />
-            <SolidColorBrush x:Key="StatusBarBackgroundBrush" Color="#F0F2F5" />
-            <SolidColorBrush x:Key="StatusBarBorderBrush" Color="#D8DEE6" />
+            <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="StatusBarBackgroundBrush" Color="#F6F8FA" />
+            <SolidColorBrush x:Key="StatusBarBorderBrush" Color="#D0D7DE" />
+            <SolidColorBrush x:Key="ToolbarBackgroundBrush" Color="#24292F" />
+            <SolidColorBrush x:Key="ToolbarBorderBrush" Color="#11161C" />
+            <SolidColorBrush x:Key="ToolbarHoverBackgroundBrush" Color="#32383F" />
+            <SolidColorBrush x:Key="ToolbarTextBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ToolbarSecondaryTextBrush" Color="#D0D7DE" />
+            <SolidColorBrush x:Key="ToolbarSplitBorderBrush" Color="#000000" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 

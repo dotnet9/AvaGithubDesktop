@@ -37,27 +37,27 @@
     </Style>
 
     <Style Selector="ListBox.changes ListBoxItem:pointerover">
-        <Setter Property="Background" Value="#EEF3F8" />
+        <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}" />
     </Style>
 
     <Style Selector="ListBox.changes ListBoxItem:selected">
-        <Setter Property="Background" Value="#DDEBFA" />
+        <Setter Property="Background" Value="{DynamicResource SelectionBackgroundBrush}" />
     </Style>
 
     <Style Selector="ListBox.history ListBoxItem:pointerover">
-        <Setter Property="Background" Value="#EEF3F8" />
+        <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}" />
     </Style>
 
     <Style Selector="ListBox.history ListBoxItem:selected">
-        <Setter Property="Background" Value="#DDEBFA" />
+        <Setter Property="Background" Value="{DynamicResource SelectionBackgroundBrush}" />
     </Style>
 
     <Style Selector="ListBox.branchSelector ListBoxItem:pointerover">
-        <Setter Property="Background" Value="#EEF3F8" />
+        <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}" />
     </Style>
 
     <Style Selector="ListBox.branchSelector ListBoxItem:selected">
-        <Setter Property="Background" Value="#DDEBFA" />
+        <Setter Property="Background" Value="{DynamicResource SelectionBackgroundBrush}" />
     </Style>
 
     <Style Selector="Button.repositoryListItem">
@@ -70,6 +70,6 @@
     </Style>
 
     <Style Selector="Button.repositoryListItem:pointerover">
-        <Setter Property="Background" Value="#EEF3F8" />
+        <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}" />
     </Style>
 </Styles>
