@@ -25,6 +25,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuCopyRepositoryName = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyRepositoryName";
     public static readonly string MenuCopyRepositoryPath = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyRepositoryPath";
     public static readonly string MenuCopyRelativePath = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyRelativePath";
+    public static readonly string MenuDiscardChanges = "AvaGithubDesktop.AvaGithubDesktopL.MenuDiscardChanges";
     public static readonly string MenuStashAllChanges = "AvaGithubDesktop.AvaGithubDesktopL.MenuStashAllChanges";
     public static readonly string MenuRestoreStash = "AvaGithubDesktop.AvaGithubDesktopL.MenuRestoreStash";
     public static readonly string MenuDiscardStash = "AvaGithubDesktop.AvaGithubDesktopL.MenuDiscardStash";
@@ -45,6 +46,7 @@ public static class AvaGithubDesktopL
     public static readonly string NoRepositoriesFound = "AvaGithubDesktop.AvaGithubDesktopL.NoRepositoriesFound";
     public static readonly string Browse = "AvaGithubDesktop.AvaGithubDesktopL.Browse";
     public static readonly string Open = "AvaGithubDesktop.AvaGithubDesktopL.Open";
+    public static readonly string Cancel = "AvaGithubDesktop.AvaGithubDesktopL.Cancel";
     public static readonly string Refresh = "AvaGithubDesktop.AvaGithubDesktopL.Refresh";
     public static readonly string Changes = "AvaGithubDesktop.AvaGithubDesktopL.Changes";
     public static readonly string History = "AvaGithubDesktop.AvaGithubDesktopL.History";
@@ -89,6 +91,11 @@ public static class AvaGithubDesktopL
     public static readonly string SelectFilesToCommit = "AvaGithubDesktop.AvaGithubDesktopL.SelectFilesToCommit";
     public static readonly string CommitSummaryRequired = "AvaGithubDesktop.AvaGithubDesktopL.CommitSummaryRequired";
     public static readonly string NoFilesSelected = "AvaGithubDesktop.AvaGithubDesktopL.NoFilesSelected";
+    public static readonly string DiscardChangesConfirmTitle = "AvaGithubDesktop.AvaGithubDesktopL.DiscardChangesConfirmTitle";
+    public static readonly string DiscardChangesConfirmMessage = "AvaGithubDesktop.AvaGithubDesktopL.DiscardChangesConfirmMessage";
+    public static readonly string DiscardChangesConfirmManyMessageFormat = "AvaGithubDesktop.AvaGithubDesktopL.DiscardChangesConfirmManyMessageFormat";
+    public static readonly string DiscardChangesConfirmWarning = "AvaGithubDesktop.AvaGithubDesktopL.DiscardChangesConfirmWarning";
+    public static readonly string DiscardChangesConfirmButton = "AvaGithubDesktop.AvaGithubDesktopL.DiscardChangesConfirmButton";
     public static readonly string StatusCommittingFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCommittingFormat";
     public static readonly string StatusCommittedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCommittedFormat";
     public static readonly string StatusCommitFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCommitFailedFormat";
@@ -127,6 +134,10 @@ public static class AvaGithubDesktopL
     public static readonly string StatusCopyChangePathFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopyChangePathFailedFormat";
     public static readonly string StatusShowedChangeInFileManager = "AvaGithubDesktop.AvaGithubDesktopL.StatusShowedChangeInFileManager";
     public static readonly string StatusShowChangeInFileManagerFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusShowChangeInFileManagerFailedFormat";
+    public static readonly string StatusDiscardChangesCanceled = "AvaGithubDesktop.AvaGithubDesktopL.StatusDiscardChangesCanceled";
+    public static readonly string StatusDiscardingChangesFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusDiscardingChangesFormat";
+    public static readonly string StatusDiscardedChangesFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusDiscardedChangesFormat";
+    public static readonly string StatusDiscardChangesFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusDiscardChangesFailedFormat";
     public static readonly string ChangedFileCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.ChangedFileCountFormat";
     public static readonly string ChangedFilesCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.ChangedFilesCountFormat";
     public static readonly string ChangedFilesFilteredCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.ChangedFilesFilteredCountFormat";

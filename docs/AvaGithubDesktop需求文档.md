@@ -56,3 +56,4 @@
 - Desktop 风格仓库复制名称/路径与 View on GitHub 操作
 - `Directory.Build.props` 使用统一版本变量驱动 `Version`、`FileVersion` 等属性
 - Desktop 风格 Changes 文件列表复制相对路径与文件管理器显示操作
+- Desktop 风格 Changes 文件列表丢弃更改与确认对话框

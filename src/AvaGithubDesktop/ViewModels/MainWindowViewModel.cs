@@ -18,6 +18,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly IRepositoryHistoryService _repositoryHistoryService;
     private readonly IRepositoryShellService _repositoryShellService;
     private readonly IHelpService _helpService;
+    private readonly IConfirmationDialogService _confirmationDialogService;
     private readonly IAppLocalizer _localizer;
     private readonly IEventBus _eventBus;
     private string _repositoryPath;
@@ -43,6 +44,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isStashing;
     private bool _isRestoringStash;
     private bool _isDiscardingStash;
+    private bool _isDiscardingChanges;
     private bool _isInitialized;
     private bool _isBulkUpdatingIncludedChanges;
     private int _changedFilesCount;
@@ -76,6 +78,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         IRepositoryHistoryService repositoryHistoryService,
         IRepositoryShellService repositoryShellService,
         IHelpService helpService,
+        IConfirmationDialogService confirmationDialogService,
         IAppLocalizer localizer,
         IEventBus eventBus,
         ShellStatusViewModel statusBar)
@@ -85,6 +88,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _repositoryHistoryService = repositoryHistoryService;
         _repositoryShellService = repositoryShellService;
         _helpService = helpService;
+        _confirmationDialogService = confirmationDialogService;
         _localizer = localizer;
         _eventBus = eventBus;
         StatusBar = statusBar;
@@ -334,7 +338,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         !IsSyncing &&
         !IsStashing &&
         !IsRestoringStash &&
-        !IsDiscardingStash;
+        !IsDiscardingStash &&
+        !IsDiscardingChanges;
 
     public bool IsLoading
     {
@@ -403,6 +408,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         private set
         {
             this.RaiseAndSetIfChanged(ref _isDiscardingStash, value);
+            RaiseOperationStateChanged();
+        }
+    }
+
+    public bool IsDiscardingChanges
+    {
+        get => _isDiscardingChanges;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isDiscardingChanges, value);
             RaiseOperationStateChanged();
         }
     }
@@ -966,6 +981,48 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private async Task DiscardChangeAsync(GitChangeItemViewModel change)
+    {
+        if (!HasRepository || !CanRunRepositoryCommand)
+        {
+            return;
+        }
+
+        var confirmed = await _confirmationDialogService.ShowDiscardChangesConfirmationAsync(new[] { change.Path });
+        if (!confirmed)
+        {
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusDiscardChangesCanceled)));
+            return;
+        }
+
+        if (!HasRepository || !CanRunRepositoryCommand)
+        {
+            return;
+        }
+
+        IsDiscardingChanges = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(
+            _localizer.Format(AvaGithubDesktopL.StatusDiscardingChangesFormat, change.Path)));
+
+        try
+        {
+            await _gitRepositoryService.DiscardChangesAsync(RootPath, new[] { change.Change }, CancellationToken.None);
+            await ReloadRepositoryWorkspaceAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusDiscardedChangesFormat, change.Path)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusDiscardChangesFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsDiscardingChanges = false;
+        }
+    }
+
     private async Task CopyTextAsync(string text, string successKey, string failureFormatKey)
     {
         try
@@ -1481,7 +1538,8 @@ public sealed class MainWindowViewModel : ViewModelBase
             var changeViewModel = new GitChangeItemViewModel(
                 change,
                 CopyChangeRelativePathAsync,
-                ShowChangeInFileManagerAsync);
+                ShowChangeInFileManagerAsync,
+                DiscardChangeAsync);
             // 单个文件勾选变化会影响提交按钮、全选三态和“已选择”文案，需要集中刷新派生状态。
             var subscription = changeViewModel
                 .WhenAnyValue(model => model.IsIncluded)

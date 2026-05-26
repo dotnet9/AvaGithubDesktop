@@ -250,6 +250,48 @@ public sealed class GitRepositoryService : IGitRepositoryService
         await RunRequiredGitAsync(root, cancellationToken, "stash", "drop", stashName);
     }
 
+    public async Task DiscardChangesAsync(
+        string repositoryPath,
+        IReadOnlyList<GitChangeItem> changes,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        var normalizedChanges = changes
+            .Where(change => change.GitPaths.Count > 0)
+            .ToArray();
+
+        if (normalizedChanges.Length == 0)
+        {
+            return;
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        var trackedPaths = normalizedChanges
+            .Where(change => change.Kind != GitChangeKind.Untracked)
+            .SelectMany(change => change.GitPaths)
+            .Where(path => !string.IsNullOrWhiteSpace(path))
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+
+        if (trackedPaths.Length > 0)
+        {
+            // 同时还原 index 和工作区，覆盖已暂存、未暂存和重命名场景，行为接近 Desktop 的 discard changes。
+            await RunRequiredGitAsync(root, cancellationToken, CreatePathArguments(new[] { "restore", "--staged", "--worktree" }, trackedPaths));
+        }
+
+        foreach (var change in normalizedChanges.Where(change => change.Kind == GitChangeKind.Untracked))
+        {
+            foreach (var path in change.GitPaths)
+            {
+                DeleteUntrackedPath(root, path);
+            }
+        }
+    }
+
     public async Task<string> LoadWorkingTreeDiffAsync(
         string repositoryPath,
         IReadOnlyList<string> paths,
@@ -678,6 +720,46 @@ public sealed class GitRepositoryService : IGitRepositoryService
         arguments.Add("--");
         arguments.AddRange(paths);
         return arguments.ToArray();
+    }
+
+    private static void DeleteUntrackedPath(string root, string gitPath)
+    {
+        if (string.IsNullOrWhiteSpace(gitPath))
+        {
+            return;
+        }
+
+        if (Path.IsPathFullyQualified(gitPath))
+        {
+            throw new InvalidOperationException($"Refusing to delete a rooted path: {gitPath}");
+        }
+
+        var fullPath = Path.GetFullPath(Path.Combine(root, gitPath));
+        var relativePath = Path.GetRelativePath(root, fullPath);
+        if (IsOutsideRepository(relativePath))
+        {
+            throw new InvalidOperationException($"Refusing to delete a path outside the repository: {gitPath}");
+        }
+
+        // 未跟踪文件不受 Git 版本库保护，删除前必须确认路径仍在仓库根目录之内。
+        if (File.Exists(fullPath))
+        {
+            File.Delete(fullPath);
+            return;
+        }
+
+        if (Directory.Exists(fullPath))
+        {
+            Directory.Delete(fullPath, recursive: true);
+        }
+    }
+
+    private static bool IsOutsideRepository(string relativePath)
+    {
+        return Path.IsPathFullyQualified(relativePath)
+            || relativePath.Equals("..", StringComparison.Ordinal)
+            || relativePath.StartsWith($"..{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+            || relativePath.StartsWith($"..{Path.AltDirectorySeparatorChar}", StringComparison.Ordinal);
     }
 
     private static string JoinDiffs(string unstaged, string staged)

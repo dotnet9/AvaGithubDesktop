@@ -36,4 +36,12 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="6" />
     </Style>
+
+    <Style Selector="Border.confirmationFileList">
+        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="Background" Value="#F6F8FA" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+    </Style>
 </Styles>

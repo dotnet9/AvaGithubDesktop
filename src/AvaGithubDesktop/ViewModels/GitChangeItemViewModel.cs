@@ -8,19 +8,23 @@ public sealed class GitChangeItemViewModel : ReactiveObject
 {
     private readonly Func<GitChangeItemViewModel, Task> _copyRelativePathAsync;
     private readonly Func<GitChangeItemViewModel, Task> _showInFileManagerAsync;
+    private readonly Func<GitChangeItemViewModel, Task> _discardChangesAsync;
     private bool _isIncluded;
 
     public GitChangeItemViewModel(
         GitChangeItem change,
         Func<GitChangeItemViewModel, Task> copyRelativePathAsync,
-        Func<GitChangeItemViewModel, Task> showInFileManagerAsync)
+        Func<GitChangeItemViewModel, Task> showInFileManagerAsync,
+        Func<GitChangeItemViewModel, Task> discardChangesAsync)
     {
         Change = change;
         _copyRelativePathAsync = copyRelativePathAsync;
         _showInFileManagerAsync = showInFileManagerAsync;
+        _discardChangesAsync = discardChangesAsync;
         _isIncluded = true;
         CopyRelativePathCommand = ReactiveCommand.CreateFromTask(CopyRelativePathAsync);
         ShowInFileManagerCommand = ReactiveCommand.CreateFromTask(ShowInFileManagerAsync);
+        DiscardChangesCommand = ReactiveCommand.CreateFromTask(DiscardChangesAsync);
     }
 
     public GitChangeItem Change { get; }
@@ -43,6 +47,8 @@ public sealed class GitChangeItemViewModel : ReactiveObject
 
     public ReactiveCommand<Unit, Unit> ShowInFileManagerCommand { get; }
 
+    public ReactiveCommand<Unit, Unit> DiscardChangesCommand { get; }
+
     public bool IsIncluded
     {
         get => _isIncluded;
@@ -57,5 +63,10 @@ public sealed class GitChangeItemViewModel : ReactiveObject
     private Task ShowInFileManagerAsync()
     {
         return _showInFileManagerAsync(this);
+    }
+
+    private Task DiscardChangesAsync()
+    {
+        return _discardChangesAsync(this);
     }
 }

@@ -39,6 +39,7 @@ public partial class App : PrismApplication
         containerRegistry.RegisterSingleton<IRepositoryHistoryService, RepositoryHistoryService>();
         containerRegistry.RegisterSingleton<IRepositoryShellService, RepositoryShellService>();
         containerRegistry.RegisterSingleton<IHelpService, HelpService>();
+        containerRegistry.RegisterSingleton<IConfirmationDialogService, ConfirmationDialogService>();
         containerRegistry.RegisterSingleton<ShellStatusViewModel>();
         containerRegistry.RegisterSingleton<MainWindowViewModel>();
         containerRegistry.Register<MainWindow>();

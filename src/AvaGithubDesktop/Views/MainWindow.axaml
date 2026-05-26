@@ -437,6 +437,8 @@
                                             <MenuFlyout>
                                                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyRelativePath}}" Command="{Binding CopyRelativePathCommand}" />
                                                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowInFileManager}}" Command="{Binding ShowInFileManagerCommand}" />
+                                                <Separator />
+                                                <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuDiscardChanges}}" Command="{Binding DiscardChangesCommand}" />
                                             </MenuFlyout>
                                         </Border.ContextFlyout>
                                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">

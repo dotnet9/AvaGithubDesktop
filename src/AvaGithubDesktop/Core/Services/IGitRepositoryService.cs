@@ -51,6 +51,11 @@ public interface IGitRepositoryService
         string stashName,
         CancellationToken cancellationToken);
 
+    Task DiscardChangesAsync(
+        string repositoryPath,
+        IReadOnlyList<GitChangeItem> changes,
+        CancellationToken cancellationToken);
+
     Task<string> LoadWorkingTreeDiffAsync(
         string repositoryPath,
         IReadOnlyList<string> paths,
