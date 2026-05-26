@@ -367,6 +367,18 @@ public sealed class GitRepositoryService : IGitRepositoryService
             return GitFileDiffPreview.ImageDiff(previousImagePath, currentImagePath, currentImagePath);
         }
 
+        if (File.Exists(workingTreePath)
+            && !await IsTrackedPathAsync(root, currentPath, cancellationToken))
+        {
+            if (LooksLikeBinaryFile(workingTreePath))
+            {
+                return GitFileDiffPreview.BinaryDiff(workingTreePath);
+            }
+
+            return GitFileDiffPreview.TextDiff(
+                await CreateNewFileDiffAsync(currentPath, workingTreePath, cancellationToken));
+        }
+
         if (await HasWorkingTreeBinaryDiffAsync(root, normalizedPaths, cancellationToken))
         {
             return GitFileDiffPreview.BinaryDiff(File.Exists(workingTreePath) ? workingTreePath : null);
@@ -941,6 +953,64 @@ public sealed class GitRepositoryService : IGitRepositoryService
             cancellationToken,
             CreatePathArguments(new[] { "diff", "--numstat", "HEAD" }, paths));
         return ContainsBinaryNumstat(numstat);
+    }
+
+    private static async Task<bool> IsTrackedPathAsync(
+        string root,
+        string path,
+        CancellationToken cancellationToken)
+    {
+        var trackedPath = await RunOptionalGitAsync(
+            root,
+            cancellationToken,
+            "ls-files",
+            "--error-unmatch",
+            "--",
+            path);
+        return !string.IsNullOrWhiteSpace(trackedPath);
+    }
+
+    private static bool LooksLikeBinaryFile(string filePath)
+    {
+        Span<byte> buffer = stackalloc byte[8192];
+        using var stream = File.OpenRead(filePath);
+        var read = stream.Read(buffer);
+        return buffer[..read].Contains((byte)0);
+    }
+
+    private static async Task<string> CreateNewFileDiffAsync(
+        string gitPath,
+        string filePath,
+        CancellationToken cancellationToken)
+    {
+        var relativePath = NormalizeDiffPath(gitPath);
+        var lines = await File.ReadAllLinesAsync(filePath, cancellationToken);
+        var builder = new StringBuilder();
+        builder.AppendLine($"diff --git a/{relativePath} b/{relativePath}");
+        builder.AppendLine("new file mode 100644");
+        builder.AppendLine("--- /dev/null");
+        builder.AppendLine($"+++ b/{relativePath}");
+
+        if (lines.Length == 0)
+        {
+            return builder.ToString();
+        }
+
+        // Git 不会为未跟踪文件输出 diff；这里生成最小 unified diff，让 UI 与 Desktop 一样展示新增全文。
+        builder.AppendLine($"@@ -0,0 +1,{lines.Length} @@");
+        foreach (var line in lines)
+        {
+            builder.Append('+');
+            builder.AppendLine(line);
+        }
+
+        return builder.ToString();
+
+        static string NormalizeDiffPath(string path)
+        {
+            return path.Replace(Path.DirectorySeparatorChar, '/')
+                .Replace(Path.AltDirectorySeparatorChar, '/');
+        }
     }
 
     private static async Task<bool> HasCommitBinaryDiffAsync(

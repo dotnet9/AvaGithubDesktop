@@ -80,3 +80,4 @@
 - 操作日志栏级别与菜单文本支持 i18n
 - 菜单提供 Semi 主题切换并将当前主题写入 App.config
 - Desktop 风格图片与二进制文件 Diff 预览
+- Desktop 风格未跟踪文本文件新增 Diff 预览
