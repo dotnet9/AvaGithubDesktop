@@ -40,6 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AvaGithubDesktop.Controls\AvaGithubDesktop.Controls.csproj" />
     <ProjectReference Include="..\AvaGithubDesktop.Controls.Themes\AvaGithubDesktop.Controls.Themes.csproj" />
   </ItemGroup>
 

@@ -89,6 +89,14 @@ public static class AvaGithubDesktopL
     public static readonly string Path = "AvaGithubDesktop.AvaGithubDesktopL.Path";
     public static readonly string Language = "AvaGithubDesktop.AvaGithubDesktopL.Language";
     public static readonly string OperationLog = "AvaGithubDesktop.AvaGithubDesktopL.OperationLog";
+    public static readonly string LogLevelDebug = "AvaGithubDesktop.AvaGithubDesktopL.LogLevelDebug";
+    public static readonly string LogLevelInfo = "AvaGithubDesktop.AvaGithubDesktopL.LogLevelInfo";
+    public static readonly string LogLevelWarn = "AvaGithubDesktop.AvaGithubDesktopL.LogLevelWarn";
+    public static readonly string LogLevelError = "AvaGithubDesktop.AvaGithubDesktopL.LogLevelError";
+    public static readonly string LogLevelFatal = "AvaGithubDesktop.AvaGithubDesktopL.LogLevelFatal";
+    public static readonly string LogCopy = "AvaGithubDesktop.AvaGithubDesktopL.LogCopy";
+    public static readonly string LogClear = "AvaGithubDesktop.AvaGithubDesktopL.LogClear";
+    public static readonly string LogOpenFolder = "AvaGithubDesktop.AvaGithubDesktopL.LogOpenFolder";
     public static readonly string English = "AvaGithubDesktop.AvaGithubDesktopL.English";
     public static readonly string SimplifiedChinese = "AvaGithubDesktop.AvaGithubDesktopL.SimplifiedChinese";
     public static readonly string NoRepositoryTitle = "AvaGithubDesktop.AvaGithubDesktopL.NoRepositoryTitle";

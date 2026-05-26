@@ -74,3 +74,5 @@
 - GitHub 登录使用浏览器 OAuth Device Flow
 - 使用 CodeWF.LogViewer 展示操作日志栏并持久化显隐状态
 - 菜单提供语言切换并将当前语言写入 App.config
+- Desktop 风格统一 Diff 预览，支持行号、区块、增删行分色
+- 操作日志栏级别与菜单文本支持 i18n

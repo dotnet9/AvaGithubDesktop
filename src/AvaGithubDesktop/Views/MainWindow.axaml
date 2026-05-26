@@ -3,6 +3,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:codewf="https://codewf.com"
+    xmlns:controls="using:AvaGithubDesktop.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i18n="https://codewf.com"
     xmlns:l="clr-namespace:AvaGithubDesktop"
@@ -794,13 +795,9 @@
                                         TextTrimming="CharacterEllipsis" />
                                 </Grid>
                             </Border>
-                            <TextBox
+                            <controls:UnifiedDiffViewer
                                 Grid.Row="1"
-                                Classes="diffViewer"
-                                AcceptsReturn="True"
-                                IsReadOnly="True"
-                                Text="{Binding DiffText}"
-                                TextWrapping="NoWrap" />
+                                Text="{Binding DiffText}" />
                         </Grid>
                     </Border>
                 </Grid>
@@ -909,14 +906,10 @@
                                             TextTrimming="CharacterEllipsis" />
                                     </Grid>
                                 </Border>
-                                <TextBox
+                                <controls:UnifiedDiffViewer
                                     Grid.Row="1"
-                                    Classes="diffViewer"
-                                    AcceptsReturn="True"
                                     IsVisible="{Binding HasHistory}"
-                                    IsReadOnly="True"
-                                    Text="{Binding DiffText}"
-                                    TextWrapping="NoWrap" />
+                                    Text="{Binding DiffText}" />
                                 <StackPanel
                                     Grid.Row="1"
                                     Margin="14"
@@ -940,11 +933,16 @@
                 <Border Classes="operationLogHeader">
                     <TextBlock Classes="section" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.OperationLog}}" />
                 </Border>
-                <codewf:LogView
+                <controls:OperationLogView
                     Grid.Row="1"
-                    Padding="8"
-                    FontFamily="Consolas, Cascadia Mono, Microsoft YaHei UI"
-                    FontSize="12" />
+                    ClearText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogClear}}"
+                    CopyText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogCopy}}"
+                    DebugLevelText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogLevelDebug}}"
+                    ErrorLevelText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogLevelError}}"
+                    FatalLevelText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogLevelFatal}}"
+                    InfoLevelText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogLevelInfo}}"
+                    OpenLogFolderText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogOpenFolder}}"
+                    WarnLevelText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogLevelWarn}}" />
             </Grid>
         </Border>
 

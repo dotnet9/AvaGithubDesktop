@@ -26,6 +26,28 @@
             <SolidColorBrush x:Key="ToolbarTextBrush" Color="#FFFFFF" />
             <SolidColorBrush x:Key="ToolbarSecondaryTextBrush" Color="#D0D7DE" />
             <SolidColorBrush x:Key="ToolbarSplitBorderBrush" Color="#000000" />
+            <SolidColorBrush x:Key="DiffViewerBackgroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="DiffLineBackgroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="DiffGutterBackgroundBrush" Color="#F6F8FA" />
+            <SolidColorBrush x:Key="DiffGutterBorderBrush" Color="#D8DEE4" />
+            <SolidColorBrush x:Key="DiffGutterTextBrush" Color="#8C959F" />
+            <SolidColorBrush x:Key="DiffContentTextBrush" Color="#24292F" />
+            <SolidColorBrush x:Key="DiffHeaderBackgroundBrush" Color="#F6F8FA" />
+            <SolidColorBrush x:Key="DiffHeaderTextBrush" Color="#57606A" />
+            <SolidColorBrush x:Key="DiffHunkBackgroundBrush" Color="#DDF4FF" />
+            <SolidColorBrush x:Key="DiffHunkGutterBrush" Color="#B6E3FF" />
+            <SolidColorBrush x:Key="DiffHunkTextBrush" Color="#0969DA" />
+            <SolidColorBrush x:Key="DiffAddedBackgroundBrush" Color="#E6FFEC" />
+            <SolidColorBrush x:Key="DiffAddedGutterBrush" Color="#CCFFD8" />
+            <SolidColorBrush x:Key="DiffAddedTextBrush" Color="#116329" />
+            <SolidColorBrush x:Key="DiffRemovedBackgroundBrush" Color="#FFEBE9" />
+            <SolidColorBrush x:Key="DiffRemovedGutterBrush" Color="#FFD7D5" />
+            <SolidColorBrush x:Key="DiffRemovedTextBrush" Color="#82071E" />
+            <SolidColorBrush x:Key="LogTimeBrush" Color="#6E7781" />
+            <SolidColorBrush x:Key="LogDebugBrush" Color="#0969DA" />
+            <SolidColorBrush x:Key="LogInfoBrush" Color="#1A7F37" />
+            <SolidColorBrush x:Key="LogWarnBrush" Color="#9A6700" />
+            <SolidColorBrush x:Key="LogErrorBrush" Color="#CF222E" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 

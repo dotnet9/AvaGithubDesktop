@@ -1,0 +1,148 @@
+<ResourceDictionary
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:AvaGithubDesktop.Controls">
+    <Design.PreviewWith>
+        <controls:UnifiedDiffViewer
+            Width="720"
+            Height="320"
+            Text="diff --git a/src/App.cs b/src/App.cs&#x0a;index 1111111..2222222 100644&#x0a;@@ -1,3 +1,4 @@&#x0a; using System;&#x0a;-var name = &quot;old&quot;;&#x0a;+var name = &quot;new&quot;;&#x0a;+Console.WriteLine(name);" />
+    </Design.PreviewWith>
+
+    <ControlTheme x:Key="{x:Type controls:UnifiedDiffViewer}" TargetType="controls:UnifiedDiffViewer">
+        <Setter Property="Background" Value="{DynamicResource DiffViewerBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="FontFamily" Value="Cascadia Mono, Consolas, Microsoft YaHei UI, monospace" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Template">
+            <ControlTemplate TargetType="{x:Type controls:UnifiedDiffViewer}">
+                <Border
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}">
+                    <ScrollViewer
+                        HorizontalScrollBarVisibility="Auto"
+                        VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Lines, RelativeSource={RelativeSource TemplatedParent}}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="controls:UnifiedDiffLine">
+                                    <controls:UnifiedDiffLinePresenter
+                                        Content="{Binding Content}"
+                                        Kind="{Binding Kind}"
+                                        NewLineNumber="{Binding NewLineNumber}"
+                                        OldLineNumber="{Binding OldLineNumber}"
+                                        Prefix="{Binding Prefix}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+    <ControlTheme x:Key="{x:Type controls:UnifiedDiffLinePresenter}" TargetType="controls:UnifiedDiffLinePresenter">
+        <Setter Property="Height" Value="22" />
+        <Setter Property="Background" Value="{DynamicResource DiffLineBackgroundBrush}" />
+        <Setter Property="GutterBackground" Value="{DynamicResource DiffGutterBackgroundBrush}" />
+        <Setter Property="GutterForeground" Value="{DynamicResource DiffGutterTextBrush}" />
+        <Setter Property="PrefixForeground" Value="{DynamicResource DiffGutterTextBrush}" />
+        <Setter Property="ContentForeground" Value="{DynamicResource DiffContentTextBrush}" />
+        <Setter Property="FontFamily" Value="Cascadia Mono, Consolas, Microsoft YaHei UI, monospace" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Template">
+            <ControlTemplate TargetType="{x:Type controls:UnifiedDiffLinePresenter}">
+                <Grid
+                    MinWidth="760"
+                    Height="{TemplateBinding Height}"
+                    Background="{TemplateBinding Background}"
+                    ColumnDefinitions="48,48,26,*">
+                    <Border
+                        Background="{TemplateBinding GutterBackground}"
+                        BorderBrush="{DynamicResource DiffGutterBorderBrush}"
+                        BorderThickness="0,0,1,0">
+                        <TextBlock
+                            Margin="0,0,8,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            FontFamily="{TemplateBinding FontFamily}"
+                            FontSize="{TemplateBinding FontSize}"
+                            Foreground="{TemplateBinding GutterForeground}"
+                            Text="{TemplateBinding OldLineNumber}" />
+                    </Border>
+                    <Border
+                        Grid.Column="1"
+                        Background="{TemplateBinding GutterBackground}"
+                        BorderBrush="{DynamicResource DiffGutterBorderBrush}"
+                        BorderThickness="0,0,1,0">
+                        <TextBlock
+                            Margin="0,0,8,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            FontFamily="{TemplateBinding FontFamily}"
+                            FontSize="{TemplateBinding FontSize}"
+                            Foreground="{TemplateBinding GutterForeground}"
+                            Text="{TemplateBinding NewLineNumber}" />
+                    </Border>
+                    <TextBlock
+                        Grid.Column="2"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="{TemplateBinding FontFamily}"
+                        FontSize="{TemplateBinding FontSize}"
+                        Foreground="{TemplateBinding PrefixForeground}"
+                        Text="{TemplateBinding Prefix}" />
+                    <TextBlock
+                        Grid.Column="3"
+                        Margin="0,0,16,0"
+                        VerticalAlignment="Center"
+                        FontFamily="{TemplateBinding FontFamily}"
+                        FontSize="{TemplateBinding FontSize}"
+                        Foreground="{TemplateBinding ContentForeground}"
+                        Text="{TemplateBinding Content}"
+                        TextTrimming="None"
+                        TextWrapping="NoWrap" />
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:message">
+            <Setter Property="Background" Value="{DynamicResource DiffViewerBackgroundBrush}" />
+            <Setter Property="GutterBackground" Value="{DynamicResource DiffViewerBackgroundBrush}" />
+            <Setter Property="ContentForeground" Value="{DynamicResource MutedTextBrush}" />
+        </Style>
+        <Style Selector="^:header">
+            <Setter Property="Background" Value="{DynamicResource DiffHeaderBackgroundBrush}" />
+            <Setter Property="GutterBackground" Value="{DynamicResource DiffHeaderBackgroundBrush}" />
+            <Setter Property="ContentForeground" Value="{DynamicResource DiffHeaderTextBrush}" />
+        </Style>
+        <Style Selector="^:hunk">
+            <Setter Property="Background" Value="{DynamicResource DiffHunkBackgroundBrush}" />
+            <Setter Property="GutterBackground" Value="{DynamicResource DiffHunkGutterBrush}" />
+            <Setter Property="GutterForeground" Value="{DynamicResource DiffHunkTextBrush}" />
+            <Setter Property="PrefixForeground" Value="{DynamicResource DiffHunkTextBrush}" />
+            <Setter Property="ContentForeground" Value="{DynamicResource DiffHunkTextBrush}" />
+        </Style>
+        <Style Selector="^:added">
+            <Setter Property="Background" Value="{DynamicResource DiffAddedBackgroundBrush}" />
+            <Setter Property="GutterBackground" Value="{DynamicResource DiffAddedGutterBrush}" />
+            <Setter Property="GutterForeground" Value="{DynamicResource DiffAddedTextBrush}" />
+            <Setter Property="PrefixForeground" Value="{DynamicResource DiffAddedTextBrush}" />
+            <Setter Property="ContentForeground" Value="{DynamicResource DiffContentTextBrush}" />
+        </Style>
+        <Style Selector="^:removed">
+            <Setter Property="Background" Value="{DynamicResource DiffRemovedBackgroundBrush}" />
+            <Setter Property="GutterBackground" Value="{DynamicResource DiffRemovedGutterBrush}" />
+            <Setter Property="GutterForeground" Value="{DynamicResource DiffRemovedTextBrush}" />
+            <Setter Property="PrefixForeground" Value="{DynamicResource DiffRemovedTextBrush}" />
+            <Setter Property="ContentForeground" Value="{DynamicResource DiffContentTextBrush}" />
+        </Style>
+    </ControlTheme>
+</ResourceDictionary>
