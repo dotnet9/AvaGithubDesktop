@@ -762,72 +762,35 @@
                             TextWrapping="Wrap" />
                     </StackPanel>
 
-                    <UniformGrid Grid.Row="0" Columns="4" IsVisible="{Binding HasChanges}">
-                        <Border Classes="metricCard" Margin="0,0,8,0">
-                            <StackPanel Spacing="4">
-                                <TextBlock Classes="muted" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.ChangedFiles}}" />
-                                <TextBlock Classes="metric" Text="{Binding ChangedFilesCount}" />
-                            </StackPanel>
-                        </Border>
-                        <Border Classes="metricCard" Margin="4,0,8,0">
-                            <StackPanel Spacing="4">
-                                <TextBlock Classes="muted" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Staged}}" />
-                                <TextBlock Classes="metric" Text="{Binding StagedCount}" />
-                            </StackPanel>
-                        </Border>
-                        <Border Classes="metricCard" Margin="4,0,8,0">
-                            <StackPanel Spacing="4">
-                                <TextBlock Classes="muted" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Unstaged}}" />
-                                <TextBlock Classes="metric" Text="{Binding UnstagedCount}" />
-                            </StackPanel>
-                        </Border>
-                        <Border Classes="metricCard" Margin="4,0,0,0">
-                            <StackPanel Spacing="4">
-                                <TextBlock Classes="muted" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Untracked}}" />
-                                <TextBlock Classes="metric" Text="{Binding UntrackedCount}" />
-                            </StackPanel>
-                        </Border>
-                    </UniformGrid>
-
-                    <Grid Grid.Row="1" ColumnDefinitions="1.15*,1.45*" ColumnSpacing="14" IsVisible="{Binding HasChanges}">
-                        <Border Classes="panel" Padding="14" CornerRadius="6">
-                            <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
-                                <TextBlock Classes="section" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Summary}}" />
-                                <Grid Grid.Row="1" ColumnDefinitions="110,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="10">
-                                    <TextBlock Classes="muted" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.CurrentBranch}}" />
-                                    <TextBlock Grid.Column="1" Text="{Binding CurrentBranch}" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock Grid.Row="1" Classes="muted" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Upstream}}" />
-                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Upstream}" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock Grid.Row="2" Classes="muted" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Remote}}" />
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding RemoteUrl}" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock Grid.Row="3" Classes="muted" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.LastCommit}}" />
-                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding LastCommit}" TextWrapping="Wrap" />
+                    <Border
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                        Classes="panel"
+                        IsVisible="{Binding HasChanges}">
+                        <Grid RowDefinitions="Auto,*">
+                            <Border
+                                Padding="14,10"
+                                Background="{DynamicResource PanelAltBackgroundBrush}"
+                                BorderBrush="{DynamicResource PanelBorderBrush}"
+                                BorderThickness="0,0,0,1">
+                                <Grid RowDefinitions="Auto,Auto" RowSpacing="4">
+                                    <TextBlock Classes="section" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Diff}}" />
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        Classes="muted"
+                                        Text="{Binding DiffTitle}"
+                                        TextTrimming="CharacterEllipsis" />
                                 </Grid>
-                                <StackPanel Grid.Row="2" IsVisible="{Binding ShowEmptyRepository}" Spacing="6">
-                                    <TextBlock Classes="section" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.NoRepositoryTitle}}" />
-                                    <TextBlock Classes="muted" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.NoRepositoryDetail}}" />
-                                </StackPanel>
-                                <StackPanel Grid.Row="3" IsVisible="{Binding HasNoChanges}" Spacing="6">
-                                    <TextBlock Classes="section" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.NoChangesTitle}}" />
-                                    <TextBlock Classes="muted" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.NoChangesDetail}}" />
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-
-                        <Border Grid.Column="1" Classes="panel" Padding="14" CornerRadius="6">
-                            <Grid RowDefinitions="Auto,Auto,*" RowSpacing="10">
-                                <TextBlock Classes="section" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Diff}}" />
-                                <TextBlock Grid.Row="1" Classes="muted" Text="{Binding DiffTitle}" TextTrimming="CharacterEllipsis" />
-                                <TextBox
-                                    Grid.Row="2"
-                                    Classes="diffViewer"
-                                    AcceptsReturn="True"
-                                    IsReadOnly="True"
-                                    Text="{Binding DiffText}"
-                                    TextWrapping="NoWrap" />
-                            </Grid>
-                        </Border>
-                    </Grid>
+                            </Border>
+                            <TextBox
+                                Grid.Row="1"
+                                Classes="diffViewer"
+                                AcceptsReturn="True"
+                                IsReadOnly="True"
+                                Text="{Binding DiffText}"
+                                TextWrapping="NoWrap" />
+                        </Grid>
+                    </Border>
                 </Grid>
 
                 <Grid
