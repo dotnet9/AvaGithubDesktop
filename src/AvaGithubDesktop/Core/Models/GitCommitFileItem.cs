@@ -2,6 +2,8 @@ namespace AvaGithubDesktop.Core.Models;
 
 public sealed record GitCommitFileItem(string StatusCode, string Path)
 {
+    public string GitPath => ResolveGitPath(Path);
+
     public string DisplayStatus => StatusCode.TrimStart('0', '1', '2', '3', '4', '5', '6', '7', '8', '9') switch
     {
         "A" => "Added",
@@ -34,4 +36,10 @@ public sealed record GitCommitFileItem(string StatusCode, string Path)
         "Conflict" => "#A4262C",
         _ => "#0757A8"
     };
+
+    private static string ResolveGitPath(string path)
+    {
+        var renameSeparatorIndex = path.IndexOf(" -> ", StringComparison.Ordinal);
+        return renameSeparatorIndex < 0 ? path : path[(renameSeparatorIndex + 4)..];
+    }
 }

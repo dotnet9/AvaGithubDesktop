@@ -71,7 +71,11 @@
       "Date": "日期",
       "CommitChangedFileCountFormat": "{0} 个变更文件",
       "CommitChangedFilesCountFormat": "{0} 个变更文件",
-      "NoCommitSelected": "未选择提交"
+      "NoCommitSelected": "未选择提交",
+      "Diff": "差异",
+      "NoFileSelected": "未选择文件",
+      "NoDiffAvailable": "暂无可用差异。",
+      "LoadingDiff": "正在加载差异..."
     }
   }
 }

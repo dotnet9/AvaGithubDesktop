@@ -63,6 +63,68 @@ public sealed class GitRepositoryService : IGitRepositoryService
         return ParseHistory(history);
     }
 
+    public async Task<string> LoadWorkingTreeDiffAsync(
+        string repositoryPath,
+        IReadOnlyList<string> paths,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        var normalizedPaths = paths
+            .Where(path => !string.IsNullOrWhiteSpace(path))
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+
+        if (normalizedPaths.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        var unstaged = await RunOptionalGitAsync(
+            root,
+            cancellationToken,
+            CreatePathArguments(new[] { "diff" }, normalizedPaths));
+        var staged = await RunOptionalGitAsync(
+            root,
+            cancellationToken,
+            CreatePathArguments(new[] { "diff", "--cached" }, normalizedPaths));
+
+        return JoinDiffs(unstaged, staged);
+    }
+
+    public async Task<string> LoadCommitFileDiffAsync(
+        string repositoryPath,
+        string sha,
+        string path,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        if (string.IsNullOrWhiteSpace(sha) || string.IsNullOrWhiteSpace(path))
+        {
+            return string.Empty;
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        return await RunOptionalGitAsync(
+            root,
+            cancellationToken,
+            "show",
+            "--format=",
+            "--diff-merges=first-parent",
+            "--find-renames",
+            sha,
+            "--",
+            path);
+    }
+
     public async Task CommitAsync(
         string repositoryPath,
         IReadOnlyList<string> includedPaths,
@@ -283,9 +345,31 @@ public sealed class GitRepositoryService : IGitRepositoryService
 
     private static string[] CreatePathArguments(string command, IReadOnlyList<string> paths)
     {
-        var arguments = new List<string>(paths.Count + 2) { command, "--" };
+        return CreatePathArguments(new[] { command }, paths);
+    }
+
+    private static string[] CreatePathArguments(IReadOnlyList<string> prefix, IReadOnlyList<string> paths)
+    {
+        var arguments = new List<string>(prefix.Count + paths.Count + 1);
+        arguments.AddRange(prefix);
+        arguments.Add("--");
         arguments.AddRange(paths);
         return arguments.ToArray();
+    }
+
+    private static string JoinDiffs(string unstaged, string staged)
+    {
+        if (string.IsNullOrWhiteSpace(unstaged))
+        {
+            return staged;
+        }
+
+        if (string.IsNullOrWhiteSpace(staged))
+        {
+            return unstaged;
+        }
+
+        return $"{unstaged}{Environment.NewLine}{Environment.NewLine}{staged}";
     }
 
     private static async Task<string> RunGitAsync(

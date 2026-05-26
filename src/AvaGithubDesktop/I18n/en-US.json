@@ -71,7 +71,11 @@
       "Date": "Date",
       "CommitChangedFileCountFormat": "{0} changed file",
       "CommitChangedFilesCountFormat": "{0} changed files",
-      "NoCommitSelected": "No commit selected"
+      "NoCommitSelected": "No commit selected",
+      "Diff": "Diff",
+      "NoFileSelected": "No file selected",
+      "NoDiffAvailable": "No diff available.",
+      "LoadingDiff": "Loading diff..."
     }
   }
 }

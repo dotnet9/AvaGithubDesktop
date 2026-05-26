@@ -70,4 +70,8 @@ public static class AvaGithubDesktopL
     public const string CommitChangedFileCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.CommitChangedFileCountFormat";
     public const string CommitChangedFilesCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.CommitChangedFilesCountFormat";
     public const string NoCommitSelected = "AvaGithubDesktop.AvaGithubDesktopL.NoCommitSelected";
+    public const string Diff = "AvaGithubDesktop.AvaGithubDesktopL.Diff";
+    public const string NoFileSelected = "AvaGithubDesktop.AvaGithubDesktopL.NoFileSelected";
+    public const string NoDiffAvailable = "AvaGithubDesktop.AvaGithubDesktopL.NoDiffAvailable";
+    public const string LoadingDiff = "AvaGithubDesktop.AvaGithubDesktopL.LoadingDiff";
 }

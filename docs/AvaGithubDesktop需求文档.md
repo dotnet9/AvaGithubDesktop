@@ -35,3 +35,4 @@
 - 仓库打开与 Git 状态概览
 - Desktop 风格 Changes 文件选择与提交面板
 - Desktop 风格 History 提交列表与提交文件清单
+- Desktop 风格选中文件文本 Diff 预览

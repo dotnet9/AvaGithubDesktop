@@ -42,9 +42,15 @@ public sealed class MainWindowViewModel : ViewModelBase
     private int _behind;
     private bool? _areAllChangesIncluded = false;
     private LanguageOption? _selectedLanguage;
+    private GitChangeItemViewModel? _selectedChange;
     private GitCommitItem? _selectedCommit;
+    private GitCommitFileItem? _selectedCommitFile;
     private RepositorySection _selectedSection = RepositorySection.Changes;
     private int _historyCommitCount;
+    private int _diffRequestVersion;
+    private bool _isDiffLoading;
+    private string _diffTitle = string.Empty;
+    private string _diffText = string.Empty;
     private CompositeDisposable _changeSubscriptions = new();
 
     public MainWindowViewModel(
@@ -96,6 +102,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             UpdateAheadBehindText();
             RaiseLocalizedDerivedText();
+            QueueDiffLoad();
         };
     }
 
@@ -297,6 +304,20 @@ public sealed class MainWindowViewModel : ViewModelBase
             this.RaiseAndSetIfChanged(ref _selectedCommit, value);
             this.RaisePropertyChanged(nameof(HasSelectedCommit));
             this.RaisePropertyChanged(nameof(SelectedCommitChangedFilesHeader));
+            if (value is null)
+            {
+                SelectedCommitFile = null;
+                return;
+            }
+
+            if (SelectedCommitFile is null || !value.Files.Any(file => file.Path == SelectedCommitFile.Path))
+            {
+                SelectedCommitFile = value.Files.FirstOrDefault();
+            }
+            else if (IsHistorySelected)
+            {
+                QueueDiffLoad();
+            }
         }
     }
 
@@ -323,6 +344,50 @@ public sealed class MainWindowViewModel : ViewModelBase
                 : AvaGithubDesktopL.CommitChangedFilesCountFormat;
             return _localizer.Format(formatKey, count);
         }
+    }
+
+    public GitChangeItemViewModel? SelectedChange
+    {
+        get => _selectedChange;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedChange, value);
+            if (IsChangesSelected)
+            {
+                QueueDiffLoad();
+            }
+        }
+    }
+
+    public GitCommitFileItem? SelectedCommitFile
+    {
+        get => _selectedCommitFile;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedCommitFile, value);
+            if (IsHistorySelected)
+            {
+                QueueDiffLoad();
+            }
+        }
+    }
+
+    public bool IsDiffLoading
+    {
+        get => _isDiffLoading;
+        private set => this.RaiseAndSetIfChanged(ref _isDiffLoading, value);
+    }
+
+    public string DiffTitle
+    {
+        get => _diffTitle;
+        private set => this.RaiseAndSetIfChanged(ref _diffTitle, value);
+    }
+
+    public string DiffText
+    {
+        get => _diffText;
+        private set => this.RaiseAndSetIfChanged(ref _diffText, value);
     }
 
     public string CommitSummary
@@ -558,6 +623,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _behind = snapshot.Behind;
         UpdateAheadBehindText();
 
+        var selectedPath = SelectedChange?.Path;
         _changeSubscriptions.Dispose();
         _changeSubscriptions = new CompositeDisposable();
         ChangedFiles.Clear();
@@ -579,6 +645,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
 
         UpdateIncludedState();
+        SelectedChange = !string.IsNullOrWhiteSpace(selectedPath)
+            ? ChangedFiles.FirstOrDefault(change => change.Path == selectedPath) ?? ChangedFiles.FirstOrDefault()
+            : ChangedFiles.FirstOrDefault();
     }
 
     private void ApplyHistory(IReadOnlyList<GitCommitItem> commits)
@@ -653,11 +722,13 @@ public sealed class MainWindowViewModel : ViewModelBase
     private void ShowChanges()
     {
         SelectedSection = RepositorySection.Changes;
+        QueueDiffLoad();
     }
 
     private void ShowHistory()
     {
         SelectedSection = RepositorySection.History;
+        QueueDiffLoad();
     }
 
     private void RaiseSectionStateChanged()
@@ -668,6 +739,78 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(HistoryTabBackground));
         this.RaisePropertyChanged(nameof(ChangesTabForeground));
         this.RaisePropertyChanged(nameof(HistoryTabForeground));
+    }
+
+    private void QueueDiffLoad()
+    {
+        _ = LoadSelectedDiffAsync();
+    }
+
+    private async Task LoadSelectedDiffAsync()
+    {
+        var requestVersion = ++_diffRequestVersion;
+        IsDiffLoading = true;
+        DiffText = _localizer.Get(AvaGithubDesktopL.LoadingDiff);
+
+        try
+        {
+            var (title, diff) = IsHistorySelected
+                ? await LoadSelectedHistoryDiffAsync()
+                : await LoadSelectedWorkingTreeDiffAsync();
+
+            if (requestVersion != _diffRequestVersion)
+            {
+                return;
+            }
+
+            DiffTitle = title;
+            DiffText = string.IsNullOrWhiteSpace(diff)
+                ? _localizer.Get(AvaGithubDesktopL.NoDiffAvailable)
+                : diff;
+        }
+        catch (Exception ex)
+        {
+            if (requestVersion == _diffRequestVersion)
+            {
+                DiffText = _localizer.Format(AvaGithubDesktopL.StatusRepositoryLoadFailedFormat, ex.Message);
+            }
+        }
+        finally
+        {
+            if (requestVersion == _diffRequestVersion)
+            {
+                IsDiffLoading = false;
+            }
+        }
+    }
+
+    private async Task<(string Title, string Diff)> LoadSelectedWorkingTreeDiffAsync()
+    {
+        if (SelectedChange is null || !HasRepository)
+        {
+            return (_localizer.Get(AvaGithubDesktopL.NoFileSelected), _localizer.Get(AvaGithubDesktopL.NoFileSelected));
+        }
+
+        var diff = await _gitRepositoryService.LoadWorkingTreeDiffAsync(
+            RootPath,
+            SelectedChange.GitPaths,
+            CancellationToken.None);
+        return (SelectedChange.Path, diff);
+    }
+
+    private async Task<(string Title, string Diff)> LoadSelectedHistoryDiffAsync()
+    {
+        if (SelectedCommit is null || SelectedCommitFile is null || !HasRepository)
+        {
+            return (_localizer.Get(AvaGithubDesktopL.NoFileSelected), _localizer.Get(AvaGithubDesktopL.NoFileSelected));
+        }
+
+        var diff = await _gitRepositoryService.LoadCommitFileDiffAsync(
+            RootPath,
+            SelectedCommit.Sha,
+            SelectedCommitFile.GitPath,
+            CancellationToken.None);
+        return (SelectedCommitFile.Path, diff);
     }
 
     private static string ResolveDefaultRepositoryPath()

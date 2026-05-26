@@ -11,6 +11,17 @@ public interface IGitRepositoryService
         int maxCount,
         CancellationToken cancellationToken);
 
+    Task<string> LoadWorkingTreeDiffAsync(
+        string repositoryPath,
+        IReadOnlyList<string> paths,
+        CancellationToken cancellationToken);
+
+    Task<string> LoadCommitFileDiffAsync(
+        string repositoryPath,
+        string sha,
+        string path,
+        CancellationToken cancellationToken);
+
     Task CommitAsync(
         string repositoryPath,
         IReadOnlyList<string> includedPaths,

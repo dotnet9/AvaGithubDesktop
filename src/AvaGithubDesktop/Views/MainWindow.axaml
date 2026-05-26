@@ -193,7 +193,8 @@
                             Grid.Row="0"
                             Classes="changes"
                             IsVisible="{Binding IsChangesSelected}"
-                            ItemsSource="{Binding ChangedFiles}">
+                            ItemsSource="{Binding ChangedFiles}"
+                            SelectedItem="{Binding SelectedChange, Mode=TwoWay}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="vm:GitChangeItemViewModel">
                                     <Border
@@ -380,13 +381,15 @@
 
                         <Border Grid.Column="1" Classes="panel" Padding="14" CornerRadius="6">
                             <Grid RowDefinitions="Auto,Auto,*" RowSpacing="10">
-                                <TextBlock Classes="section" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Changes}}" />
-                                <TextBlock Grid.Row="1" Classes="muted" Text="{Binding AheadBehindText}" />
-                                <TextBlock
+                                <TextBlock Classes="section" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Diff}}" />
+                                <TextBlock Grid.Row="1" Classes="muted" Text="{Binding DiffTitle}" TextTrimming="CharacterEllipsis" />
+                                <TextBox
                                     Grid.Row="2"
-                                    Classes="muted"
-                                    Text="{Binding SelectedChangesStatusText}"
-                                    VerticalAlignment="Top" />
+                                    Classes="diffViewer"
+                                    AcceptsReturn="True"
+                                    IsReadOnly="True"
+                                    Text="{Binding DiffText}"
+                                    TextWrapping="NoWrap" />
                             </Grid>
                         </Border>
                     </Grid>
@@ -430,7 +433,8 @@
                                 <ListBox
                                     Grid.Row="1"
                                     Classes="changes"
-                                    ItemsSource="{Binding SelectedCommit.Files}">
+                                    ItemsSource="{Binding SelectedCommit.Files}"
+                                    SelectedItem="{Binding SelectedCommitFile, Mode=TwoWay}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate x:DataType="models:GitCommitFileItem">
                                             <Border Height="38" Padding="8,0">
@@ -461,15 +465,22 @@
                         </Border>
 
                         <Border Grid.Column="1" Classes="panel" Padding="14" CornerRadius="6">
-                            <StackPanel Spacing="8">
-                                <TextBlock Classes="section" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Summary}}" />
-                                <TextBlock Text="{Binding SelectedCommit.Summary}" TextWrapping="Wrap" />
-                                <TextBlock Classes="muted" Text="{Binding SelectedCommit.Sha}" TextWrapping="Wrap" />
-                                <StackPanel IsVisible="{Binding HasNoHistory}" Spacing="6">
+                            <Grid RowDefinitions="Auto,Auto,*" RowSpacing="10">
+                                <TextBlock Classes="section" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Diff}}" />
+                                <TextBlock Grid.Row="1" Classes="muted" Text="{Binding DiffTitle}" TextTrimming="CharacterEllipsis" />
+                                <TextBox
+                                    Grid.Row="2"
+                                    Classes="diffViewer"
+                                    AcceptsReturn="True"
+                                    IsVisible="{Binding HasHistory}"
+                                    IsReadOnly="True"
+                                    Text="{Binding DiffText}"
+                                    TextWrapping="NoWrap" />
+                                <StackPanel Grid.Row="2" IsVisible="{Binding HasNoHistory}" Spacing="6">
                                     <TextBlock Classes="section" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.NoHistoryTitle}}" />
                                     <TextBlock Classes="muted" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.NoHistoryDetail}}" />
                                 </StackPanel>
-                            </StackPanel>
+                            </Grid>
                         </Border>
                     </Grid>
                 </Grid>
