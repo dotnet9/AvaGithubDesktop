@@ -110,6 +110,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             model => model.CanRunRepositoryCommand,
             (hasRepository, canRunRepositoryCommand) => hasRepository && canRunRepositoryCommand);
         OpenRepositoryInShellCommand = ReactiveCommand.CreateFromTask(OpenRepositoryInShellAsync, canUseCurrentRepository);
+        OpenRepositoryInExternalEditorCommand = ReactiveCommand.CreateFromTask(OpenRepositoryInExternalEditorAsync, canUseCurrentRepository);
         ShowRepositoryInFileManagerCommand = ReactiveCommand.CreateFromTask(ShowRepositoryInFileManagerAsync, canUseCurrentRepository);
         var canViewCurrentRepositoryOnGitHub = this.WhenAnyValue(
             model => model.HasRepository,
@@ -177,6 +178,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> RefreshRepositoryCommand { get; }
 
     public ReactiveCommand<Unit, Unit> OpenRepositoryInShellCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> OpenRepositoryInExternalEditorCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ShowRepositoryInFileManagerCommand { get; }
 
@@ -922,6 +925,11 @@ public sealed class MainWindowViewModel : ViewModelBase
         await OpenRepositoryPathInShellAsync(RootPath);
     }
 
+    private async Task OpenRepositoryInExternalEditorAsync()
+    {
+        await OpenRepositoryPathInExternalEditorAsync(RootPath);
+    }
+
     private async Task ShowRepositoryInFileManagerAsync()
     {
         await ShowRepositoryPathInFileManagerAsync(RootPath);
@@ -935,6 +943,11 @@ public sealed class MainWindowViewModel : ViewModelBase
     private async Task OpenRepositoryItemInShellAsync(RepositoryListItemViewModel repository)
     {
         await OpenRepositoryPathInShellAsync(repository.Path);
+    }
+
+    private async Task OpenRepositoryItemInExternalEditorAsync(RepositoryListItemViewModel repository)
+    {
+        await OpenRepositoryPathInExternalEditorAsync(repository.Path);
     }
 
     private async Task ShowRepositoryItemInFileManagerAsync(RepositoryListItemViewModel repository)
@@ -1189,6 +1202,20 @@ public sealed class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenRepositoryShellFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+    }
+
+    private async Task OpenRepositoryPathInExternalEditorAsync(string repositoryPath)
+    {
+        try
+        {
+            await _repositoryShellService.OpenItemAsync(repositoryPath);
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedRepositoryInExternalEditor)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenRepositoryInExternalEditorFailedFormat, ex.Message);
             _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
         }
     }
@@ -1539,6 +1566,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             .Select(entry => new RepositoryListItemViewModel(
                 entry,
                 OpenKnownRepositoryAsync,
+                OpenRepositoryItemInExternalEditorAsync,
                 OpenRepositoryItemInShellAsync,
                 ShowRepositoryItemInFileManagerAsync,
                 CopyRepositoryNameAsync,

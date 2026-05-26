@@ -120,6 +120,8 @@
       "StatusOpenHelpFailedFormat": "打开帮助窗口失败：{0}",
       "StatusOpenedRepositoryShell": "已打开仓库终端。",
       "StatusOpenRepositoryShellFailedFormat": "打开仓库终端失败：{0}",
+      "StatusOpenedRepositoryInExternalEditor": "已在外部编辑器中打开仓库。",
+      "StatusOpenRepositoryInExternalEditorFailedFormat": "在外部编辑器中打开仓库失败：{0}",
       "StatusShowedRepositoryInFileManager": "已在文件管理器中显示仓库。",
       "StatusShowRepositoryInFileManagerFailedFormat": "在文件管理器中显示仓库失败：{0}",
       "StatusOpenedRepositoryOnGitHub": "已在浏览器中打开仓库 GitHub 页面。",

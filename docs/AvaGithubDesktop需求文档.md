@@ -62,3 +62,4 @@
 - Desktop 风格 Changes 文件项在外部编辑器中打开
 - Desktop 风格 History 选中提交复制完整 SHA
 - Desktop 风格 History 提交文件项右键菜单
+- Desktop 风格 Repository 菜单和仓库列表项打开外部编辑器

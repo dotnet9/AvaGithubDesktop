@@ -9,6 +9,7 @@ namespace AvaGithubDesktop.ViewModels;
 public sealed class RepositoryListItemViewModel : ViewModelBase
 {
     private readonly Func<RepositoryListItemViewModel, Task> _openAsync;
+    private readonly Func<RepositoryListItemViewModel, Task> _openInExternalEditorAsync;
     private readonly Func<RepositoryListItemViewModel, Task> _openInShellAsync;
     private readonly Func<RepositoryListItemViewModel, Task> _showInFileManagerAsync;
     private readonly Func<RepositoryListItemViewModel, Task> _copyNameAsync;
@@ -19,6 +20,7 @@ public sealed class RepositoryListItemViewModel : ViewModelBase
     public RepositoryListItemViewModel(
         RepositoryHistoryEntry entry,
         Func<RepositoryListItemViewModel, Task> openAsync,
+        Func<RepositoryListItemViewModel, Task> openInExternalEditorAsync,
         Func<RepositoryListItemViewModel, Task> openInShellAsync,
         Func<RepositoryListItemViewModel, Task> showInFileManagerAsync,
         Func<RepositoryListItemViewModel, Task> copyNameAsync,
@@ -27,12 +29,14 @@ public sealed class RepositoryListItemViewModel : ViewModelBase
     {
         Entry = entry;
         _openAsync = openAsync;
+        _openInExternalEditorAsync = openInExternalEditorAsync;
         _openInShellAsync = openInShellAsync;
         _showInFileManagerAsync = showInFileManagerAsync;
         _copyNameAsync = copyNameAsync;
         _copyPathAsync = copyPathAsync;
         _viewOnGitHubAsync = viewOnGitHubAsync;
         OpenCommand = ReactiveCommand.CreateFromTask(OpenAsync);
+        OpenInExternalEditorCommand = ReactiveCommand.CreateFromTask(OpenInExternalEditorAsync);
         OpenInShellCommand = ReactiveCommand.CreateFromTask(OpenInShellAsync);
         ShowInFileManagerCommand = ReactiveCommand.CreateFromTask(ShowInFileManagerAsync);
         CopyNameCommand = ReactiveCommand.CreateFromTask(CopyNameAsync);
@@ -60,6 +64,8 @@ public sealed class RepositoryListItemViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> OpenCommand { get; }
 
+    public ReactiveCommand<Unit, Unit> OpenInExternalEditorCommand { get; }
+
     public ReactiveCommand<Unit, Unit> OpenInShellCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ShowInFileManagerCommand { get; }
@@ -73,6 +79,11 @@ public sealed class RepositoryListItemViewModel : ViewModelBase
     private Task OpenAsync()
     {
         return _openAsync(this);
+    }
+
+    private Task OpenInExternalEditorAsync()
+    {
+        return _openInExternalEditorAsync(this);
     }
 
     private Task OpenInShellAsync()

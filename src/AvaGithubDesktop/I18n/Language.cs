@@ -125,6 +125,8 @@ public static class AvaGithubDesktopL
     public static readonly string StatusOpenHelpFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenHelpFailedFormat";
     public static readonly string StatusOpenedRepositoryShell = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedRepositoryShell";
     public static readonly string StatusOpenRepositoryShellFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenRepositoryShellFailedFormat";
+    public static readonly string StatusOpenedRepositoryInExternalEditor = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedRepositoryInExternalEditor";
+    public static readonly string StatusOpenRepositoryInExternalEditorFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenRepositoryInExternalEditorFailedFormat";
     public static readonly string StatusShowedRepositoryInFileManager = "AvaGithubDesktop.AvaGithubDesktopL.StatusShowedRepositoryInFileManager";
     public static readonly string StatusShowRepositoryInFileManagerFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusShowRepositoryInFileManagerFailedFormat";
     public static readonly string StatusOpenedRepositoryOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedRepositoryOnGitHub";

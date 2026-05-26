@@ -120,6 +120,8 @@
       "StatusOpenHelpFailedFormat": "Failed to open help window: {0}",
       "StatusOpenedRepositoryShell": "Opened terminal for the repository.",
       "StatusOpenRepositoryShellFailedFormat": "Failed to open terminal for the repository: {0}",
+      "StatusOpenedRepositoryInExternalEditor": "Opened repository in external editor.",
+      "StatusOpenRepositoryInExternalEditorFailedFormat": "Failed to open repository in external editor: {0}",
       "StatusShowedRepositoryInFileManager": "Showed repository in file manager.",
       "StatusShowRepositoryInFileManagerFailedFormat": "Failed to show repository in file manager: {0}",
       "StatusOpenedRepositoryOnGitHub": "Opened repository GitHub page in the browser.",

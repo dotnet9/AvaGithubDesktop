@@ -46,6 +46,7 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Refresh}}" Command="{Binding RefreshRepositoryCommand}" />
                     <Separator />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuViewOnGitHub}}" Command="{Binding ViewRepositoryOnGitHubCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuOpenInExternalEditor}}" Command="{Binding OpenRepositoryInExternalEditorCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuOpenInShell}}" Command="{Binding OpenRepositoryInShellCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowInFileManager}}" Command="{Binding ShowRepositoryInFileManagerCommand}" />
                 </MenuItem>
@@ -124,6 +125,7 @@
                                                                                     <Separator />
                                                                                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuViewOnGitHub}}" Command="{Binding ViewOnGitHubCommand}" />
                                                                                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Open}}" Command="{Binding OpenCommand}" />
+                                                                                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuOpenInExternalEditor}}" Command="{Binding OpenInExternalEditorCommand}" />
                                                                                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuOpenInShell}}" Command="{Binding OpenInShellCommand}" />
                                                                                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowInFileManager}}" Command="{Binding ShowInFileManagerCommand}" />
                                                                                 </MenuFlyout>
