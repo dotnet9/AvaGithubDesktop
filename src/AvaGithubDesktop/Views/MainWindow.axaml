@@ -75,6 +75,7 @@
                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuBranch}}">
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuNewBranch}}" Command="{Binding CreateBranchCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyBranchName}}" Command="{Binding CopyCurrentBranchNameCommand}" IsEnabled="{Binding CanCopyCurrentBranchName}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyUpstreamBranchName}}" Command="{Binding CopyUpstreamBranchNameCommand}" IsEnabled="{Binding CanCopyUpstreamBranchName}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRenameBranch}}" Command="{Binding RenameCurrentBranchCommand}" IsEnabled="{Binding CanRenameCurrentBranch}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuDeleteBranch}}" Command="{Binding DeleteCurrentBranchCommand}" IsEnabled="{Binding CanDeleteCurrentBranch}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuSetUpstream}}" Command="{Binding SetUpstreamCommand}" IsEnabled="{Binding CanSetUpstream}" />
