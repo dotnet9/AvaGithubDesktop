@@ -173,6 +173,15 @@ public sealed class MainWindowViewModel : ViewModelBase
         var canCheckoutBranch = this.WhenAnyValue(model => model.CanCheckoutBranch);
         CheckoutBranchCommand = ReactiveCommand.CreateFromTask(CheckoutSelectedBranchAsync, canCheckoutBranch);
         CreateBranchCommand = ReactiveCommand.CreateFromTask(CreateBranchAsync, this.WhenAnyValue(model => model.CanCreateBranch));
+        ViewCurrentBranchOnGitHubCommand = ReactiveCommand.CreateFromTask(
+            ViewCurrentBranchOnGitHubAsync,
+            this.WhenAnyValue(
+                model => model.HasRepository,
+                model => model.RemoteUrl,
+                model => model.Upstream,
+                model => model.CanRunRepositoryCommand,
+                (hasRepository, remoteUrl, upstream, canRunRepositoryCommand) =>
+                    hasRepository && canRunRepositoryCommand && RepositoryRemoteUrlHelper.TryGetGitHubBranchUrl(remoteUrl, upstream, out _)));
         StashAllChangesCommand = ReactiveCommand.CreateFromTask(StashAllChangesAsync, this.WhenAnyValue(model => model.CanStashChanges));
         RestoreStashCommand = ReactiveCommand.CreateFromTask(RestoreStashAsync, this.WhenAnyValue(model => model.CanRestoreStash));
         DiscardStashCommand = ReactiveCommand.CreateFromTask(DiscardStashAsync, this.WhenAnyValue(model => model.CanDiscardStash));
@@ -268,6 +277,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> CheckoutBranchCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CreateBranchCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ViewCurrentBranchOnGitHubCommand { get; }
 
     public ReactiveCommand<Unit, Unit> StashAllChangesCommand { get; }
 
@@ -1384,6 +1395,11 @@ public sealed class MainWindowViewModel : ViewModelBase
     private async Task ViewBranchOnGitHubAsync(GitBranchItemViewModel branch)
     {
         await ViewBranchOnGitHubAsync(RemoteUrl, branch.Upstream);
+    }
+
+    private async Task ViewCurrentBranchOnGitHubAsync()
+    {
+        await ViewBranchOnGitHubAsync(RemoteUrl, Upstream);
     }
 
     private async Task ViewRepositoryItemOnGitHubAsync(RepositoryListItemViewModel repository)
