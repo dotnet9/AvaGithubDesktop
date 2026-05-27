@@ -217,6 +217,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         var canCheckoutBranch = this.WhenAnyValue(model => model.CanCheckoutBranch);
         CheckoutBranchCommand = ReactiveCommand.CreateFromTask(CheckoutSelectedBranchAsync, canCheckoutBranch);
         CreateBranchCommand = ReactiveCommand.CreateFromTask(CreateBranchAsync, this.WhenAnyValue(model => model.CanCreateBranch));
+        CopyCurrentBranchNameCommand = ReactiveCommand.CreateFromTask(
+            CopyCurrentBranchNameAsync,
+            this.WhenAnyValue(model => model.CanCopyCurrentBranchName));
         RenameCurrentBranchCommand = ReactiveCommand.CreateFromTask(
             RenameCurrentBranchAsync,
             this.WhenAnyValue(model => model.CanRenameCurrentBranch));
@@ -410,6 +413,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> CheckoutBranchCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CreateBranchCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> CopyCurrentBranchNameCommand { get; }
 
     public ReactiveCommand<Unit, Unit> RenameCurrentBranchCommand { get; }
 
@@ -1011,6 +1016,13 @@ public sealed class MainWindowViewModel : ViewModelBase
         HasRepository &&
         CanRunRepositoryCommand &&
         !HasRepositoryOperationInProgress;
+
+    public bool CanCopyCurrentBranchName =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        !string.IsNullOrWhiteSpace(CurrentBranch) &&
+        CurrentBranch != "-" &&
+        !CurrentBranch.StartsWith("HEAD", StringComparison.OrdinalIgnoreCase);
 
     public bool CanRenameCurrentBranch =>
         HasRepository &&
@@ -2164,6 +2176,14 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         await CopyTextAsync(
             branch.Name,
+            AvaGithubDesktopL.StatusCopiedBranchName,
+            AvaGithubDesktopL.StatusCopyBranchNameFailedFormat);
+    }
+
+    private async Task CopyCurrentBranchNameAsync()
+    {
+        await CopyTextAsync(
+            CurrentBranch,
             AvaGithubDesktopL.StatusCopiedBranchName,
             AvaGithubDesktopL.StatusCopyBranchNameFailedFormat);
     }
@@ -3470,6 +3490,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         this.RaisePropertyChanged(nameof(CanCheckoutBranch));
         this.RaisePropertyChanged(nameof(CanCreateBranch));
+        this.RaisePropertyChanged(nameof(CanCopyCurrentBranchName));
         this.RaisePropertyChanged(nameof(CanRenameCurrentBranch));
         this.RaisePropertyChanged(nameof(CanDeleteCurrentBranch));
         this.RaisePropertyChanged(nameof(CanSetUpstream));
