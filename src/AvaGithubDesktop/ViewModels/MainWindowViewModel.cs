@@ -174,6 +174,14 @@ public sealed class MainWindowViewModel : ViewModelBase
         ManageRemoteCommand = ReactiveCommand.CreateFromTask(ManageRemoteAsync, canUseCurrentRepository);
         CopyCurrentRepositoryNameCommand = ReactiveCommand.CreateFromTask(CopyCurrentRepositoryNameAsync, canUseCurrentRepository);
         CopyCurrentRepositoryPathCommand = ReactiveCommand.CreateFromTask(CopyCurrentRepositoryPathAsync, canUseCurrentRepository);
+        CopyRemoteUrlCommand = ReactiveCommand.CreateFromTask(
+            CopyRemoteUrlAsync,
+            this.WhenAnyValue(
+                model => model.HasRepository,
+                model => model.RemoteUrl,
+                model => model.CanRunRepositoryCommand,
+                (hasRepository, remoteUrl, canRunRepositoryCommand) =>
+                    hasRepository && canRunRepositoryCommand && !string.IsNullOrWhiteSpace(remoteUrl) && remoteUrl != "-"));
         var canViewCurrentRepositoryOnGitHub = this.WhenAnyValue(
             model => model.HasRepository,
             model => model.RemoteUrl,
@@ -373,6 +381,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> CopyCurrentRepositoryNameCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CopyCurrentRepositoryPathCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> CopyRemoteUrlCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ViewRepositoryOnGitHubCommand { get; }
 
@@ -2192,6 +2202,14 @@ public sealed class MainWindowViewModel : ViewModelBase
             RootPath,
             AvaGithubDesktopL.StatusCopiedRepositoryPath,
             AvaGithubDesktopL.StatusCopyRepositoryTextFailedFormat);
+    }
+
+    private async Task CopyRemoteUrlAsync()
+    {
+        await CopyTextAsync(
+            RemoteUrl,
+            AvaGithubDesktopL.StatusCopiedRemoteUrl,
+            AvaGithubDesktopL.StatusCopyRemoteUrlFailedFormat);
     }
 
     private async Task CopyBranchNameAsync(GitBranchItemViewModel branch)

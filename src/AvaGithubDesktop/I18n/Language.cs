@@ -44,6 +44,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuFetchAllRemotes = "AvaGithubDesktop.AvaGithubDesktopL.MenuFetchAllRemotes";
     public static readonly string MenuUpdateSubmodules = "AvaGithubDesktop.AvaGithubDesktopL.MenuUpdateSubmodules";
     public static readonly string MenuManageRemote = "AvaGithubDesktop.AvaGithubDesktopL.MenuManageRemote";
+    public static readonly string MenuCopyRemoteUrl = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyRemoteUrl";
     public static readonly string MenuOpenInShell = "AvaGithubDesktop.AvaGithubDesktopL.MenuOpenInShell";
     public static readonly string MenuOpenInExternalEditor = "AvaGithubDesktop.AvaGithubDesktopL.MenuOpenInExternalEditor";
     public static readonly string MenuShowInFileManager = "AvaGithubDesktop.AvaGithubDesktopL.MenuShowInFileManager";
@@ -200,6 +201,8 @@ public static class AvaGithubDesktopL
     public static readonly string StatusRemovingRemoteFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRemovingRemoteFormat";
     public static readonly string StatusRemovedRemoteFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRemovedRemoteFormat";
     public static readonly string StatusRemoveRemoteFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRemoveRemoteFailedFormat";
+    public static readonly string StatusCopiedRemoteUrl = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopiedRemoteUrl";
+    public static readonly string StatusCopyRemoteUrlFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopyRemoteUrlFailedFormat";
     public static readonly string ErrorInvalidRepository = "AvaGithubDesktop.AvaGithubDesktopL.ErrorInvalidRepository";
     public static readonly string DialogOpenRepositoryTitle = "AvaGithubDesktop.AvaGithubDesktopL.DialogOpenRepositoryTitle";
     public static readonly string DialogCreateRepositoryParentDirectoryTitle = "AvaGithubDesktop.AvaGithubDesktopL.DialogCreateRepositoryParentDirectoryTitle";
