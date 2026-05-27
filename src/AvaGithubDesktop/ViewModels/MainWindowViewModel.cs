@@ -48,6 +48,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isCreatingBranch;
     private bool _isUpdatingBranch;
     private bool _isMergingBranch;
+    private bool _isRebasingBranch;
     private bool _isSyncing;
     private bool _isStashing;
     private bool _isRestoringStash;
@@ -175,6 +176,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         CheckoutBranchCommand = ReactiveCommand.CreateFromTask(CheckoutSelectedBranchAsync, canCheckoutBranch);
         CreateBranchCommand = ReactiveCommand.CreateFromTask(CreateBranchAsync, this.WhenAnyValue(model => model.CanCreateBranch));
         MergeBranchCommand = ReactiveCommand.CreateFromTask(MergeBranchAsync, this.WhenAnyValue(model => model.CanMergeBranch));
+        RebaseBranchCommand = ReactiveCommand.CreateFromTask(RebaseBranchAsync, this.WhenAnyValue(model => model.CanRebaseBranch));
         CompareCurrentBranchOnGitHubCommand = ReactiveCommand.CreateFromTask(
             CompareCurrentBranchOnGitHubAsync,
             this.WhenAnyValue(
@@ -290,6 +292,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> CreateBranchCommand { get; }
 
     public ReactiveCommand<Unit, Unit> MergeBranchCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> RebaseBranchCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CompareCurrentBranchOnGitHubCommand { get; }
 
@@ -488,6 +492,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         !IsCreatingBranch &&
         !IsUpdatingBranch &&
         !IsMergingBranch &&
+        !IsRebasingBranch &&
         !IsSyncing &&
         !IsStashing &&
         !IsRestoringStash &&
@@ -552,6 +557,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         private set
         {
             this.RaiseAndSetIfChanged(ref _isMergingBranch, value);
+            RaiseOperationStateChanged();
+        }
+    }
+
+    public bool IsRebasingBranch
+    {
+        get => _isRebasingBranch;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isRebasingBranch, value);
             RaiseOperationStateChanged();
         }
     }
@@ -751,6 +766,11 @@ public sealed class MainWindowViewModel : ViewModelBase
         CanRunRepositoryCommand;
 
     public bool CanMergeBranch =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        Branches.Any(branch => !branch.IsCurrent);
+
+    public bool CanRebaseBranch =>
         HasRepository &&
         CanRunRepositoryCommand &&
         Branches.Any(branch => !branch.IsCurrent);
@@ -2551,6 +2571,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(CanCheckoutBranch));
         this.RaisePropertyChanged(nameof(CanCreateBranch));
         this.RaisePropertyChanged(nameof(CanMergeBranch));
+        this.RaisePropertyChanged(nameof(CanRebaseBranch));
         this.RaisePropertyChanged(nameof(FilteredBranchesCount));
         this.RaisePropertyChanged(nameof(HasActiveBranchFilter));
         this.RaisePropertyChanged(nameof(HasNoFilteredBranches));
@@ -2700,6 +2721,52 @@ public sealed class MainWindowViewModel : ViewModelBase
         finally
         {
             IsMergingBranch = false;
+        }
+    }
+
+    private async Task RebaseBranchAsync()
+    {
+        if (!CanRebaseBranch)
+        {
+            return;
+        }
+
+        var request = await _branchDialogService.ShowRebaseBranchDialogAsync(
+            CurrentBranch,
+            Branches.Select(branch => branch.Branch).ToArray());
+        if (request is null)
+        {
+            return;
+        }
+
+        IsRebasingBranch = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(
+            _localizer.Format(AvaGithubDesktopL.StatusRebasingBranchFormat, CurrentBranch, request.BaseBranchName)));
+
+        try
+        {
+            var result = await _gitRepositoryService.RebaseCurrentBranchAsync(
+                RootPath,
+                request.BaseBranchName,
+                CancellationToken.None);
+            await ReloadRepositoryWorkspaceAsync();
+            var messageKey = result == GitRebaseResult.AlreadyUpToDate
+                ? AvaGithubDesktopL.StatusRebaseBranchAlreadyUpToDateFormat
+                : AvaGithubDesktopL.StatusRebasedBranchFormat;
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(messageKey, CurrentBranch, request.BaseBranchName)));
+        }
+        catch (Exception ex)
+        {
+            // rebase 冲突会让 Git 留在变基状态；刷新工作区后用户可以在 Changes 中继续处理冲突文件。
+            await TryReloadRepositoryWorkspaceAsync();
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusRebaseBranchFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsRebasingBranch = false;
         }
     }
 

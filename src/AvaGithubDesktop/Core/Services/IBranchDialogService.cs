@@ -17,5 +17,9 @@ public interface IBranchDialogService
         string currentBranch,
         IReadOnlyList<GitBranchItem> branches);
 
+    Task<BranchRebaseRequest?> ShowRebaseBranchDialogAsync(
+        string currentBranch,
+        IReadOnlyList<GitBranchItem> branches);
+
     Task<bool> ShowDeleteBranchConfirmationAsync(string branchName);
 }

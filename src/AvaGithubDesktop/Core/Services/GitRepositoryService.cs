@@ -241,6 +241,30 @@ public sealed class GitRepositoryService : IGitRepositoryService
             : GitMergeResult.Success;
     }
 
+    public async Task<GitRebaseResult> RebaseCurrentBranchAsync(
+        string repositoryPath,
+        string baseBranchName,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        if (string.IsNullOrWhiteSpace(baseBranchName))
+        {
+            throw new ArgumentException("A base branch name is required.", nameof(baseBranchName));
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        var normalizedBase = baseBranchName.Trim();
+        // 当前分支已经由 UI 保证签出；对齐 Desktop 的核心行为，把当前分支 rebase 到所选基准分支之上。
+        var output = await RunRequiredGitAsync(root, cancellationToken, "rebase", normalizedBase);
+        return output.Contains("up to date", StringComparison.OrdinalIgnoreCase)
+            ? GitRebaseResult.AlreadyUpToDate
+            : GitRebaseResult.Success;
+    }
+
     public async Task FetchAsync(
         string repositoryPath,
         string remoteName,

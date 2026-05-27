@@ -1,0 +1,105 @@
+<codewf:CodeWFWindow
+    x:Class="AvaGithubDesktop.Views.RebaseBranchWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:codewf="https://codewf.com"
+    xmlns:i18n="https://codewf.com"
+    xmlns:l="clr-namespace:AvaGithubDesktop"
+    xmlns:models="using:AvaGithubDesktop.Core.Models"
+    xmlns:vm="using:AvaGithubDesktop.ViewModels"
+    x:DataType="vm:RebaseBranchWindowViewModel"
+    Width="560"
+    Height="520"
+    MinWidth="520"
+    MinHeight="460"
+    Background="{DynamicResource PanelBackgroundBrush}"
+    CanMaximize="False"
+    CanMinimize="False"
+    CanResize="False"
+    Icon="/Assets/app-logo.ico"
+    ShowInTaskbar="False"
+    Title="{Binding Title}"
+    TitleBarBackground="{DynamicResource ToolbarBackgroundBrush}"
+    TitleBarBorderBrush="{DynamicResource ToolbarBorderBrush}"
+    TitleBarForeground="{DynamicResource ToolbarTextBrush}"
+    TitleBarHeight="34"
+    WindowStartupLocation="CenterOwner">
+
+    <codewf:CodeWFWindow.LeftContent>
+        <TextBlock
+            Margin="12,0,0,0"
+            VerticalAlignment="Center"
+            FontSize="13"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource ToolbarTextBrush}"
+            Text="{Binding Title}" />
+    </codewf:CodeWFWindow.LeftContent>
+
+    <Border Padding="24" Background="{DynamicResource PanelBackgroundBrush}">
+        <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="12">
+            <TextBlock
+                Classes="heading"
+                Text="{Binding Title}"
+                TextWrapping="Wrap" />
+            <TextBlock
+                Grid.Row="1"
+                Classes="muted"
+                Text="{Binding Description}"
+                TextWrapping="Wrap" />
+            <TextBox
+                Grid.Row="2"
+                Classes="branchNameInput"
+                PlaceholderText="{i18n:I18n {x:Static l:AvaGithubDesktopL.RebaseBranchFilterPlaceholder}}"
+                Text="{Binding BranchFilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <Border Grid.Row="3" Classes="branchBasePanel">
+                <Grid RowDefinitions="*,Auto">
+                    <ListBox
+                        Classes="branchSelector"
+                        ItemsSource="{Binding FilteredBranches}"
+                        SelectedItem="{Binding SelectedBranch, Mode=TwoWay}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="models:GitBranchItem">
+                                <Border Height="42" Padding="12,0">
+                                    <Grid RowDefinitions="Auto,Auto">
+                                        <TextBlock
+                                            VerticalAlignment="Bottom"
+                                            FontWeight="SemiBold"
+                                            Text="{Binding Name}" />
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            Classes="muted"
+                                            Text="{Binding DisplayDetail}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <TextBlock
+                        Grid.Row="1"
+                        Classes="muted"
+                        HorizontalAlignment="Center"
+                        IsVisible="{Binding HasNoFilteredBranches}"
+                        Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.NoBranchesFound}}" />
+                </Grid>
+            </Border>
+
+            <StackPanel
+                Grid.Row="4"
+                HorizontalAlignment="Right"
+                Orientation="Horizontal"
+                Spacing="8">
+                <Button
+                    MinWidth="86"
+                    Command="{Binding CancelCommand}"
+                    Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.Cancel}}" />
+                <Button
+                    Classes="dialogPrimary"
+                    MinWidth="160"
+                    Command="{Binding RebaseCommand}"
+                    Content="{Binding RebaseButtonText}" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</codewf:CodeWFWindow>

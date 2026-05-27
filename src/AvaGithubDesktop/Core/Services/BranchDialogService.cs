@@ -63,6 +63,20 @@ public sealed class BranchDialogService : IBranchDialogService
         return await window.ShowDialog<BranchMergeRequest?>(owner);
     }
 
+    public async Task<BranchRebaseRequest?> ShowRebaseBranchDialogAsync(
+        string currentBranch,
+        IReadOnlyList<GitBranchItem> branches)
+    {
+        if (GetMainWindow() is not { } owner)
+        {
+            return null;
+        }
+
+        var viewModel = new RebaseBranchWindowViewModel(currentBranch, branches, _localizer);
+        var window = new RebaseBranchWindow(viewModel);
+        return await window.ShowDialog<BranchRebaseRequest?>(owner);
+    }
+
     public async Task<bool> ShowDeleteBranchConfirmationAsync(string branchName)
     {
         if (GetMainWindow() is not { } owner)

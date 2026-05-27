@@ -43,6 +43,11 @@ public interface IGitRepositoryService
         string sourceBranchName,
         CancellationToken cancellationToken);
 
+    Task<GitRebaseResult> RebaseCurrentBranchAsync(
+        string repositoryPath,
+        string baseBranchName,
+        CancellationToken cancellationToken);
+
     Task FetchAsync(
         string repositoryPath,
         string remoteName,

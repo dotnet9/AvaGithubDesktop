@@ -91,3 +91,4 @@
 - Desktop 风格 Branch 主菜单支持打开当前 GitHub 分支页面
 - Desktop 风格 Branch 主菜单支持 Compare on GitHub
 - Desktop 风格 Branch 主菜单支持 Merge into current branch
+- Desktop 风格 Branch 主菜单支持 Rebase current branch
