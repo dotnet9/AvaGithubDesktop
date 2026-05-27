@@ -176,6 +176,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         CheckoutBranchCommand = ReactiveCommand.CreateFromTask(CheckoutSelectedBranchAsync, canCheckoutBranch);
         CreateBranchCommand = ReactiveCommand.CreateFromTask(CreateBranchAsync, this.WhenAnyValue(model => model.CanCreateBranch));
         MergeBranchCommand = ReactiveCommand.CreateFromTask(MergeBranchAsync, this.WhenAnyValue(model => model.CanMergeBranch));
+        SquashMergeBranchCommand = ReactiveCommand.CreateFromTask(
+            SquashMergeBranchAsync,
+            this.WhenAnyValue(model => model.CanMergeBranch));
         RebaseBranchCommand = ReactiveCommand.CreateFromTask(RebaseBranchAsync, this.WhenAnyValue(model => model.CanRebaseBranch));
         CompareCurrentBranchOnGitHubCommand = ReactiveCommand.CreateFromTask(
             CompareCurrentBranchOnGitHubAsync,
@@ -292,6 +295,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> CreateBranchCommand { get; }
 
     public ReactiveCommand<Unit, Unit> MergeBranchCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> SquashMergeBranchCommand { get; }
 
     public ReactiveCommand<Unit, Unit> RebaseBranchCommand { get; }
 
@@ -2716,6 +2721,52 @@ public sealed class MainWindowViewModel : ViewModelBase
             // merge 冲突会让 Git 留在合并状态；刷新工作区可以立即展示冲突文件，便于后续继续处理。
             await TryReloadRepositoryWorkspaceAsync();
             ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusMergeBranchFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsMergingBranch = false;
+        }
+    }
+
+    private async Task SquashMergeBranchAsync()
+    {
+        if (!CanMergeBranch)
+        {
+            return;
+        }
+
+        var request = await _branchDialogService.ShowSquashMergeBranchDialogAsync(
+            CurrentBranch,
+            Branches.Select(branch => branch.Branch).ToArray());
+        if (request is null)
+        {
+            return;
+        }
+
+        IsMergingBranch = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(
+            _localizer.Format(AvaGithubDesktopL.StatusSquashMergingBranchFormat, request.SourceBranchName, CurrentBranch)));
+
+        try
+        {
+            var result = await _gitRepositoryService.SquashMergeBranchAsync(
+                RootPath,
+                request.SourceBranchName,
+                CancellationToken.None);
+            await ReloadRepositoryWorkspaceAsync();
+            var messageKey = result == GitMergeResult.AlreadyUpToDate
+                ? AvaGithubDesktopL.StatusSquashMergeBranchAlreadyUpToDateFormat
+                : AvaGithubDesktopL.StatusSquashMergedBranchFormat;
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(messageKey, request.SourceBranchName, CurrentBranch)));
+        }
+        catch (Exception ex)
+        {
+            // squash merge 失败后可能留下 SQUASH_MSG 或冲突文件，刷新工作区可以让用户继续处理当前 Git 状态。
+            await TryReloadRepositoryWorkspaceAsync();
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusSquashMergeBranchFailedFormat, ex.Message);
             _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
         }
         finally

@@ -15,6 +15,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuBranch";
     public static readonly string MenuNewBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuNewBranch";
     public static readonly string MenuMergeBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuMergeBranch";
+    public static readonly string MenuSquashMergeBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuSquashMergeBranch";
     public static readonly string MenuRebaseBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuRebaseBranch";
     public static readonly string MenuView = "AvaGithubDesktop.AvaGithubDesktopL.MenuView";
     public static readonly string MenuHelp = "AvaGithubDesktop.AvaGithubDesktopL.MenuHelp";
@@ -90,6 +91,9 @@ public static class AvaGithubDesktopL
     public static readonly string MergeBranchDescriptionFormat = "AvaGithubDesktop.AvaGithubDesktopL.MergeBranchDescriptionFormat";
     public static readonly string MergeBranchFilterPlaceholder = "AvaGithubDesktop.AvaGithubDesktopL.MergeBranchFilterPlaceholder";
     public static readonly string MergeBranchButtonFormat = "AvaGithubDesktop.AvaGithubDesktopL.MergeBranchButtonFormat";
+    public static readonly string SquashMergeBranchTitle = "AvaGithubDesktop.AvaGithubDesktopL.SquashMergeBranchTitle";
+    public static readonly string SquashMergeBranchDescriptionFormat = "AvaGithubDesktop.AvaGithubDesktopL.SquashMergeBranchDescriptionFormat";
+    public static readonly string SquashMergeBranchButtonFormat = "AvaGithubDesktop.AvaGithubDesktopL.SquashMergeBranchButtonFormat";
     public static readonly string RebaseBranchTitleFormat = "AvaGithubDesktop.AvaGithubDesktopL.RebaseBranchTitleFormat";
     public static readonly string RebaseBranchDescriptionFormat = "AvaGithubDesktop.AvaGithubDesktopL.RebaseBranchDescriptionFormat";
     public static readonly string RebaseBranchFilterPlaceholder = "AvaGithubDesktop.AvaGithubDesktopL.RebaseBranchFilterPlaceholder";
@@ -276,6 +280,10 @@ public static class AvaGithubDesktopL
     public static readonly string StatusMergedBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusMergedBranchFormat";
     public static readonly string StatusMergeBranchAlreadyUpToDateFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusMergeBranchAlreadyUpToDateFormat";
     public static readonly string StatusMergeBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusMergeBranchFailedFormat";
+    public static readonly string StatusSquashMergingBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusSquashMergingBranchFormat";
+    public static readonly string StatusSquashMergedBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusSquashMergedBranchFormat";
+    public static readonly string StatusSquashMergeBranchAlreadyUpToDateFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusSquashMergeBranchAlreadyUpToDateFormat";
+    public static readonly string StatusSquashMergeBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusSquashMergeBranchFailedFormat";
     public static readonly string StatusRebasingBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRebasingBranchFormat";
     public static readonly string StatusRebasedBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRebasedBranchFormat";
     public static readonly string StatusRebaseBranchAlreadyUpToDateFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRebaseBranchAlreadyUpToDateFormat";

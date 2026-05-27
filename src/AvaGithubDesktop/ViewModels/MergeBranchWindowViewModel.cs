@@ -10,15 +10,18 @@ public sealed class MergeBranchWindowViewModel : ViewModelBase
 {
     private readonly IAppLocalizer _localizer;
     private readonly IReadOnlyList<GitBranchItem> _availableBranches;
+    private readonly bool _isSquashMerge;
     private string _branchFilterText = string.Empty;
     private GitBranchItem? _selectedBranch;
 
     public MergeBranchWindowViewModel(
         string currentBranch,
         IReadOnlyList<GitBranchItem> branches,
-        IAppLocalizer localizer)
+        IAppLocalizer localizer,
+        bool isSquashMerge = false)
     {
         _localizer = localizer;
+        _isSquashMerge = isSquashMerge;
         CurrentBranch = string.IsNullOrWhiteSpace(currentBranch) ? "-" : currentBranch;
         _availableBranches = branches
             .Where(branch => !branch.IsCurrent && !string.Equals(branch.Name, CurrentBranch, StringComparison.Ordinal))
@@ -40,13 +43,19 @@ public sealed class MergeBranchWindowViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> MergeCommand { get; }
 
-    public string Title => _localizer.Get(AvaGithubDesktopL.MergeBranchTitle);
+    public string Title => _isSquashMerge
+        ? _localizer.Get(AvaGithubDesktopL.SquashMergeBranchTitle)
+        : _localizer.Get(AvaGithubDesktopL.MergeBranchTitle);
 
     public string CurrentBranch { get; }
 
-    public string Description => _localizer.Format(AvaGithubDesktopL.MergeBranchDescriptionFormat, CurrentBranch);
+    public string Description => _isSquashMerge
+        ? _localizer.Format(AvaGithubDesktopL.SquashMergeBranchDescriptionFormat, CurrentBranch)
+        : _localizer.Format(AvaGithubDesktopL.MergeBranchDescriptionFormat, CurrentBranch);
 
-    public string MergeButtonText => _localizer.Format(AvaGithubDesktopL.MergeBranchButtonFormat, CurrentBranch);
+    public string MergeButtonText => _isSquashMerge
+        ? _localizer.Format(AvaGithubDesktopL.SquashMergeBranchButtonFormat, CurrentBranch)
+        : _localizer.Format(AvaGithubDesktopL.MergeBranchButtonFormat, CurrentBranch);
 
     public string BranchFilterText
     {

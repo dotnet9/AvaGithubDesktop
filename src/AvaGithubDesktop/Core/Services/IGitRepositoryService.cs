@@ -43,6 +43,11 @@ public interface IGitRepositoryService
         string sourceBranchName,
         CancellationToken cancellationToken);
 
+    Task<GitMergeResult> SquashMergeBranchAsync(
+        string repositoryPath,
+        string sourceBranchName,
+        CancellationToken cancellationToken);
+
     Task<GitRebaseResult> RebaseCurrentBranchAsync(
         string repositoryPath,
         string baseBranchName,

@@ -241,6 +241,34 @@ public sealed class GitRepositoryService : IGitRepositoryService
             : GitMergeResult.Success;
     }
 
+    public async Task<GitMergeResult> SquashMergeBranchAsync(
+        string repositoryPath,
+        string sourceBranchName,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        if (string.IsNullOrWhiteSpace(sourceBranchName))
+        {
+            throw new ArgumentException("A source branch name is required.", nameof(sourceBranchName));
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        var normalizedSource = sourceBranchName.Trim();
+        // 对齐 GitHub Desktop：先执行 squash merge，Git 生成 SQUASH_MSG 后再用 --no-edit 创建压缩合并提交。
+        var output = await RunRequiredGitAsync(root, cancellationToken, "merge", "--squash", normalizedSource);
+        if (output.Contains("Already up to date", StringComparison.OrdinalIgnoreCase))
+        {
+            return GitMergeResult.AlreadyUpToDate;
+        }
+
+        await RunRequiredGitAsync(root, cancellationToken, "commit", "--no-edit");
+        return GitMergeResult.Success;
+    }
+
     public async Task<GitRebaseResult> RebaseCurrentBranchAsync(
         string repositoryPath,
         string baseBranchName,

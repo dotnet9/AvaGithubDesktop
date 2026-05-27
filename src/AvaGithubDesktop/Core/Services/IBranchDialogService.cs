@@ -17,6 +17,10 @@ public interface IBranchDialogService
         string currentBranch,
         IReadOnlyList<GitBranchItem> branches);
 
+    Task<BranchMergeRequest?> ShowSquashMergeBranchDialogAsync(
+        string currentBranch,
+        IReadOnlyList<GitBranchItem> branches);
+
     Task<BranchRebaseRequest?> ShowRebaseBranchDialogAsync(
         string currentBranch,
         IReadOnlyList<GitBranchItem> branches);
