@@ -328,6 +328,14 @@ public static class AvaGithubDesktopL
     public static readonly string HistoryCommitsCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.HistoryCommitsCountFormat";
     public static readonly string NoHistoryTitle = "AvaGithubDesktop.AvaGithubDesktopL.NoHistoryTitle";
     public static readonly string NoHistoryDetail = "AvaGithubDesktop.AvaGithubDesktopL.NoHistoryDetail";
+    public static readonly string OperationMergeConflictTitle = "AvaGithubDesktop.AvaGithubDesktopL.OperationMergeConflictTitle";
+    public static readonly string OperationMergeConflictDetail = "AvaGithubDesktop.AvaGithubDesktopL.OperationMergeConflictDetail";
+    public static readonly string OperationRebaseConflictTitle = "AvaGithubDesktop.AvaGithubDesktopL.OperationRebaseConflictTitle";
+    public static readonly string OperationRebaseConflictDetail = "AvaGithubDesktop.AvaGithubDesktopL.OperationRebaseConflictDetail";
+    public static readonly string OperationRevertConflictTitle = "AvaGithubDesktop.AvaGithubDesktopL.OperationRevertConflictTitle";
+    public static readonly string OperationRevertConflictDetail = "AvaGithubDesktop.AvaGithubDesktopL.OperationRevertConflictDetail";
+    public static readonly string OperationCherryPickConflictTitle = "AvaGithubDesktop.AvaGithubDesktopL.OperationCherryPickConflictTitle";
+    public static readonly string OperationCherryPickConflictDetail = "AvaGithubDesktop.AvaGithubDesktopL.OperationCherryPickConflictDetail";
     public static readonly string SelectedCommit = "AvaGithubDesktop.AvaGithubDesktopL.SelectedCommit";
     public static readonly string CommitSha = "AvaGithubDesktop.AvaGithubDesktopL.CommitSha";
     public static readonly string CopyCommitSha = "AvaGithubDesktop.AvaGithubDesktopL.CopyCommitSha";

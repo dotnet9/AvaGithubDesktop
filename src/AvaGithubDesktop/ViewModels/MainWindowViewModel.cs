@@ -1126,6 +1126,28 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public bool CanAbortCherryPick => CanContinueCherryPick;
 
+    public bool ShowRepositoryOperationBanner => IsChangesSelected && HasRepositoryOperationInProgress;
+
+    public string RepositoryOperationBannerTitle =>
+        OperationState switch
+        {
+            RepositoryOperationState.Merge => _localizer.Get(AvaGithubDesktopL.OperationMergeConflictTitle),
+            RepositoryOperationState.Rebase => _localizer.Get(AvaGithubDesktopL.OperationRebaseConflictTitle),
+            RepositoryOperationState.Revert => _localizer.Get(AvaGithubDesktopL.OperationRevertConflictTitle),
+            RepositoryOperationState.CherryPick => _localizer.Get(AvaGithubDesktopL.OperationCherryPickConflictTitle),
+            _ => string.Empty
+        };
+
+    public string RepositoryOperationBannerDetail =>
+        OperationState switch
+        {
+            RepositoryOperationState.Merge => _localizer.Get(AvaGithubDesktopL.OperationMergeConflictDetail),
+            RepositoryOperationState.Rebase => _localizer.Get(AvaGithubDesktopL.OperationRebaseConflictDetail),
+            RepositoryOperationState.Revert => _localizer.Get(AvaGithubDesktopL.OperationRevertConflictDetail),
+            RepositoryOperationState.CherryPick => _localizer.Get(AvaGithubDesktopL.OperationCherryPickConflictDetail),
+            _ => string.Empty
+        };
+
     public bool HasCurrentBranchStash => CurrentBranchStash is not null;
 
     public bool CanStashChanges =>
@@ -3258,6 +3280,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(HistoryHeaderText));
         this.RaisePropertyChanged(nameof(SelectedCommitChangedFilesHeader));
         this.RaisePropertyChanged(nameof(BranchesHeaderText));
+        this.RaisePropertyChanged(nameof(RepositoryOperationBannerTitle));
+        this.RaisePropertyChanged(nameof(RepositoryOperationBannerDetail));
         this.RaisePropertyChanged(nameof(StashAllChangesButtonText));
         this.RaisePropertyChanged(nameof(StashDescriptionText));
         this.RaisePropertyChanged(nameof(RepositorySelectorTitle));
@@ -3314,6 +3338,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(HistoryTabBackground));
         this.RaisePropertyChanged(nameof(ChangesTabForeground));
         this.RaisePropertyChanged(nameof(HistoryTabForeground));
+        this.RaisePropertyChanged(nameof(ShowRepositoryOperationBanner));
     }
 
     private void RaiseBranchStateChanged()
@@ -3361,6 +3386,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(CanAbortRevert));
         this.RaisePropertyChanged(nameof(CanContinueCherryPick));
         this.RaisePropertyChanged(nameof(CanAbortCherryPick));
+        this.RaisePropertyChanged(nameof(ShowRepositoryOperationBanner));
+        this.RaisePropertyChanged(nameof(RepositoryOperationBannerTitle));
+        this.RaisePropertyChanged(nameof(RepositoryOperationBannerDetail));
         RaiseBranchStateChanged();
         RaiseSyncStateChanged();
         RaiseStashStateChanged();

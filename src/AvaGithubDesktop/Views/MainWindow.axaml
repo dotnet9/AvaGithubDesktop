@@ -644,7 +644,7 @@
                         </Grid>
                     </Border>
 
-                    <Grid Grid.Row="2" RowDefinitions="*,Auto">
+                    <Grid Grid.Row="2" RowDefinitions="*,Auto,Auto">
                         <ListBox
                             Grid.Row="0"
                             Classes="changes"
@@ -738,8 +738,26 @@
                             </ListBox.ItemTemplate>
                         </ListBox>
 
-                        <StackPanel
+                        <Border
                             Grid.Row="1"
+                            Margin="12,8,12,0"
+                            Classes="stashBanner"
+                            IsVisible="{Binding ShowRepositoryOperationBanner}">
+                            <Grid RowDefinitions="Auto,Auto" RowSpacing="3">
+                                <TextBlock
+                                    FontWeight="SemiBold"
+                                    Text="{Binding RepositoryOperationBannerTitle}" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Classes="muted"
+                                    FontSize="12"
+                                    Text="{Binding RepositoryOperationBannerDetail}"
+                                    TextWrapping="Wrap" />
+                            </Grid>
+                        </Border>
+
+                        <StackPanel
+                            Grid.Row="2"
                             Margin="16"
                             IsVisible="{Binding ShowEmptyRepository}"
                             Spacing="6">
@@ -747,7 +765,7 @@
                             <TextBlock Classes="muted" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.NoRepositoryDetail}}" />
                         </StackPanel>
                         <Border
-                            Grid.Row="1"
+                            Grid.Row="2"
                             Margin="12,8,12,12"
                             Classes="stashBanner"
                             IsVisible="{Binding HasCurrentBranchStash}">
