@@ -172,6 +172,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         OpenRepositoryInExternalEditorCommand = ReactiveCommand.CreateFromTask(OpenRepositoryInExternalEditorAsync, canUseCurrentRepository);
         ShowRepositoryInFileManagerCommand = ReactiveCommand.CreateFromTask(ShowRepositoryInFileManagerAsync, canUseCurrentRepository);
         ManageRemoteCommand = ReactiveCommand.CreateFromTask(ManageRemoteAsync, canUseCurrentRepository);
+        CopyCurrentRepositoryNameCommand = ReactiveCommand.CreateFromTask(CopyCurrentRepositoryNameAsync, canUseCurrentRepository);
+        CopyCurrentRepositoryPathCommand = ReactiveCommand.CreateFromTask(CopyCurrentRepositoryPathAsync, canUseCurrentRepository);
         var canViewCurrentRepositoryOnGitHub = this.WhenAnyValue(
             model => model.HasRepository,
             model => model.RemoteUrl,
@@ -367,6 +369,10 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ShowRepositoryInFileManagerCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ManageRemoteCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> CopyCurrentRepositoryNameCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> CopyCurrentRepositoryPathCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ViewRepositoryOnGitHubCommand { get; }
 
@@ -2168,6 +2174,22 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         await CopyTextAsync(
             repository.Path,
+            AvaGithubDesktopL.StatusCopiedRepositoryPath,
+            AvaGithubDesktopL.StatusCopyRepositoryTextFailedFormat);
+    }
+
+    private async Task CopyCurrentRepositoryNameAsync()
+    {
+        await CopyTextAsync(
+            RepositoryName,
+            AvaGithubDesktopL.StatusCopiedRepositoryName,
+            AvaGithubDesktopL.StatusCopyRepositoryTextFailedFormat);
+    }
+
+    private async Task CopyCurrentRepositoryPathAsync()
+    {
+        await CopyTextAsync(
+            RootPath,
             AvaGithubDesktopL.StatusCopiedRepositoryPath,
             AvaGithubDesktopL.StatusCopyRepositoryTextFailedFormat);
     }
