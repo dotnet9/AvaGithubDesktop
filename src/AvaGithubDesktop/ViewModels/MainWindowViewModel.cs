@@ -177,6 +177,12 @@ public sealed class MainWindowViewModel : ViewModelBase
         var canCheckoutBranch = this.WhenAnyValue(model => model.CanCheckoutBranch);
         CheckoutBranchCommand = ReactiveCommand.CreateFromTask(CheckoutSelectedBranchAsync, canCheckoutBranch);
         CreateBranchCommand = ReactiveCommand.CreateFromTask(CreateBranchAsync, this.WhenAnyValue(model => model.CanCreateBranch));
+        RenameCurrentBranchCommand = ReactiveCommand.CreateFromTask(
+            RenameCurrentBranchAsync,
+            this.WhenAnyValue(model => model.CanRenameCurrentBranch));
+        DeleteCurrentBranchCommand = ReactiveCommand.CreateFromTask(
+            DeleteCurrentBranchAsync,
+            this.WhenAnyValue(model => model.CanDeleteCurrentBranch));
         UpdateFromDefaultBranchCommand = ReactiveCommand.CreateFromTask(
             UpdateFromDefaultBranchAsync,
             this.WhenAnyValue(model => model.CanUpdateFromDefaultBranch));
@@ -310,6 +316,10 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> CheckoutBranchCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CreateBranchCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> RenameCurrentBranchCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> DeleteCurrentBranchCommand { get; }
 
     public ReactiveCommand<Unit, Unit> UpdateFromDefaultBranchCommand { get; }
 
@@ -802,6 +812,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         HasRepository &&
         CanRunRepositoryCommand;
 
+    public bool CanRenameCurrentBranch =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        CurrentBranchItem?.CanRename == true;
+
+    public bool CanDeleteCurrentBranch =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        CurrentBranchItem?.CanDelete == true;
+
     public string UpdateFromDefaultBranchMenuText =>
         string.IsNullOrWhiteSpace(DefaultBranch) || DefaultBranch == "-"
             ? _localizer.Get(AvaGithubDesktopL.MenuUpdateFromDefaultBranch)
@@ -829,6 +849,9 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool HasActiveBranchFilter => !string.IsNullOrWhiteSpace(BranchFilterText);
 
     public bool HasNoFilteredBranches => HasRepository && !IsLoading && FilteredBranches.Count == 0;
+
+    private GitBranchItemViewModel? CurrentBranchItem =>
+        Branches.FirstOrDefault(branch => branch.IsCurrent);
 
     public GitStashEntry? CurrentBranchStash
     {
@@ -2673,6 +2696,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         this.RaisePropertyChanged(nameof(CanCheckoutBranch));
         this.RaisePropertyChanged(nameof(CanCreateBranch));
+        this.RaisePropertyChanged(nameof(CanRenameCurrentBranch));
+        this.RaisePropertyChanged(nameof(CanDeleteCurrentBranch));
         this.RaisePropertyChanged(nameof(CanUpdateFromDefaultBranch));
         this.RaisePropertyChanged(nameof(UpdateFromDefaultBranchMenuText));
         this.RaisePropertyChanged(nameof(CanMergeBranch));
@@ -2749,6 +2774,22 @@ public sealed class MainWindowViewModel : ViewModelBase
         finally
         {
             IsUpdatingBranch = false;
+        }
+    }
+
+    private async Task RenameCurrentBranchAsync()
+    {
+        if (CurrentBranchItem is { } branch)
+        {
+            await RenameBranchAsync(branch);
+        }
+    }
+
+    private async Task DeleteCurrentBranchAsync()
+    {
+        if (CurrentBranchItem is { } branch)
+        {
+            await DeleteBranchAsync(branch);
         }
     }
 

@@ -97,3 +97,4 @@
 - Desktop 风格 Branch 主菜单支持 Create Pull Request
 - Desktop 风格 Repository 主菜单支持 Create Issue on GitHub
 - 启动时优先恢复最后打开的仓库，最后仓库路径写入 `App.config`
+- Desktop 风格 Branch 主菜单支持当前分支 Rename 与 Delete 入口
