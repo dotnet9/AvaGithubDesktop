@@ -48,6 +48,25 @@ public static class RepositoryRemoteUrlHelper
         return TryGetGitHubBranchRouteUrl(remoteUrl, upstream, "compare", out webUrl);
     }
 
+    public static bool TryGetGitHubPullRequestUrl(string? remoteUrl, string? upstream, string? currentBranch, out string webUrl)
+    {
+        webUrl = string.Empty;
+        if (!TryGetGitHubWebUrl(remoteUrl, out var repositoryUrl))
+        {
+            return false;
+        }
+
+        var branchName = GetBranchNameWithoutRemote(upstream) ?? GetCurrentBranchName(currentBranch);
+        if (string.IsNullOrWhiteSpace(branchName))
+        {
+            return false;
+        }
+
+        // GitHub Desktop 的 Create Pull Request 会打开 /pull/new/{branch}，让 GitHub 决定默认 base 分支。
+        webUrl = $"{repositoryUrl}/pull/new/{Uri.EscapeDataString(branchName)}";
+        return true;
+    }
+
     private static bool TryGetGitHubBranchRouteUrl(string? remoteUrl, string? upstream, string route, out string webUrl)
     {
         webUrl = string.Empty;
@@ -82,6 +101,19 @@ public static class RepositoryRemoteUrlHelper
         }
 
         return trimmed[(separatorIndex + 1)..];
+    }
+
+    private static string? GetCurrentBranchName(string? currentBranch)
+    {
+        if (string.IsNullOrWhiteSpace(currentBranch) || currentBranch == "-")
+        {
+            return null;
+        }
+
+        var trimmed = currentBranch.Trim();
+        return trimmed.StartsWith("HEAD", StringComparison.OrdinalIgnoreCase)
+            ? null
+            : trimmed;
     }
 
     private static bool TryBuildGitHubUrl(string ownerAndRepository, out string webUrl)

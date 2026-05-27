@@ -94,3 +94,4 @@
 - Desktop 风格 Branch 主菜单支持 Merge into current branch
 - Desktop 风格 Branch 主菜单支持 Squash and merge into current branch
 - Desktop 风格 Branch 主菜单支持 Rebase current branch
+- Desktop 风格 Branch 主菜单支持 Create Pull Request

@@ -67,6 +67,7 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRebaseBranch}}" Command="{Binding RebaseBranchCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCompareOnGitHub}}" Command="{Binding CompareCurrentBranchOnGitHubCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuViewBranchOnGitHub}}" Command="{Binding ViewCurrentBranchOnGitHubCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCreatePullRequest}}" Command="{Binding CreatePullRequestCommand}" />
                     <Separator />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuStashAllChanges}}" Command="{Binding StashAllChangesCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRestoreStash}}" Command="{Binding RestoreStashCommand}" />

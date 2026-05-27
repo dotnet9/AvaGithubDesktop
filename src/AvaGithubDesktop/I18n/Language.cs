@@ -44,6 +44,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuRenameBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuRenameBranch";
     public static readonly string MenuCopyBranchName = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyBranchName";
     public static readonly string MenuViewBranchOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.MenuViewBranchOnGitHub";
+    public static readonly string MenuCreatePullRequest = "AvaGithubDesktop.AvaGithubDesktopL.MenuCreatePullRequest";
     public static readonly string MenuDeleteBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuDeleteBranch";
     public static readonly string MenuAbout = "AvaGithubDesktop.AvaGithubDesktopL.MenuAbout";
     public static readonly string SignInToGitHub = "AvaGithubDesktop.AvaGithubDesktopL.SignInToGitHub";
@@ -307,6 +308,8 @@ public static class AvaGithubDesktopL
     public static readonly string StatusOpenBranchOnGitHubFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenBranchOnGitHubFailedFormat";
     public static readonly string StatusOpenedBranchCompareOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedBranchCompareOnGitHub";
     public static readonly string StatusOpenBranchCompareOnGitHubFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenBranchCompareOnGitHubFailedFormat";
+    public static readonly string StatusOpenedCreatePullRequestOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedCreatePullRequestOnGitHub";
+    public static readonly string StatusOpenCreatePullRequestOnGitHubFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenCreatePullRequestOnGitHubFailedFormat";
     public static readonly string StatusCheckingOutBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckingOutBranchFormat";
     public static readonly string StatusCheckedOutBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckedOutBranchFormat";
     public static readonly string StatusCheckoutBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckoutBranchFailedFormat";

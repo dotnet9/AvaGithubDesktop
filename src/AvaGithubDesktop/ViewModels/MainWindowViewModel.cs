@@ -202,6 +202,16 @@ public sealed class MainWindowViewModel : ViewModelBase
                 model => model.CanRunRepositoryCommand,
                 (hasRepository, remoteUrl, upstream, canRunRepositoryCommand) =>
                     hasRepository && canRunRepositoryCommand && RepositoryRemoteUrlHelper.TryGetGitHubBranchUrl(remoteUrl, upstream, out _)));
+        CreatePullRequestCommand = ReactiveCommand.CreateFromTask(
+            CreatePullRequestAsync,
+            this.WhenAnyValue(
+                model => model.HasRepository,
+                model => model.RemoteUrl,
+                model => model.Upstream,
+                model => model.CurrentBranch,
+                model => model.CanRunRepositoryCommand,
+                (hasRepository, remoteUrl, upstream, currentBranch, canRunRepositoryCommand) =>
+                    hasRepository && canRunRepositoryCommand && RepositoryRemoteUrlHelper.TryGetGitHubPullRequestUrl(remoteUrl, upstream, currentBranch, out _)));
         StashAllChangesCommand = ReactiveCommand.CreateFromTask(StashAllChangesAsync, this.WhenAnyValue(model => model.CanStashChanges));
         RestoreStashCommand = ReactiveCommand.CreateFromTask(RestoreStashAsync, this.WhenAnyValue(model => model.CanRestoreStash));
         DiscardStashCommand = ReactiveCommand.CreateFromTask(DiscardStashAsync, this.WhenAnyValue(model => model.CanDiscardStash));
@@ -309,6 +319,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> CompareCurrentBranchOnGitHubCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ViewCurrentBranchOnGitHubCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> CreatePullRequestCommand { get; }
 
     public ReactiveCommand<Unit, Unit> StashAllChangesCommand { get; }
 
@@ -1492,6 +1504,11 @@ public sealed class MainWindowViewModel : ViewModelBase
         await CompareBranchOnGitHubAsync(RemoteUrl, Upstream);
     }
 
+    private async Task CreatePullRequestAsync()
+    {
+        await OpenCreatePullRequestOnGitHubAsync(RemoteUrl, Upstream, CurrentBranch);
+    }
+
     private async Task ViewRepositoryItemOnGitHubAsync(RepositoryListItemViewModel repository)
     {
         await ViewRepositoryRemoteOnGitHubAsync(repository.Entry.RemoteUrl);
@@ -1772,6 +1789,27 @@ public sealed class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenBranchCompareOnGitHubFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+    }
+
+    private async Task OpenCreatePullRequestOnGitHubAsync(string? remoteUrl, string upstream, string currentBranch)
+    {
+        if (!RepositoryRemoteUrlHelper.TryGetGitHubPullRequestUrl(remoteUrl, upstream, currentBranch, out var webUrl))
+        {
+            ErrorMessage = _localizer.Get(AvaGithubDesktopL.StatusRepositoryHasNoGitHubRemote);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+            return;
+        }
+
+        try
+        {
+            await _repositoryShellService.OpenUrlAsync(webUrl);
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedCreatePullRequestOnGitHub)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenCreatePullRequestOnGitHubFailedFormat, ex.Message);
             _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
         }
     }
