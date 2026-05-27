@@ -7,7 +7,6 @@ namespace AvaGithubDesktop.Core.Services;
 public sealed class RepositoryHistoryService : IRepositoryHistoryService
 {
     private const int MaxStoredRepositories = 100;
-    private const int MaxDiscoveredRepositories = 80;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
         WriteIndented = true
@@ -23,29 +22,10 @@ public sealed class RepositoryHistoryService : IRepositoryHistoryService
     public async Task<IReadOnlyList<RepositoryHistoryEntry>> LoadKnownRepositoriesAsync(CancellationToken cancellationToken)
     {
         var entries = await ReadStoredRepositoriesAsync(cancellationToken);
-        var byPath = entries
+        return entries
             .Where(entry => Directory.Exists(entry.Path))
             .GroupBy(entry => NormalizePath(entry.Path), StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(group => group.Key, group => group.OrderByDescending(entry => entry.LastOpenedAt).First(), StringComparer.OrdinalIgnoreCase);
-
-        // GitHub Desktop 的仓库列表来自持久化数据库；本项目开发期先扫描 D:\github 作为可用种子，
-        // 这样首次启动就能看到和截图接近的本地仓库列表，用户手动打开的仓库仍会持久化保存。
-        var discoveredEntries = await Task.Run(
-            () => DiscoverDevelopmentRepositories()
-                .Select(path => CreateEntry(NormalizePath(path), DateTimeOffset.MinValue))
-                .ToArray(),
-            cancellationToken);
-
-        foreach (var discoveredEntry in discoveredEntries)
-        {
-            var normalizedPath = NormalizePath(discoveredEntry.Path);
-            if (!byPath.ContainsKey(normalizedPath))
-            {
-                byPath[normalizedPath] = discoveredEntry;
-            }
-        }
-
-        return byPath.Values
+            .Select(group => group.OrderByDescending(entry => entry.LastOpenedAt).First())
             .OrderByDescending(entry => entry.LastOpenedAt)
             .ThenBy(entry => entry.GroupName, StringComparer.OrdinalIgnoreCase)
             .ThenBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase)
@@ -102,33 +82,6 @@ public sealed class RepositoryHistoryService : IRepositoryHistoryService
                && !string.IsNullOrWhiteSpace(entry.Name)
                && !string.IsNullOrWhiteSpace(entry.Path)
                && !string.IsNullOrWhiteSpace(entry.GroupName);
-    }
-
-    private static IEnumerable<string> DiscoverDevelopmentRepositories()
-    {
-        if (!OperatingSystem.IsWindows())
-        {
-            yield break;
-        }
-
-        const string developmentRoot = @"D:\github";
-        if (!Directory.Exists(developmentRoot))
-        {
-            yield break;
-        }
-
-        foreach (var childDirectory in Directory.EnumerateDirectories(developmentRoot).Take(MaxDiscoveredRepositories))
-        {
-            if (IsGitRepository(childDirectory))
-            {
-                yield return childDirectory;
-            }
-        }
-    }
-
-    private static bool IsGitRepository(string path)
-    {
-        return Directory.Exists(Path.Combine(path, ".git")) || File.Exists(Path.Combine(path, ".git"));
     }
 
     private static RepositoryHistoryEntry CreateEntry(string repositoryPath, DateTimeOffset lastOpenedAt)

@@ -3243,14 +3243,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             return lastRepositoryPath;
         }
 
-        // 开发环境首次启动时仍优先展示 GitHub Desktop 源码仓库，后续启动则恢复用户最后打开的仓库。
-        const string desktopRepositoryPath = @"D:\github\desktop";
-        if (OperatingSystem.IsWindows() && Directory.Exists(desktopRepositoryPath))
-        {
-            return desktopRepositoryPath;
-        }
-
-        return Directory.GetCurrentDirectory();
+        return string.Empty;
     }
 }
 
