@@ -4,6 +4,7 @@ public sealed record GitRepositorySnapshot(
     string RepositoryName,
     string RootPath,
     string CurrentBranch,
+    string DefaultBranch,
     string Upstream,
     string RemoteName,
     string RemoteUrl,

@@ -41,6 +41,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
         var upstream = await RunOptionalGitAsync(root, cancellationToken, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}");
         var remotes = await RunOptionalGitAsync(root, cancellationToken, "remote");
         var remoteName = ResolveRemoteName(upstream, remotes);
+        var defaultBranch = await ResolveDefaultBranchAsync(root, remoteName, cancellationToken);
         var remote = remoteName == "-"
             ? string.Empty
             : await RunOptionalGitAsync(root, cancellationToken, "remote", "get-url", remoteName);
@@ -54,6 +55,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
             RepositoryName: new DirectoryInfo(root).Name,
             RootPath: root,
             CurrentBranch: branch,
+            DefaultBranch: defaultBranch,
             Upstream: string.IsNullOrWhiteSpace(upstream) ? "-" : upstream,
             RemoteName: remoteName,
             RemoteUrl: string.IsNullOrWhiteSpace(remote) ? "-" : remote,
@@ -717,6 +719,65 @@ public sealed class GitRepositoryService : IGitRepositoryService
 
         return remoteNames.FirstOrDefault(remote => remote.Equals("origin", StringComparison.OrdinalIgnoreCase))
             ?? remoteNames[0];
+    }
+
+    private static async Task<string> ResolveDefaultBranchAsync(
+        string root,
+        string remoteName,
+        CancellationToken cancellationToken)
+    {
+        var candidates = new List<string>();
+        if (!string.IsNullOrWhiteSpace(remoteName) && remoteName != "-")
+        {
+            var remoteHead = await RunOptionalGitAsync(
+                root,
+                cancellationToken,
+                "symbolic-ref",
+                "--quiet",
+                "--short",
+                $"refs/remotes/{remoteName}/HEAD");
+            var prefix = remoteName + "/";
+            if (remoteHead.StartsWith(prefix, StringComparison.Ordinal))
+            {
+                candidates.Add(remoteHead[prefix.Length..]);
+            }
+            else if (!string.IsNullOrWhiteSpace(remoteHead))
+            {
+                candidates.Add(remoteHead.Trim());
+            }
+        }
+
+        candidates.Add("main");
+        candidates.Add("master");
+        foreach (var candidate in candidates.Distinct(StringComparer.Ordinal))
+        {
+            if (await LocalBranchExistsAsync(root, candidate, cancellationToken))
+            {
+                return candidate;
+            }
+        }
+
+        return "-";
+    }
+
+    private static async Task<bool> LocalBranchExistsAsync(
+        string root,
+        string branchName,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(branchName))
+        {
+            return false;
+        }
+
+        var resolved = await RunOptionalGitAsync(
+            root,
+            cancellationToken,
+            "rev-parse",
+            "--verify",
+            "--quiet",
+            $"refs/heads/{branchName}");
+        return !string.IsNullOrWhiteSpace(resolved);
     }
 
     private static async Task<DateTimeOffset?> ResolveLastFetchedAtAsync(string root, CancellationToken cancellationToken)

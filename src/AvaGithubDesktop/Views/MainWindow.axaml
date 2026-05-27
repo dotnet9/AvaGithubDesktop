@@ -61,6 +61,7 @@
                 </MenuItem>
                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuBranch}}">
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuNewBranch}}" Command="{Binding CreateBranchCommand}" />
+                    <MenuItem Header="{Binding UpdateFromDefaultBranchMenuText}" Command="{Binding UpdateFromDefaultBranchCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuMergeBranch}}" Command="{Binding MergeBranchCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuSquashMergeBranch}}" Command="{Binding SquashMergeBranchCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRebaseBranch}}" Command="{Binding RebaseBranchCommand}" />

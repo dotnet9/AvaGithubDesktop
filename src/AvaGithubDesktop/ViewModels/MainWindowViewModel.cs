@@ -30,6 +30,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private string _repositoryName = "-";
     private string _rootPath = "-";
     private string _currentBranch = "-";
+    private string _defaultBranch = "-";
     private string _upstream = "-";
     private string _remoteName = "-";
     private string _remoteUrl = "-";
@@ -175,6 +176,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         var canCheckoutBranch = this.WhenAnyValue(model => model.CanCheckoutBranch);
         CheckoutBranchCommand = ReactiveCommand.CreateFromTask(CheckoutSelectedBranchAsync, canCheckoutBranch);
         CreateBranchCommand = ReactiveCommand.CreateFromTask(CreateBranchAsync, this.WhenAnyValue(model => model.CanCreateBranch));
+        UpdateFromDefaultBranchCommand = ReactiveCommand.CreateFromTask(
+            UpdateFromDefaultBranchAsync,
+            this.WhenAnyValue(model => model.CanUpdateFromDefaultBranch));
         MergeBranchCommand = ReactiveCommand.CreateFromTask(MergeBranchAsync, this.WhenAnyValue(model => model.CanMergeBranch));
         SquashMergeBranchCommand = ReactiveCommand.CreateFromTask(
             SquashMergeBranchAsync,
@@ -294,6 +298,8 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> CreateBranchCommand { get; }
 
+    public ReactiveCommand<Unit, Unit> UpdateFromDefaultBranchCommand { get; }
+
     public ReactiveCommand<Unit, Unit> MergeBranchCommand { get; }
 
     public ReactiveCommand<Unit, Unit> SquashMergeBranchCommand { get; }
@@ -373,7 +379,18 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             this.RaiseAndSetIfChanged(ref _currentBranch, value);
             this.RaisePropertyChanged(nameof(CommitButtonText));
+            RaiseDefaultBranchStateChanged();
             RaiseSyncStateChanged();
+        }
+    }
+
+    public string DefaultBranch
+    {
+        get => _defaultBranch;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _defaultBranch, value);
+            RaiseDefaultBranchStateChanged();
         }
     }
 
@@ -769,6 +786,18 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool CanCreateBranch =>
         HasRepository &&
         CanRunRepositoryCommand;
+
+    public string UpdateFromDefaultBranchMenuText =>
+        string.IsNullOrWhiteSpace(DefaultBranch) || DefaultBranch == "-"
+            ? _localizer.Get(AvaGithubDesktopL.MenuUpdateFromDefaultBranch)
+            : _localizer.Format(AvaGithubDesktopL.MenuUpdateFromBranchFormat, DefaultBranch);
+
+    public bool CanUpdateFromDefaultBranch =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        !string.IsNullOrWhiteSpace(DefaultBranch) &&
+        DefaultBranch != "-" &&
+        !string.Equals(CurrentBranch, DefaultBranch, StringComparison.Ordinal);
 
     public bool CanMergeBranch =>
         HasRepository &&
@@ -2242,6 +2271,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         RootPath = snapshot.RootPath;
         UpdateCurrentRepositoryIndicators();
         CurrentBranch = snapshot.CurrentBranch;
+        DefaultBranch = snapshot.DefaultBranch;
         Upstream = snapshot.Upstream;
         RemoteName = snapshot.RemoteName;
         RemoteUrl = snapshot.RemoteUrl;
@@ -2575,6 +2605,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         this.RaisePropertyChanged(nameof(CanCheckoutBranch));
         this.RaisePropertyChanged(nameof(CanCreateBranch));
+        this.RaisePropertyChanged(nameof(CanUpdateFromDefaultBranch));
+        this.RaisePropertyChanged(nameof(UpdateFromDefaultBranchMenuText));
         this.RaisePropertyChanged(nameof(CanMergeBranch));
         this.RaisePropertyChanged(nameof(CanRebaseBranch));
         this.RaisePropertyChanged(nameof(FilteredBranchesCount));
@@ -2592,6 +2624,12 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(CanDiscardChanges));
         this.RaisePropertyChanged(nameof(StashAllChangesButtonText));
         this.RaisePropertyChanged(nameof(StashDescriptionText));
+    }
+
+    private void RaiseDefaultBranchStateChanged()
+    {
+        this.RaisePropertyChanged(nameof(CanUpdateFromDefaultBranch));
+        this.RaisePropertyChanged(nameof(UpdateFromDefaultBranchMenuText));
     }
 
     private void RaiseAccountStateChanged()
@@ -2675,6 +2713,45 @@ public sealed class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusDeleteBranchFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsUpdatingBranch = false;
+        }
+    }
+
+    private async Task UpdateFromDefaultBranchAsync()
+    {
+        if (!CanUpdateFromDefaultBranch)
+        {
+            return;
+        }
+
+        var defaultBranch = DefaultBranch;
+        IsUpdatingBranch = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(
+            _localizer.Format(AvaGithubDesktopL.StatusUpdatingFromDefaultBranchFormat, defaultBranch, CurrentBranch)));
+
+        try
+        {
+            var result = await _gitRepositoryService.MergeBranchAsync(
+                RootPath,
+                defaultBranch,
+                CancellationToken.None);
+            await ReloadRepositoryWorkspaceAsync();
+            var messageKey = result == GitMergeResult.AlreadyUpToDate
+                ? AvaGithubDesktopL.StatusUpdateFromDefaultBranchAlreadyUpToDateFormat
+                : AvaGithubDesktopL.StatusUpdatedFromDefaultBranchFormat;
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(messageKey, defaultBranch, CurrentBranch)));
+        }
+        catch (Exception ex)
+        {
+            // Update from default branch 底层是一次普通 merge；冲突时保留 Git 状态并刷新 Changes 方便继续解决。
+            await TryReloadRepositoryWorkspaceAsync();
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusUpdateFromDefaultBranchFailedFormat, ex.Message);
             _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
         }
         finally

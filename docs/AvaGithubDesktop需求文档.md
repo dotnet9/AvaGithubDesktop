@@ -90,6 +90,7 @@
 - Desktop 风格未发布分支 Publish branch 同步入口
 - Desktop 风格 Branch 主菜单支持打开当前 GitHub 分支页面
 - Desktop 风格 Branch 主菜单支持 Compare on GitHub
+- Desktop 风格 Branch 主菜单支持 Update from default branch
 - Desktop 风格 Branch 主菜单支持 Merge into current branch
 - Desktop 风格 Branch 主菜单支持 Squash and merge into current branch
 - Desktop 风格 Branch 主菜单支持 Rebase current branch

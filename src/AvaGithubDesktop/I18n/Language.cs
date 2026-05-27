@@ -14,6 +14,8 @@ public static class AvaGithubDesktopL
     public static readonly string MenuRepository = "AvaGithubDesktop.AvaGithubDesktopL.MenuRepository";
     public static readonly string MenuBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuBranch";
     public static readonly string MenuNewBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuNewBranch";
+    public static readonly string MenuUpdateFromDefaultBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuUpdateFromDefaultBranch";
+    public static readonly string MenuUpdateFromBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.MenuUpdateFromBranchFormat";
     public static readonly string MenuMergeBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuMergeBranch";
     public static readonly string MenuSquashMergeBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuSquashMergeBranch";
     public static readonly string MenuRebaseBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuRebaseBranch";
@@ -276,6 +278,10 @@ public static class AvaGithubDesktopL
     public static readonly string StatusCreatingBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCreatingBranchFormat";
     public static readonly string StatusCreatedBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCreatedBranchFormat";
     public static readonly string StatusCreateBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCreateBranchFailedFormat";
+    public static readonly string StatusUpdatingFromDefaultBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusUpdatingFromDefaultBranchFormat";
+    public static readonly string StatusUpdatedFromDefaultBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusUpdatedFromDefaultBranchFormat";
+    public static readonly string StatusUpdateFromDefaultBranchAlreadyUpToDateFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusUpdateFromDefaultBranchAlreadyUpToDateFormat";
+    public static readonly string StatusUpdateFromDefaultBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusUpdateFromDefaultBranchFailedFormat";
     public static readonly string StatusMergingBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusMergingBranchFormat";
     public static readonly string StatusMergedBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusMergedBranchFormat";
     public static readonly string StatusMergeBranchAlreadyUpToDateFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusMergeBranchAlreadyUpToDateFormat";
