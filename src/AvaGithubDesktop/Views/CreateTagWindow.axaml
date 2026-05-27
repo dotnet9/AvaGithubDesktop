@@ -1,0 +1,93 @@
+<codewf:CodeWFWindow
+    x:Class="AvaGithubDesktop.Views.CreateTagWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:codewf="https://codewf.com"
+    xmlns:i18n="https://codewf.com"
+    xmlns:l="clr-namespace:AvaGithubDesktop"
+    xmlns:vm="using:AvaGithubDesktop.ViewModels"
+    x:DataType="vm:CreateTagWindowViewModel"
+    Width="560"
+    Height="420"
+    MinWidth="520"
+    MinHeight="380"
+    Background="{DynamicResource PanelBackgroundBrush}"
+    CanMaximize="False"
+    CanMinimize="False"
+    CanResize="False"
+    Icon="/Assets/app-logo.ico"
+    ShowInTaskbar="False"
+    Title="{Binding Title}"
+    TitleBarBackground="{DynamicResource ToolbarBackgroundBrush}"
+    TitleBarBorderBrush="{DynamicResource ToolbarBorderBrush}"
+    TitleBarForeground="{DynamicResource ToolbarTextBrush}"
+    TitleBarHeight="34"
+    WindowStartupLocation="CenterOwner">
+
+    <codewf:CodeWFWindow.LeftContent>
+        <TextBlock
+            Margin="12,0,0,0"
+            VerticalAlignment="Center"
+            FontSize="13"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource ToolbarTextBrush}"
+            Text="{Binding Title}" />
+    </codewf:CodeWFWindow.LeftContent>
+
+    <Border Padding="24" Background="{DynamicResource PanelBackgroundBrush}">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto" RowSpacing="12">
+            <TextBlock
+                Classes="heading"
+                Text="{Binding Title}"
+                TextWrapping="Wrap" />
+
+            <StackPanel Grid.Row="1" Spacing="6">
+                <TextBlock Classes="formLabel" Text="{Binding TagNameLabel}" />
+                <TextBox
+                    Classes="branchNameInput"
+                    PlaceholderText="{Binding TagNamePlaceholder}"
+                    Text="{Binding TagName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock
+                    Classes="warning"
+                    IsVisible="{Binding HasTagNameError}"
+                    Text="{Binding TagNameError}" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Spacing="6">
+                <TextBlock Classes="formLabel" Text="{Binding MessageLabel}" />
+                <TextBox
+                    Classes="commitDescription"
+                    MinHeight="86"
+                    PlaceholderText="{Binding MessagePlaceholder}"
+                    Text="{Binding Message, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+
+            <Border Grid.Row="3" Classes="branchBasePanel">
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="section" Text="{Binding TargetTitle}" />
+                    <TextBlock
+                        Classes="muted"
+                        Text="{Binding TargetDescription}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <StackPanel
+                Grid.Row="5"
+                HorizontalAlignment="Right"
+                Orientation="Horizontal"
+                Spacing="8">
+                <Button
+                    MinWidth="86"
+                    Command="{Binding CancelCommand}"
+                    Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.Cancel}}" />
+                <Button
+                    Classes="dialogPrimary"
+                    MinWidth="112"
+                    Command="{Binding CreateCommand}"
+                    Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.CreateTagButton}}" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</codewf:CodeWFWindow>

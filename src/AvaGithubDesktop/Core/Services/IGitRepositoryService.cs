@@ -31,6 +31,10 @@ public interface IGitRepositoryService
         int maxCount,
         CancellationToken cancellationToken);
 
+    Task<IReadOnlySet<string>> LoadTagNamesAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken);
+
     Task<IReadOnlyList<GitBranchItem>> LoadBranchesAsync(
         string repositoryPath,
         CancellationToken cancellationToken);
@@ -157,5 +161,12 @@ public interface IGitRepositoryService
         string summary,
         string description,
         bool amendLastCommit,
+        CancellationToken cancellationToken);
+
+    Task CreateTagAsync(
+        string repositoryPath,
+        string tagName,
+        string message,
+        string targetSha,
         CancellationToken cancellationToken);
 }

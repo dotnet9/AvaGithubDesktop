@@ -212,6 +212,17 @@ public sealed class GitRepositoryService : IGitRepositoryService
         return ParseHistory(history);
     }
 
+    public async Task<IReadOnlySet<string>> LoadTagNamesAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken)
+    {
+        var root = await ResolveRootAsync(repositoryPath, cancellationToken);
+        var tags = await RunOptionalGitAsync(root, cancellationToken, "tag", "--list");
+        return tags
+            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToHashSet(StringComparer.Ordinal);
+    }
+
     public async Task<IReadOnlyList<GitBranchItem>> LoadBranchesAsync(
         string repositoryPath,
         CancellationToken cancellationToken)
@@ -856,6 +867,35 @@ public sealed class GitRepositoryService : IGitRepositoryService
         }
 
         await RunRequiredGitAsync(root, cancellationToken, commitArguments.ToArray());
+    }
+
+    public async Task CreateTagAsync(
+        string repositoryPath,
+        string tagName,
+        string message,
+        string targetSha,
+        CancellationToken cancellationToken)
+    {
+        var root = await ResolveRootAsync(repositoryPath, cancellationToken);
+        var normalizedTagName = tagName.Trim();
+        if (string.IsNullOrWhiteSpace(normalizedTagName))
+        {
+            throw new ArgumentException("A tag name is required.", nameof(tagName));
+        }
+
+        if (string.IsNullOrWhiteSpace(targetSha))
+        {
+            throw new ArgumentException("A target commit is required.", nameof(targetSha));
+        }
+
+        await RunRequiredGitAsync(root, cancellationToken, "check-ref-format", $"refs/tags/{normalizedTagName}");
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            await RunRequiredGitAsync(root, cancellationToken, "tag", normalizedTagName, targetSha.Trim());
+            return;
+        }
+
+        await RunRequiredGitAsync(root, cancellationToken, "tag", "-a", normalizedTagName, targetSha.Trim(), "-m", message.Trim());
     }
 
     private static async Task<string> ResolveBranchAsync(string root, CancellationToken cancellationToken)

@@ -928,6 +928,11 @@
                                             Command="{Binding ViewSelectedCommitOnGitHubCommand}"
                                             Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.ViewCommitOnGitHub}}"
                                             IsEnabled="{Binding CanViewSelectedCommitOnGitHub}" />
+                                        <Button
+                                            Classes="inlineAction"
+                                            Command="{Binding CreateTagCommand}"
+                                            Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.CreateTag}}"
+                                            IsEnabled="{Binding CanCreateTag}" />
                                     </StackPanel>
                                 </Grid>
                             </Grid>

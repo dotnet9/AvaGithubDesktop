@@ -26,6 +26,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly IHelpService _helpService;
     private readonly IConfirmationDialogService _confirmationDialogService;
     private readonly IBranchDialogService _branchDialogService;
+    private readonly ITagDialogService _tagDialogService;
     private readonly IAppSettingsStore _settingsStore;
     private readonly IThemeService _themeService;
     private readonly IAppLocalizer _localizer;
@@ -62,6 +63,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isDiscardingChanges;
     private bool _isManagingRemote;
     private bool _isAmendingLastCommit;
+    private bool _isCreatingTag;
     private bool _isSigningIn;
     private bool _isOperationLogVisible;
     private bool _isInitialized;
@@ -109,6 +111,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         IHelpService helpService,
         IConfirmationDialogService confirmationDialogService,
         IBranchDialogService branchDialogService,
+        ITagDialogService tagDialogService,
         IAppSettingsStore settingsStore,
         IThemeService themeService,
         IAppLocalizer localizer,
@@ -128,6 +131,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _helpService = helpService;
         _confirmationDialogService = confirmationDialogService;
         _branchDialogService = branchDialogService;
+        _tagDialogService = tagDialogService;
         _settingsStore = settingsStore;
         _themeService = themeService;
         _localizer = localizer;
@@ -179,6 +183,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         ViewSelectedCommitOnGitHubCommand = ReactiveCommand.CreateFromTask(
             ViewSelectedCommitOnGitHubAsync,
             this.WhenAnyValue(model => model.CanViewSelectedCommitOnGitHub));
+        CreateTagCommand = ReactiveCommand.CreateFromTask(
+            CreateTagAsync,
+            this.WhenAnyValue(model => model.CanCreateTag));
         ToggleOperationLogCommand = ReactiveCommand.Create(ToggleOperationLog);
         SelectThemeCommand = ReactiveCommand.Create<string?>(SelectThemeByKey);
         SelectSimplifiedChineseCommand = ReactiveCommand.Create(() => SelectLanguageByCulture("zh-CN"));
@@ -344,6 +351,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> CopySelectedCommitShaCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ViewSelectedCommitOnGitHubCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> CreateTagCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ToggleOperationLogCommand { get; }
 
@@ -601,7 +610,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         !IsRestoringStash &&
         !IsDiscardingStash &&
         !IsDiscardingChanges &&
-        !IsManagingRemote;
+        !IsManagingRemote &&
+        !IsCreatingTag;
 
     public bool IsLoading
     {
@@ -735,6 +745,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    public bool IsCreatingTag
+    {
+        get => _isCreatingTag;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isCreatingTag, value);
+            RaiseOperationStateChanged();
+        }
+    }
+
     public int ChangedFilesCount
     {
         get => _changedFilesCount;
@@ -820,6 +840,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(SelectedCommitChangedFilesHeader));
             this.RaisePropertyChanged(nameof(CanCopySelectedCommitSha));
             this.RaisePropertyChanged(nameof(CanViewSelectedCommitOnGitHub));
+            this.RaisePropertyChanged(nameof(CanCreateTag));
             ApplySelectedCommitFiles(value, selectedFilePath);
         }
     }
@@ -836,6 +857,12 @@ public sealed class MainWindowViewModel : ViewModelBase
         CanRunRepositoryCommand &&
         SelectedCommit is not null &&
         RepositoryRemoteUrlHelper.TryGetGitHubCommitUrl(RemoteUrl, SelectedCommit.Sha, out _);
+
+    public bool CanCreateTag =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        !HasRepositoryOperationInProgress &&
+        SelectedCommit is not null;
 
     public string HistoryHeaderText
     {
@@ -1763,6 +1790,59 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
 
         await ViewCommitOnGitHubAsync(RemoteUrl, SelectedCommit.Sha);
+    }
+
+    private async Task CreateTagAsync()
+    {
+        if (!CanCreateTag || SelectedCommit is null)
+        {
+            return;
+        }
+
+        var targetCommit = SelectedCommit;
+        IReadOnlySet<string> tagNames;
+        try
+        {
+            tagNames = await _gitRepositoryService.LoadTagNamesAsync(RootPath, CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusLoadTagsFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+            return;
+        }
+
+        var request = await _tagDialogService.ShowCreateTagDialogAsync(targetCommit, tagNames);
+        if (request is null)
+        {
+            return;
+        }
+
+        IsCreatingTag = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(
+            _localizer.Format(AvaGithubDesktopL.StatusCreatingTagFormat, request.TagName, targetCommit.ShortSha)));
+
+        try
+        {
+            await _gitRepositoryService.CreateTagAsync(
+                RootPath,
+                request.TagName,
+                request.Message,
+                request.TargetSha,
+                CancellationToken.None);
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusCreatedTagFormat, request.TagName)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusCreateTagFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsCreatingTag = false;
+        }
     }
 
     private async Task OpenRepositoryItemInShellAsync(RepositoryListItemViewModel repository)
@@ -2935,6 +3015,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(CanToggleAmendLastCommit));
         this.RaisePropertyChanged(nameof(CanCopySelectedCommitSha));
         this.RaisePropertyChanged(nameof(CanViewSelectedCommitOnGitHub));
+        this.RaisePropertyChanged(nameof(CanCreateTag));
         this.RaisePropertyChanged(nameof(CommitButtonText));
         this.RaisePropertyChanged(nameof(SelectedChangesStatusText));
     }
