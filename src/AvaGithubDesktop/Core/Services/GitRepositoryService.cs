@@ -351,6 +351,20 @@ public sealed class GitRepositoryService : IGitRepositoryService
         await RunRequiredGitAsync(root, cancellationToken, "branch", "-D", branchName.Trim());
     }
 
+    public async Task UnsetUpstreamAsync(
+        string repositoryPath,
+        string branchName,
+        CancellationToken cancellationToken)
+    {
+        var root = await ResolveRootAsync(repositoryPath, cancellationToken);
+        if (string.IsNullOrWhiteSpace(branchName) || branchName.StartsWith("HEAD", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("A local branch name is required.", nameof(branchName));
+        }
+
+        await RunRequiredGitAsync(root, cancellationToken, "branch", "--unset-upstream", branchName.Trim());
+    }
+
     public async Task<GitMergeResult> MergeBranchAsync(
         string repositoryPath,
         string sourceBranchName,

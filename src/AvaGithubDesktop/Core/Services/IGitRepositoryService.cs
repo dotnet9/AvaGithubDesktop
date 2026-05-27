@@ -62,6 +62,11 @@ public interface IGitRepositoryService
         string branchName,
         CancellationToken cancellationToken);
 
+    Task UnsetUpstreamAsync(
+        string repositoryPath,
+        string branchName,
+        CancellationToken cancellationToken);
+
     Task<GitMergeResult> MergeBranchAsync(
         string repositoryPath,
         string sourceBranchName,

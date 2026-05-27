@@ -214,6 +214,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         DeleteCurrentBranchCommand = ReactiveCommand.CreateFromTask(
             DeleteCurrentBranchAsync,
             this.WhenAnyValue(model => model.CanDeleteCurrentBranch));
+        UnsetUpstreamCommand = ReactiveCommand.CreateFromTask(
+            UnsetUpstreamAsync,
+            this.WhenAnyValue(model => model.CanUnsetUpstream));
         UpdateFromDefaultBranchCommand = ReactiveCommand.CreateFromTask(
             UpdateFromDefaultBranchAsync,
             this.WhenAnyValue(model => model.CanUpdateFromDefaultBranch));
@@ -385,6 +388,8 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> DeleteCurrentBranchCommand { get; }
 
+    public ReactiveCommand<Unit, Unit> UnsetUpstreamCommand { get; }
+
     public ReactiveCommand<Unit, Unit> UpdateFromDefaultBranchCommand { get; }
 
     public ReactiveCommand<Unit, Unit> MergeBranchCommand { get; }
@@ -500,7 +505,12 @@ public sealed class MainWindowViewModel : ViewModelBase
     public string Upstream
     {
         get => _upstream;
-        private set => this.RaiseAndSetIfChanged(ref _upstream, value);
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _upstream, value);
+            RaiseBranchStateChanged();
+            RaiseSyncStateChanged();
+        }
     }
 
     public string RemoteName
@@ -957,6 +967,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         CanRunRepositoryCommand &&
         !HasRepositoryOperationInProgress &&
         CurrentBranchItem?.CanDelete == true;
+
+    public bool CanUnsetUpstream =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        !HasRepositoryOperationInProgress &&
+        !string.IsNullOrWhiteSpace(CurrentBranch) &&
+        CurrentBranch != "-" &&
+        !CurrentBranch.StartsWith("HEAD", StringComparison.OrdinalIgnoreCase) &&
+        !string.IsNullOrWhiteSpace(Upstream) &&
+        Upstream != "-";
 
     public string UpdateFromDefaultBranchMenuText =>
         string.IsNullOrWhiteSpace(DefaultBranch) || DefaultBranch == "-"
@@ -3207,6 +3227,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(CanCreateBranch));
         this.RaisePropertyChanged(nameof(CanRenameCurrentBranch));
         this.RaisePropertyChanged(nameof(CanDeleteCurrentBranch));
+        this.RaisePropertyChanged(nameof(CanUnsetUpstream));
         this.RaisePropertyChanged(nameof(CanUpdateFromDefaultBranch));
         this.RaisePropertyChanged(nameof(UpdateFromDefaultBranchMenuText));
         this.RaisePropertyChanged(nameof(CanMergeBranch));
@@ -3317,6 +3338,38 @@ public sealed class MainWindowViewModel : ViewModelBase
         if (CurrentBranchItem is { } branch)
         {
             await DeleteBranchAsync(branch);
+        }
+    }
+
+    private async Task UnsetUpstreamAsync()
+    {
+        if (!CanUnsetUpstream)
+        {
+            return;
+        }
+
+        var branchName = CurrentBranch;
+        var upstream = Upstream;
+        IsUpdatingBranch = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(
+            _localizer.Format(AvaGithubDesktopL.StatusUnsettingUpstreamFormat, branchName, upstream)));
+
+        try
+        {
+            await _gitRepositoryService.UnsetUpstreamAsync(RootPath, branchName, CancellationToken.None);
+            await ReloadRepositoryWorkspaceAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusUnsetUpstreamFormat, branchName)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusUnsetUpstreamFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsUpdatingBranch = false;
         }
     }
 
