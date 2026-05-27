@@ -153,6 +153,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             (hasRepository, remoteUrl, canRunRepositoryCommand) =>
                 hasRepository && canRunRepositoryCommand && RepositoryRemoteUrlHelper.TryGetGitHubWebUrl(remoteUrl, out _));
         ViewRepositoryOnGitHubCommand = ReactiveCommand.CreateFromTask(ViewRepositoryOnGitHubAsync, canViewCurrentRepositoryOnGitHub);
+        CreateIssueOnGitHubCommand = ReactiveCommand.CreateFromTask(CreateIssueOnGitHubAsync, canViewCurrentRepositoryOnGitHub);
         ShowChangesCommand = ReactiveCommand.Create(ShowChanges);
         ShowHistoryCommand = ReactiveCommand.Create(ShowHistory);
         CopySelectedCommitShaCommand = ReactiveCommand.CreateFromTask(CopySelectedCommitShaAsync, this.WhenAnyValue(model => model.CanCopySelectedCommitSha));
@@ -277,6 +278,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ShowRepositoryInFileManagerCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ViewRepositoryOnGitHubCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> CreateIssueOnGitHubCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CommitCommand { get; }
 
@@ -1390,6 +1393,11 @@ public sealed class MainWindowViewModel : ViewModelBase
         await ViewRepositoryRemoteOnGitHubAsync(RemoteUrl);
     }
 
+    private async Task CreateIssueOnGitHubAsync()
+    {
+        await OpenIssueCreationOnGitHubAsync(RemoteUrl);
+    }
+
     private void ToggleOperationLog()
     {
         IsOperationLogVisible = !IsOperationLogVisible;
@@ -1726,6 +1734,27 @@ public sealed class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenRepositoryOnGitHubFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+    }
+
+    private async Task OpenIssueCreationOnGitHubAsync(string? remoteUrl)
+    {
+        if (!RepositoryRemoteUrlHelper.TryGetGitHubIssueCreationUrl(remoteUrl, out var webUrl))
+        {
+            ErrorMessage = _localizer.Get(AvaGithubDesktopL.StatusRepositoryHasNoGitHubRemote);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+            return;
+        }
+
+        try
+        {
+            await _repositoryShellService.OpenUrlAsync(webUrl);
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedIssueCreationOnGitHub)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenIssueCreationOnGitHubFailedFormat, ex.Message);
             _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
         }
     }

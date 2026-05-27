@@ -67,6 +67,19 @@ public static class RepositoryRemoteUrlHelper
         return true;
     }
 
+    public static bool TryGetGitHubIssueCreationUrl(string? remoteUrl, out string webUrl)
+    {
+        webUrl = string.Empty;
+        if (!TryGetGitHubWebUrl(remoteUrl, out var repositoryUrl))
+        {
+            return false;
+        }
+
+        // GitHub Desktop 会打开 issue 模板选择页，兼容配置了 issue forms/templates 的仓库。
+        webUrl = $"{repositoryUrl}/issues/new/choose";
+        return true;
+    }
+
     private static bool TryGetGitHubBranchRouteUrl(string? remoteUrl, string? upstream, string route, out string webUrl)
     {
         webUrl = string.Empty;

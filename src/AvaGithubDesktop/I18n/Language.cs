@@ -31,6 +31,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuOpenInExternalEditor = "AvaGithubDesktop.AvaGithubDesktopL.MenuOpenInExternalEditor";
     public static readonly string MenuShowInFileManager = "AvaGithubDesktop.AvaGithubDesktopL.MenuShowInFileManager";
     public static readonly string MenuViewOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.MenuViewOnGitHub";
+    public static readonly string MenuCreateIssueOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.MenuCreateIssueOnGitHub";
     public static readonly string MenuCopyRepositoryName = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyRepositoryName";
     public static readonly string MenuCopyRepositoryPath = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyRepositoryPath";
     public static readonly string MenuCopyFilePath = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyFilePath";
@@ -217,6 +218,8 @@ public static class AvaGithubDesktopL
     public static readonly string StatusShowRepositoryInFileManagerFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusShowRepositoryInFileManagerFailedFormat";
     public static readonly string StatusOpenedRepositoryOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedRepositoryOnGitHub";
     public static readonly string StatusOpenRepositoryOnGitHubFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenRepositoryOnGitHubFailedFormat";
+    public static readonly string StatusOpenedIssueCreationOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedIssueCreationOnGitHub";
+    public static readonly string StatusOpenIssueCreationOnGitHubFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenIssueCreationOnGitHubFailedFormat";
     public static readonly string StatusRepositoryHasNoGitHubRemote = "AvaGithubDesktop.AvaGithubDesktopL.StatusRepositoryHasNoGitHubRemote";
     public static readonly string StatusOpenedCommitOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedCommitOnGitHub";
     public static readonly string StatusOpenCommitOnGitHubFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenCommitOnGitHubFailedFormat";

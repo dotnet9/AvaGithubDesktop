@@ -95,3 +95,4 @@
 - Desktop 风格 Branch 主菜单支持 Squash and merge into current branch
 - Desktop 风格 Branch 主菜单支持 Rebase current branch
 - Desktop 风格 Branch 主菜单支持 Create Pull Request
+- Desktop 风格 Repository 主菜单支持 Create Issue on GitHub
