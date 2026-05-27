@@ -797,6 +797,13 @@ public sealed class MainWindowViewModel : ViewModelBase
         HasRemote &&
         CanRunRepositoryCommand;
 
+    public bool CanPublishCurrentBranch =>
+        HasRemote &&
+        string.Equals(Upstream, "-", StringComparison.Ordinal) &&
+        !string.IsNullOrWhiteSpace(CurrentBranch) &&
+        CurrentBranch != "-" &&
+        !CurrentBranch.StartsWith("HEAD", StringComparison.OrdinalIgnoreCase);
+
     public string SyncActionTitle
     {
         get
@@ -811,9 +818,15 @@ public sealed class MainWindowViewModel : ViewModelBase
                 return _activeSyncOperation switch
                 {
                     RepositorySyncOperation.Pull => _localizer.Format(AvaGithubDesktopL.SyncPullingTitleFormat, RemoteName),
+                    RepositorySyncOperation.Publish => _localizer.Get(AvaGithubDesktopL.SyncPublishingBranchTitle),
                     RepositorySyncOperation.Push => _localizer.Format(AvaGithubDesktopL.SyncPushingTitleFormat, RemoteName),
                     _ => _localizer.Format(AvaGithubDesktopL.SyncFetchingTitleFormat, RemoteName)
                 };
+            }
+
+            if (CanPublishCurrentBranch)
+            {
+                return _localizer.Get(AvaGithubDesktopL.SyncPublishBranchTitle);
             }
 
             if (_behind > 0)
@@ -844,12 +857,22 @@ public sealed class MainWindowViewModel : ViewModelBase
                 return _localizer.Get(AvaGithubDesktopL.SyncInProgressDescription);
             }
 
+            if (CanPublishCurrentBranch)
+            {
+                var descriptionKey = RepositoryRemoteUrlHelper.TryGetGitHubWebUrl(RemoteUrl, out _)
+                    ? AvaGithubDesktopL.SyncPublishBranchToGitHubDescription
+                    : AvaGithubDesktopL.SyncPublishBranchToRemoteDescription;
+                return _localizer.Get(descriptionKey);
+            }
+
             return FormatLastFetched(LastFetchedAt);
         }
     }
 
     public string SyncActionIcon => IsSyncing
         ? "..."
+        : CanPublishCurrentBranch
+            ? "↑"
         : _behind > 0
             ? "↓"
             : _ahead > 0
@@ -1797,6 +1820,11 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private Task SynchronizeRepositoryAsync()
     {
+        if (CanPublishCurrentBranch)
+        {
+            return PublishBranchAsync();
+        }
+
         if (_behind > 0)
         {
             return PullRepositoryAsync();
@@ -1818,6 +1846,9 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private Task PushRepositoryAsync() =>
         RunRemoteOperationAsync(RepositorySyncOperation.Push);
+
+    private Task PublishBranchAsync() =>
+        RunRemoteOperationAsync(RepositorySyncOperation.Publish);
 
     private async Task RunRemoteOperationAsync(RepositorySyncOperation operation)
     {
@@ -1842,6 +1873,7 @@ public sealed class MainWindowViewModel : ViewModelBase
                     await _gitRepositoryService.PullAsync(RootPath, RemoteName, CancellationToken.None);
                     break;
                 case RepositorySyncOperation.Push:
+                case RepositorySyncOperation.Publish:
                     await _gitRepositoryService.PushAsync(RootPath, RemoteName, CurrentBranch, CancellationToken.None);
                     break;
                 default:
@@ -1873,6 +1905,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         operation switch
         {
             RepositorySyncOperation.Pull => _localizer.Format(AvaGithubDesktopL.StatusPullingFormat, RemoteName),
+            RepositorySyncOperation.Publish => _localizer.Format(AvaGithubDesktopL.StatusPublishingBranchFormat, CurrentBranch, RemoteName),
             RepositorySyncOperation.Push => _localizer.Format(AvaGithubDesktopL.StatusPushingFormat, RemoteName),
             _ => _localizer.Format(AvaGithubDesktopL.StatusFetchingFormat, RemoteName)
         };
@@ -1881,6 +1914,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         operation switch
         {
             RepositorySyncOperation.Pull => _localizer.Format(AvaGithubDesktopL.StatusPulledFormat, RemoteName),
+            RepositorySyncOperation.Publish => _localizer.Format(AvaGithubDesktopL.StatusPublishedBranchFormat, CurrentBranch, RemoteName),
             RepositorySyncOperation.Push => _localizer.Format(AvaGithubDesktopL.StatusPushedFormat, RemoteName),
             _ => _localizer.Format(AvaGithubDesktopL.StatusFetchedFormat, RemoteName)
         };
@@ -1889,6 +1923,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         operation switch
         {
             RepositorySyncOperation.Pull => AvaGithubDesktopL.StatusPullFailedFormat,
+            RepositorySyncOperation.Publish => AvaGithubDesktopL.StatusPublishBranchFailedFormat,
             RepositorySyncOperation.Push => AvaGithubDesktopL.StatusPushFailedFormat,
             _ => AvaGithubDesktopL.StatusFetchFailedFormat
         };
@@ -2398,6 +2433,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         this.RaisePropertyChanged(nameof(HasRemote));
         this.RaisePropertyChanged(nameof(CanSynchronize));
+        this.RaisePropertyChanged(nameof(CanPublishCurrentBranch));
         this.RaisePropertyChanged(nameof(SyncActionTitle));
         this.RaisePropertyChanged(nameof(SyncActionDescription));
         this.RaisePropertyChanged(nameof(SyncActionIcon));
@@ -2756,5 +2792,6 @@ public enum RepositorySyncOperation
     None,
     Fetch,
     Pull,
+    Publish,
     Push
 }

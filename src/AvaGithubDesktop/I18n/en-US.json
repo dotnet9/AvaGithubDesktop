@@ -273,12 +273,16 @@
       "SyncFetchTitleFormat": "Fetch {0}",
       "SyncPullTitleFormat": "Pull {0}",
       "SyncPushTitleFormat": "Push {0}",
+      "SyncPublishBranchTitle": "Publish branch",
       "SyncFetchingTitleFormat": "Fetching {0}",
       "SyncPullingTitleFormat": "Pulling {0}",
       "SyncPushingTitleFormat": "Pushing {0}",
+      "SyncPublishingBranchTitle": "Publishing branch",
       "SyncNoRemote": "No remote",
       "SyncNoRemoteDescription": "Configure a remote before syncing.",
       "SyncInProgressDescription": "Synchronizing repository...",
+      "SyncPublishBranchToGitHubDescription": "Publish this branch to GitHub",
+      "SyncPublishBranchToRemoteDescription": "Publish this branch to the remote",
       "SyncNeverFetched": "Never fetched",
       "SyncLastFetchedJustNow": "Last fetched just now",
       "SyncLastFetchedMinutesAgoFormat": "Last fetched {0} minutes ago",
@@ -292,7 +296,10 @@
       "StatusPullFailedFormat": "Pull failed: {0}",
       "StatusPushingFormat": "Pushing {0}...",
       "StatusPushedFormat": "Pushed {0}.",
-      "StatusPushFailedFormat": "Push failed: {0}"
+      "StatusPushFailedFormat": "Push failed: {0}",
+      "StatusPublishingBranchFormat": "Publishing branch {0} to {1}...",
+      "StatusPublishedBranchFormat": "Published branch {0} to {1}.",
+      "StatusPublishBranchFailedFormat": "Publish branch failed: {0}"
     }
   }
 }

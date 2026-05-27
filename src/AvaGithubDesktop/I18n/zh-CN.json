@@ -273,12 +273,16 @@
       "SyncFetchTitleFormat": "获取 {0}",
       "SyncPullTitleFormat": "拉取 {0}",
       "SyncPushTitleFormat": "推送 {0}",
+      "SyncPublishBranchTitle": "发布分支",
       "SyncFetchingTitleFormat": "正在获取 {0}",
       "SyncPullingTitleFormat": "正在拉取 {0}",
       "SyncPushingTitleFormat": "正在推送 {0}",
+      "SyncPublishingBranchTitle": "正在发布分支",
       "SyncNoRemote": "无远端",
       "SyncNoRemoteDescription": "同步前需要先配置远端。",
       "SyncInProgressDescription": "正在同步仓库...",
+      "SyncPublishBranchToGitHubDescription": "发布此分支到 GitHub",
+      "SyncPublishBranchToRemoteDescription": "发布此分支到远端",
       "SyncNeverFetched": "从未获取",
       "SyncLastFetchedJustNow": "刚刚获取",
       "SyncLastFetchedMinutesAgoFormat": "{0} 分钟前获取",
@@ -292,7 +296,10 @@
       "StatusPullFailedFormat": "拉取失败：{0}",
       "StatusPushingFormat": "正在推送 {0}...",
       "StatusPushedFormat": "已推送 {0}。",
-      "StatusPushFailedFormat": "推送失败：{0}"
+      "StatusPushFailedFormat": "推送失败：{0}",
+      "StatusPublishingBranchFormat": "正在发布分支 {0} 到 {1}...",
+      "StatusPublishedBranchFormat": "已发布分支 {0} 到 {1}。",
+      "StatusPublishBranchFailedFormat": "发布分支失败：{0}"
     }
   }
 }

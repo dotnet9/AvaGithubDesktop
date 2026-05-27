@@ -278,12 +278,16 @@ public static class AvaGithubDesktopL
     public static readonly string SyncFetchTitleFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncFetchTitleFormat";
     public static readonly string SyncPullTitleFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncPullTitleFormat";
     public static readonly string SyncPushTitleFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncPushTitleFormat";
+    public static readonly string SyncPublishBranchTitle = "AvaGithubDesktop.AvaGithubDesktopL.SyncPublishBranchTitle";
     public static readonly string SyncFetchingTitleFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncFetchingTitleFormat";
     public static readonly string SyncPullingTitleFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncPullingTitleFormat";
     public static readonly string SyncPushingTitleFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncPushingTitleFormat";
+    public static readonly string SyncPublishingBranchTitle = "AvaGithubDesktop.AvaGithubDesktopL.SyncPublishingBranchTitle";
     public static readonly string SyncNoRemote = "AvaGithubDesktop.AvaGithubDesktopL.SyncNoRemote";
     public static readonly string SyncNoRemoteDescription = "AvaGithubDesktop.AvaGithubDesktopL.SyncNoRemoteDescription";
     public static readonly string SyncInProgressDescription = "AvaGithubDesktop.AvaGithubDesktopL.SyncInProgressDescription";
+    public static readonly string SyncPublishBranchToGitHubDescription = "AvaGithubDesktop.AvaGithubDesktopL.SyncPublishBranchToGitHubDescription";
+    public static readonly string SyncPublishBranchToRemoteDescription = "AvaGithubDesktop.AvaGithubDesktopL.SyncPublishBranchToRemoteDescription";
     public static readonly string SyncNeverFetched = "AvaGithubDesktop.AvaGithubDesktopL.SyncNeverFetched";
     public static readonly string SyncLastFetchedJustNow = "AvaGithubDesktop.AvaGithubDesktopL.SyncLastFetchedJustNow";
     public static readonly string SyncLastFetchedMinutesAgoFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncLastFetchedMinutesAgoFormat";
@@ -298,4 +302,7 @@ public static class AvaGithubDesktopL
     public static readonly string StatusPushingFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPushingFormat";
     public static readonly string StatusPushedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPushedFormat";
     public static readonly string StatusPushFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPushFailedFormat";
+    public static readonly string StatusPublishingBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPublishingBranchFormat";
+    public static readonly string StatusPublishedBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPublishedBranchFormat";
+    public static readonly string StatusPublishBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPublishBranchFailedFormat";
 }

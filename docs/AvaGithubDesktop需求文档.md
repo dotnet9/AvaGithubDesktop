@@ -87,3 +87,4 @@
 - 左侧仓库列表、文件列表和分支列表文字对比度优化
 - Diff 预览 Git 输出统一 UTF-8 解码，支持中文注释和中文内容正常显示
 - Desktop 风格分支右键菜单支持打开 GitHub 分支页面
+- Desktop 风格未发布分支 Publish branch 同步入口
