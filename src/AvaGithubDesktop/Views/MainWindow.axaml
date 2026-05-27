@@ -43,6 +43,8 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAddLocalRepository}}" Command="{Binding BrowseRepositoryCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRefresh}}" Command="{Binding RefreshRepositoryCommand}" />
                     <Separator />
+                    <MenuItem Header="{Binding AccountButtonText}" IsEnabled="False" IsVisible="{Binding IsSignedIn}" />
+                    <MenuItem Header="{Binding AccountEndpointText}" IsEnabled="False" IsVisible="{Binding IsSignedIn}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.SignInToGitHub}}" Command="{Binding SignInCommand}" IsVisible="{Binding IsSignedOut}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.SignOut}}" Command="{Binding SignOutCommand}" IsVisible="{Binding IsSignedIn}" />
                 </MenuItem>
@@ -164,7 +166,7 @@
         <Border
             Grid.Row="0"
             Classes="toolbarBand">
-            <Grid ColumnDefinitions="360,230,230,*,170,150" ColumnSpacing="0">
+            <Grid ColumnDefinitions="360,230,230,*" ColumnSpacing="0">
                 <Button
                     Classes="repositorySelector toolbarSplit"
                     HorizontalAlignment="Stretch"
@@ -426,129 +428,6 @@
                                 Text="{Binding SyncActionDescription}"
                                 TextTrimming="CharacterEllipsis" />
                         </StackPanel>
-                    </Grid>
-                </Button>
-                <ComboBox
-                    Grid.Column="5"
-                    Classes="toolbarLanguage"
-                    HorizontalAlignment="Stretch"
-                    Width="150"
-                    ItemsSource="{Binding Languages}"
-                    SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate x:DataType="models:LanguageOption">
-                            <TextBlock Text="{Binding DisplayName}" />
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-                <Button
-                    Grid.Column="4"
-                    Classes="accountButton toolbarSplit"
-                    Command="{Binding SignInCommand}"
-                    HorizontalAlignment="Stretch"
-                    IsVisible="{Binding IsSignedOut}">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                        <Border
-                            Width="26"
-                            Height="26"
-                            VerticalAlignment="Center"
-                            Background="{DynamicResource AccentBrush}"
-                            CornerRadius="13">
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                FontSize="11"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource ToolbarTextBrush}"
-                                Text="GH" />
-                        </Border>
-                        <StackPanel Grid.Column="1" Spacing="1">
-                            <TextBlock
-                                FontWeight="SemiBold"
-                                Text="{Binding AccountButtonText}"
-                                TextTrimming="CharacterEllipsis" />
-                            <TextBlock
-                                Classes="muted"
-                                FontSize="11"
-                                Text="{Binding AccountEndpointText}"
-                                TextTrimming="CharacterEllipsis" />
-                        </StackPanel>
-                    </Grid>
-                </Button>
-                <Button
-                    Grid.Column="4"
-                    Classes="accountButton toolbarSplit"
-                    HorizontalAlignment="Stretch"
-                    IsVisible="{Binding IsSignedIn}">
-                    <Button.Flyout>
-                        <Flyout>
-                            <Border Classes="accountFlyout">
-                                <StackPanel Width="260" Spacing="10">
-                                    <Grid ColumnDefinitions="36,*" ColumnSpacing="10">
-                                        <Border
-                                            Width="32"
-                                            Height="32"
-                                            VerticalAlignment="Center"
-                                            Background="{DynamicResource AccentBrush}"
-                                            CornerRadius="16">
-                                            <TextBlock
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Center"
-                                                FontSize="12"
-                                                FontWeight="SemiBold"
-                                                Foreground="{DynamicResource ToolbarTextBrush}"
-                                                Text="{Binding AccountInitials}" />
-                                        </Border>
-                                        <StackPanel Grid.Column="1" Spacing="2">
-                                            <TextBlock
-                                                FontWeight="SemiBold"
-                                                Text="{Binding AccountNameText}"
-                                                TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Classes="muted" Text="{Binding AccountButtonText}" />
-                                        </StackPanel>
-                                    </Grid>
-                                    <TextBlock Classes="muted" Text="{Binding AccountEndpointText}" TextWrapping="Wrap" />
-                                    <Separator />
-                                    <Button
-                                        HorizontalAlignment="Stretch"
-                                        Classes="repositoryAddMenu"
-                                        Command="{Binding SignOutCommand}"
-                                        Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.SignOut}}" />
-                                </StackPanel>
-                            </Border>
-                        </Flyout>
-                    </Button.Flyout>
-                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
-                        <Border
-                            Width="26"
-                            Height="26"
-                            VerticalAlignment="Center"
-                            Background="{DynamicResource AccentBrush}"
-                            CornerRadius="13">
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                FontSize="11"
-                                FontWeight="SemiBold"
-                                Foreground="{DynamicResource ToolbarTextBrush}"
-                                Text="{Binding AccountInitials}" />
-                        </Border>
-                        <StackPanel Grid.Column="1" Spacing="1">
-                            <TextBlock
-                                FontWeight="SemiBold"
-                                Text="{Binding AccountButtonText}"
-                                TextTrimming="CharacterEllipsis" />
-                            <TextBlock
-                                Classes="muted"
-                                FontSize="11"
-                                Text="{Binding AccountEndpointText}"
-                                TextTrimming="CharacterEllipsis" />
-                        </StackPanel>
-                        <TextBlock
-                            Grid.Column="2"
-                            VerticalAlignment="Center"
-                            FontWeight="SemiBold"
-                            Text="v" />
                     </Grid>
                 </Button>
             </Grid>

@@ -98,3 +98,5 @@
 - Desktop 风格 Repository 主菜单支持 Create Issue on GitHub
 - 启动时优先恢复最后打开的仓库，最后仓库路径写入 `App.config`
 - Desktop 风格 Branch 主菜单支持当前分支 Rename 与 Delete 入口
+- 默认界面配色优化为冷色科技风
+- 账号登录和语言切换入口收纳到标题栏菜单，工具栏保留核心仓库、分支和同步入口
