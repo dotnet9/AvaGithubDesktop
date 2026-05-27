@@ -21,18 +21,21 @@
     <Style Selector="ListBox.changes ListBoxItem">
         <Setter Property="Padding" Value="0" />
         <Setter Property="Margin" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     </Style>
 
     <Style Selector="ListBox.history ListBoxItem">
         <Setter Property="Padding" Value="0" />
         <Setter Property="Margin" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     </Style>
 
     <Style Selector="ListBox.branchSelector ListBoxItem">
         <Setter Property="Padding" Value="0" />
         <Setter Property="Margin" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     </Style>
 
@@ -42,6 +45,7 @@
 
     <Style Selector="ListBox.changes ListBoxItem:selected">
         <Setter Property="Background" Value="{DynamicResource SelectionBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
     </Style>
 
     <Style Selector="ListBox.history ListBoxItem:pointerover">
@@ -50,6 +54,7 @@
 
     <Style Selector="ListBox.history ListBoxItem:selected">
         <Setter Property="Background" Value="{DynamicResource SelectionBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
     </Style>
 
     <Style Selector="ListBox.branchSelector ListBoxItem:pointerover">
@@ -58,6 +63,31 @@
 
     <Style Selector="ListBox.branchSelector ListBoxItem:selected">
         <Setter Property="Background" Value="{DynamicResource SelectionBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+    </Style>
+
+    <Style Selector="ListBox.changes ListBoxItem TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+    </Style>
+
+    <Style Selector="ListBox.history ListBoxItem TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+    </Style>
+
+    <Style Selector="ListBox.branchSelector ListBoxItem TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+    </Style>
+
+    <Style Selector="ListBox.changes ListBoxItem TextBlock.muted">
+        <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+    </Style>
+
+    <Style Selector="ListBox.history ListBoxItem TextBlock.muted">
+        <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+    </Style>
+
+    <Style Selector="ListBox.branchSelector ListBoxItem TextBlock.muted">
+        <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
     </Style>
 
     <Style Selector="Button.repositoryListItem">
@@ -66,10 +96,20 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     </Style>
 
     <Style Selector="Button.repositoryListItem:pointerover">
         <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.repositoryListItem TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.repositoryListItem TextBlock.muted">
+        <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
     </Style>
 </Styles>
