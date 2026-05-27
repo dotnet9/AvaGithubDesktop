@@ -23,6 +23,11 @@ public sealed class RepositoryPickerService : IRepositoryPickerService
         return await PickFolderAsync(_localizer.Get(AvaGithubDesktopL.DialogCloneParentDirectoryTitle));
     }
 
+    public async Task<string?> PickCreateRepositoryParentDirectoryAsync()
+    {
+        return await PickFolderAsync(_localizer.Get(AvaGithubDesktopL.DialogCreateRepositoryParentDirectoryTitle));
+    }
+
     private static async Task<string?> PickFolderAsync(string title)
     {
         if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime { MainWindow: { } window })

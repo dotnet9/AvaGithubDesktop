@@ -40,6 +40,7 @@
                 Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.AppTitle}}" />
             <Menu Classes="titleBar">
                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFile}}">
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuNewRepository}}" Command="{Binding CreateRepositoryCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAddLocalRepository}}" Command="{Binding BrowseRepositoryCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCloneRepository}}" Command="{Binding CloneRepositoryCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRefresh}}" Command="{Binding RefreshRepositoryCommand}" />
@@ -185,6 +186,10 @@
                                             <Button.Flyout>
                                                 <Flyout>
                                                     <StackPanel Width="220" Spacing="4">
+                                                        <Button
+                                                            Classes="repositoryAddMenu"
+                                                            Command="{Binding CreateRepositoryCommand}"
+                                                            Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.NewRepository}}" />
                                                         <Button
                                                             Classes="repositoryAddMenu"
                                                             Command="{Binding BrowseRepositoryCommand}"

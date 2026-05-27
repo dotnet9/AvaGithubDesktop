@@ -62,6 +62,39 @@ public sealed class GitRepositoryService : IGitRepositoryService
             normalizedDestination);
     }
 
+    public async Task CreateRepositoryAsync(
+        string destinationPath,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(destinationPath))
+        {
+            throw new ArgumentException("A destination path is required.", nameof(destinationPath));
+        }
+
+        var normalizedDestination = Path.GetFullPath(destinationPath);
+        if (Directory.Exists(normalizedDestination) || File.Exists(normalizedDestination))
+        {
+            throw new IOException($"The destination path already exists: {normalizedDestination}");
+        }
+
+        var parentDirectory = Path.GetDirectoryName(normalizedDestination);
+        if (string.IsNullOrWhiteSpace(parentDirectory) || !Directory.Exists(parentDirectory))
+        {
+            throw new DirectoryNotFoundException(parentDirectory);
+        }
+
+        Directory.CreateDirectory(normalizedDestination);
+        try
+        {
+            await RunRequiredGitAsync(normalizedDestination, cancellationToken, "init");
+        }
+        catch
+        {
+            TryDeleteDirectory(normalizedDestination);
+            throw;
+        }
+    }
+
     public async Task<GitRepositorySnapshot> LoadRepositoryAsync(
         string repositoryPath,
         CancellationToken cancellationToken)
@@ -1371,6 +1404,21 @@ public sealed class GitRepositoryService : IGitRepositoryService
         catch
         {
             // 清理缓存失败不应打断差异查看，后续缓存目录仍可复用。
+        }
+    }
+
+    private static void TryDeleteDirectory(string directoryPath)
+    {
+        try
+        {
+            if (Directory.Exists(directoryPath))
+            {
+                Directory.Delete(directoryPath, recursive: true);
+            }
+        }
+        catch
+        {
+            // git init 失败时的清理只做 best effort，真正的错误继续交给调用方展示。
         }
     }
 

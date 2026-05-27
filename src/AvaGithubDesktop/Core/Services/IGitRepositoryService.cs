@@ -9,6 +9,10 @@ public interface IGitRepositoryService
         string destinationPath,
         CancellationToken cancellationToken);
 
+    Task CreateRepositoryAsync(
+        string destinationPath,
+        CancellationToken cancellationToken);
+
     Task<GitRepositorySnapshot> LoadRepositoryAsync(string repositoryPath, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<GitCommitItem>> LoadHistoryAsync(
