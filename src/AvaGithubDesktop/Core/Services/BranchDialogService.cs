@@ -49,6 +49,20 @@ public sealed class BranchDialogService : IBranchDialogService
         return await window.ShowDialog<BranchRenameRequest?>(owner);
     }
 
+    public async Task<BranchMergeRequest?> ShowMergeBranchDialogAsync(
+        string currentBranch,
+        IReadOnlyList<GitBranchItem> branches)
+    {
+        if (GetMainWindow() is not { } owner)
+        {
+            return null;
+        }
+
+        var viewModel = new MergeBranchWindowViewModel(currentBranch, branches, _localizer);
+        var window = new MergeBranchWindow(viewModel);
+        return await window.ShowDialog<BranchMergeRequest?>(owner);
+    }
+
     public async Task<bool> ShowDeleteBranchConfirmationAsync(string branchName)
     {
         if (GetMainWindow() is not { } owner)

@@ -13,5 +13,9 @@ public interface IBranchDialogService
         string branchName,
         IReadOnlyList<GitBranchItem> branches);
 
+    Task<BranchMergeRequest?> ShowMergeBranchDialogAsync(
+        string currentBranch,
+        IReadOnlyList<GitBranchItem> branches);
+
     Task<bool> ShowDeleteBranchConfirmationAsync(string branchName);
 }

@@ -47,6 +47,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isCheckingOutBranch;
     private bool _isCreatingBranch;
     private bool _isUpdatingBranch;
+    private bool _isMergingBranch;
     private bool _isSyncing;
     private bool _isStashing;
     private bool _isRestoringStash;
@@ -173,6 +174,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var canCheckoutBranch = this.WhenAnyValue(model => model.CanCheckoutBranch);
         CheckoutBranchCommand = ReactiveCommand.CreateFromTask(CheckoutSelectedBranchAsync, canCheckoutBranch);
         CreateBranchCommand = ReactiveCommand.CreateFromTask(CreateBranchAsync, this.WhenAnyValue(model => model.CanCreateBranch));
+        MergeBranchCommand = ReactiveCommand.CreateFromTask(MergeBranchAsync, this.WhenAnyValue(model => model.CanMergeBranch));
         CompareCurrentBranchOnGitHubCommand = ReactiveCommand.CreateFromTask(
             CompareCurrentBranchOnGitHubAsync,
             this.WhenAnyValue(
@@ -286,6 +288,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> CheckoutBranchCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CreateBranchCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> MergeBranchCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CompareCurrentBranchOnGitHubCommand { get; }
 
@@ -483,6 +487,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         !IsCheckingOutBranch &&
         !IsCreatingBranch &&
         !IsUpdatingBranch &&
+        !IsMergingBranch &&
         !IsSyncing &&
         !IsStashing &&
         !IsRestoringStash &&
@@ -537,6 +542,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         private set
         {
             this.RaiseAndSetIfChanged(ref _isUpdatingBranch, value);
+            RaiseOperationStateChanged();
+        }
+    }
+
+    public bool IsMergingBranch
+    {
+        get => _isMergingBranch;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isMergingBranch, value);
             RaiseOperationStateChanged();
         }
     }
@@ -734,6 +749,11 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool CanCreateBranch =>
         HasRepository &&
         CanRunRepositoryCommand;
+
+    public bool CanMergeBranch =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        Branches.Any(branch => !branch.IsCurrent);
 
     public int FilteredBranchesCount => FilteredBranches.Count;
 
@@ -2081,6 +2101,18 @@ public sealed class MainWindowViewModel : ViewModelBase
         ApplyHistory(history);
     }
 
+    private async Task TryReloadRepositoryWorkspaceAsync()
+    {
+        try
+        {
+            await ReloadRepositoryWorkspaceAsync();
+        }
+        catch
+        {
+            // 刷新失败不能覆盖原始 Git 错误；调用方会继续显示真正的操作失败原因。
+        }
+    }
+
     private async Task LoadRepositoryHistoryAsync()
     {
         var entries = await _repositoryHistoryService.LoadKnownRepositoriesAsync(CancellationToken.None);
@@ -2518,6 +2550,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         this.RaisePropertyChanged(nameof(CanCheckoutBranch));
         this.RaisePropertyChanged(nameof(CanCreateBranch));
+        this.RaisePropertyChanged(nameof(CanMergeBranch));
         this.RaisePropertyChanged(nameof(FilteredBranchesCount));
         this.RaisePropertyChanged(nameof(HasActiveBranchFilter));
         this.RaisePropertyChanged(nameof(HasNoFilteredBranches));
@@ -2621,6 +2654,52 @@ public sealed class MainWindowViewModel : ViewModelBase
         finally
         {
             IsUpdatingBranch = false;
+        }
+    }
+
+    private async Task MergeBranchAsync()
+    {
+        if (!CanMergeBranch)
+        {
+            return;
+        }
+
+        var request = await _branchDialogService.ShowMergeBranchDialogAsync(
+            CurrentBranch,
+            Branches.Select(branch => branch.Branch).ToArray());
+        if (request is null)
+        {
+            return;
+        }
+
+        IsMergingBranch = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(
+            _localizer.Format(AvaGithubDesktopL.StatusMergingBranchFormat, request.SourceBranchName, CurrentBranch)));
+
+        try
+        {
+            var result = await _gitRepositoryService.MergeBranchAsync(
+                RootPath,
+                request.SourceBranchName,
+                CancellationToken.None);
+            await ReloadRepositoryWorkspaceAsync();
+            var messageKey = result == GitMergeResult.AlreadyUpToDate
+                ? AvaGithubDesktopL.StatusMergeBranchAlreadyUpToDateFormat
+                : AvaGithubDesktopL.StatusMergedBranchFormat;
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(messageKey, request.SourceBranchName, CurrentBranch)));
+        }
+        catch (Exception ex)
+        {
+            // merge 冲突会让 Git 留在合并状态；刷新工作区可以立即展示冲突文件，便于后续继续处理。
+            await TryReloadRepositoryWorkspaceAsync();
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusMergeBranchFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsMergingBranch = false;
         }
     }
 

@@ -14,6 +14,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuRepository = "AvaGithubDesktop.AvaGithubDesktopL.MenuRepository";
     public static readonly string MenuBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuBranch";
     public static readonly string MenuNewBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuNewBranch";
+    public static readonly string MenuMergeBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuMergeBranch";
     public static readonly string MenuView = "AvaGithubDesktop.AvaGithubDesktopL.MenuView";
     public static readonly string MenuHelp = "AvaGithubDesktop.AvaGithubDesktopL.MenuHelp";
     public static readonly string ShowOperationLog = "AvaGithubDesktop.AvaGithubDesktopL.ShowOperationLog";
@@ -84,6 +85,10 @@ public static class AvaGithubDesktopL
     public static readonly string CreateBranchBaseTitle = "AvaGithubDesktop.AvaGithubDesktopL.CreateBranchBaseTitle";
     public static readonly string CreateBranchBaseDescriptionFormat = "AvaGithubDesktop.AvaGithubDesktopL.CreateBranchBaseDescriptionFormat";
     public static readonly string CreateBranchButton = "AvaGithubDesktop.AvaGithubDesktopL.CreateBranchButton";
+    public static readonly string MergeBranchTitle = "AvaGithubDesktop.AvaGithubDesktopL.MergeBranchTitle";
+    public static readonly string MergeBranchDescriptionFormat = "AvaGithubDesktop.AvaGithubDesktopL.MergeBranchDescriptionFormat";
+    public static readonly string MergeBranchFilterPlaceholder = "AvaGithubDesktop.AvaGithubDesktopL.MergeBranchFilterPlaceholder";
+    public static readonly string MergeBranchButtonFormat = "AvaGithubDesktop.AvaGithubDesktopL.MergeBranchButtonFormat";
     public static readonly string RenameBranchTitle = "AvaGithubDesktop.AvaGithubDesktopL.RenameBranchTitle";
     public static readonly string RenameBranchNameLabel = "AvaGithubDesktop.AvaGithubDesktopL.RenameBranchNameLabel";
     public static readonly string RenameBranchDescriptionFormat = "AvaGithubDesktop.AvaGithubDesktopL.RenameBranchDescriptionFormat";
@@ -262,6 +267,10 @@ public static class AvaGithubDesktopL
     public static readonly string StatusCreatingBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCreatingBranchFormat";
     public static readonly string StatusCreatedBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCreatedBranchFormat";
     public static readonly string StatusCreateBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCreateBranchFailedFormat";
+    public static readonly string StatusMergingBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusMergingBranchFormat";
+    public static readonly string StatusMergedBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusMergedBranchFormat";
+    public static readonly string StatusMergeBranchAlreadyUpToDateFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusMergeBranchAlreadyUpToDateFormat";
+    public static readonly string StatusMergeBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusMergeBranchFailedFormat";
     public static readonly string StatusRenamingBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRenamingBranchFormat";
     public static readonly string StatusRenamedBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRenamedBranchFormat";
     public static readonly string StatusRenameBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRenameBranchFailedFormat";

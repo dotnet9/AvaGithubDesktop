@@ -217,6 +217,30 @@ public sealed class GitRepositoryService : IGitRepositoryService
         await RunRequiredGitAsync(root, cancellationToken, "branch", "-D", branchName.Trim());
     }
 
+    public async Task<GitMergeResult> MergeBranchAsync(
+        string repositoryPath,
+        string sourceBranchName,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        if (string.IsNullOrWhiteSpace(sourceBranchName))
+        {
+            throw new ArgumentException("A source branch name is required.", nameof(sourceBranchName));
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        var normalizedSource = sourceBranchName.Trim();
+        // GitHub Desktop 调用的是普通 git merge <branch>，让 Git 自己决定 fast-forward、merge commit 或冲突状态。
+        var output = await RunRequiredGitAsync(root, cancellationToken, "merge", normalizedSource);
+        return output.Contains("Already up to date", StringComparison.OrdinalIgnoreCase)
+            ? GitMergeResult.AlreadyUpToDate
+            : GitMergeResult.Success;
+    }
+
     public async Task FetchAsync(
         string repositoryPath,
         string remoteName,
