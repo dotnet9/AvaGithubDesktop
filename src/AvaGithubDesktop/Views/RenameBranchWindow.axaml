@@ -1,0 +1,85 @@
+<codewf:CodeWFWindow
+    x:Class="AvaGithubDesktop.Views.RenameBranchWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:codewf="https://codewf.com"
+    xmlns:i18n="https://codewf.com"
+    xmlns:l="clr-namespace:AvaGithubDesktop"
+    xmlns:vm="using:AvaGithubDesktop.ViewModels"
+    x:DataType="vm:RenameBranchWindowViewModel"
+    Width="520"
+    Height="300"
+    MinWidth="480"
+    MinHeight="290"
+    Background="{DynamicResource PanelBackgroundBrush}"
+    CanMaximize="False"
+    CanMinimize="False"
+    CanResize="False"
+    Icon="/Assets/app-logo.ico"
+    ShowInTaskbar="False"
+    Title="{Binding Title}"
+    TitleBarBackground="{DynamicResource ToolbarBackgroundBrush}"
+    TitleBarBorderBrush="{DynamicResource ToolbarBorderBrush}"
+    TitleBarForeground="{DynamicResource ToolbarTextBrush}"
+    TitleBarHeight="34"
+    WindowStartupLocation="CenterOwner">
+
+    <codewf:CodeWFWindow.LeftContent>
+        <TextBlock
+            Margin="12,0,0,0"
+            VerticalAlignment="Center"
+            FontSize="13"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource ToolbarTextBrush}"
+            Text="{Binding Title}" />
+    </codewf:CodeWFWindow.LeftContent>
+
+    <Border Padding="24" Background="{DynamicResource PanelBackgroundBrush}">
+        <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="12">
+            <TextBlock
+                Classes="heading"
+                Text="{Binding Title}"
+                TextWrapping="Wrap" />
+            <TextBlock
+                Grid.Row="1"
+                Classes="muted"
+                Text="{Binding RenameBranchDescription}" />
+            <StackPanel Grid.Row="2" Spacing="6">
+                <TextBlock
+                    Classes="formLabel"
+                    Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.RenameBranchNameLabel}}" />
+                <TextBox
+                    Classes="branchNameInput"
+                    PlaceholderText="{i18n:I18n {x:Static l:AvaGithubDesktopL.CreateBranchNamePlaceholder}}"
+                    Text="{Binding BranchName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock
+                    Classes="warning"
+                    IsVisible="{Binding HasBranchNameError}"
+                    Text="{Binding BranchNameError}" />
+            </StackPanel>
+
+            <Border Grid.Row="3" Classes="branchBasePanel">
+                <TextBlock
+                    Classes="monospace"
+                    Text="{Binding OldBranchName}"
+                    TextWrapping="Wrap" />
+            </Border>
+
+            <StackPanel
+                Grid.Row="4"
+                HorizontalAlignment="Right"
+                Orientation="Horizontal"
+                Spacing="8">
+                <Button
+                    MinWidth="86"
+                    Command="{Binding CancelCommand}"
+                    Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.Cancel}}" />
+                <Button
+                    Classes="dialogPrimary"
+                    MinWidth="112"
+                    Command="{Binding RenameCommand}"
+                    Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.RenameBranchButton}}" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</codewf:CodeWFWindow>

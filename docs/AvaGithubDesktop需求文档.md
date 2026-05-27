@@ -83,3 +83,4 @@
 - Desktop 风格图片与二进制文件 Diff 预览
 - Desktop 风格未跟踪文本文件新增 Diff 预览
 - Desktop 风格 Branch 菜单与 Current Branch 弹出层创建分支
+- Desktop 风格分支右键菜单、重命名分支和删除本地分支

@@ -314,8 +314,16 @@
                                             ItemsSource="{Binding FilteredBranches}"
                                             SelectedItem="{Binding SelectedBranch, Mode=TwoWay}">
                                             <ListBox.ItemTemplate>
-                                                <DataTemplate x:DataType="models:GitBranchItem">
+                                                <DataTemplate x:DataType="vm:GitBranchItemViewModel">
                                                     <Border Height="38" Padding="12,0">
+                                                        <Border.ContextFlyout>
+                                                            <MenuFlyout>
+                                                                <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRenameBranch}}" Command="{Binding RenameCommand}" IsEnabled="{Binding CanRename}" />
+                                                                <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyBranchName}}" Command="{Binding CopyNameCommand}" />
+                                                                <Separator />
+                                                                <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuDeleteBranch}}" Command="{Binding DeleteCommand}" IsEnabled="{Binding CanDelete}" />
+                                                            </MenuFlyout>
+                                                        </Border.ContextFlyout>
                                                         <Grid ColumnDefinitions="18,*,Auto" ColumnSpacing="8">
                                                             <TextBlock
                                                                 VerticalAlignment="Center"

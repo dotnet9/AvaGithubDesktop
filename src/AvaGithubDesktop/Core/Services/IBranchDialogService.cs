@@ -8,4 +8,10 @@ public interface IBranchDialogService
         string currentBranch,
         IReadOnlyList<GitBranchItem> branches,
         string initialName);
+
+    Task<BranchRenameRequest?> ShowRenameBranchDialogAsync(
+        string branchName,
+        IReadOnlyList<GitBranchItem> branches);
+
+    Task<bool> ShowDeleteBranchConfirmationAsync(string branchName);
 }

@@ -46,6 +46,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isCommitting;
     private bool _isCheckingOutBranch;
     private bool _isCreatingBranch;
+    private bool _isUpdatingBranch;
     private bool _isSyncing;
     private bool _isStashing;
     private bool _isRestoringStash;
@@ -69,7 +70,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private GitChangeItemViewModel? _selectedChange;
     private GitCommitItem? _selectedCommit;
     private GitCommitFileItemViewModel? _selectedCommitFile;
-    private GitBranchItem? _selectedBranch;
+    private GitBranchItemViewModel? _selectedBranch;
     private GitHubAccount? _currentAccount;
     private GitStashEntry? _currentBranchStash;
     private RepositorySection _selectedSection = RepositorySection.Changes;
@@ -216,9 +217,9 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public ObservableCollection<GitCommitFileItemViewModel> SelectedCommitFiles { get; } = new();
 
-    public ObservableCollection<GitBranchItem> Branches { get; } = new();
+    public ObservableCollection<GitBranchItemViewModel> Branches { get; } = new();
 
-    public ObservableCollection<GitBranchItem> FilteredBranches { get; } = new();
+    public ObservableCollection<GitBranchItemViewModel> FilteredBranches { get; } = new();
 
     public ObservableCollection<RepositoryListGroupViewModel> RepositoryGroups { get; } = new();
 
@@ -459,6 +460,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         !IsCommitting &&
         !IsCheckingOutBranch &&
         !IsCreatingBranch &&
+        !IsUpdatingBranch &&
         !IsSyncing &&
         !IsStashing &&
         !IsRestoringStash &&
@@ -503,6 +505,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         private set
         {
             this.RaiseAndSetIfChanged(ref _isCreatingBranch, value);
+            RaiseOperationStateChanged();
+        }
+    }
+
+    public bool IsUpdatingBranch
+    {
+        get => _isUpdatingBranch;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isUpdatingBranch, value);
             RaiseOperationStateChanged();
         }
     }
@@ -681,7 +693,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
-    public GitBranchItem? SelectedBranch
+    public GitBranchItemViewModel? SelectedBranch
     {
         get => _selectedBranch;
         set
@@ -1336,6 +1348,14 @@ public sealed class MainWindowViewModel : ViewModelBase
             repository.Path,
             AvaGithubDesktopL.StatusCopiedRepositoryPath,
             AvaGithubDesktopL.StatusCopyRepositoryTextFailedFormat);
+    }
+
+    private async Task CopyBranchNameAsync(GitBranchItemViewModel branch)
+    {
+        await CopyTextAsync(
+            branch.Name,
+            AvaGithubDesktopL.StatusCopiedBranchName,
+            AvaGithubDesktopL.StatusCopyBranchNameFailedFormat);
     }
 
     private async Task ViewRepositoryItemOnGitHubAsync(RepositoryListItemViewModel repository)
@@ -2144,7 +2164,11 @@ public sealed class MainWindowViewModel : ViewModelBase
         Branches.Clear();
         foreach (var branch in branches)
         {
-            Branches.Add(branch);
+            Branches.Add(new GitBranchItemViewModel(
+                branch,
+                RenameBranchAsync,
+                CopyBranchNameAsync,
+                DeleteBranchAsync));
         }
 
         ApplyBranchFilter(selectedName, preferCurrentBranch: true);
@@ -2173,7 +2197,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         RaiseBranchStateChanged();
     }
 
-    private static bool MatchesBranchFilter(GitBranchItem branch, string filterText)
+    private static bool MatchesBranchFilter(GitBranchItemViewModel branch, string filterText)
     {
         if (string.IsNullOrWhiteSpace(filterText))
         {
@@ -2404,6 +2428,85 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(AccountInitials));
     }
 
+    private async Task RenameBranchAsync(GitBranchItemViewModel branch)
+    {
+        if (!HasRepository || !CanRunRepositoryCommand || !branch.CanRename)
+        {
+            return;
+        }
+
+        var request = await _branchDialogService.ShowRenameBranchDialogAsync(
+            branch.Name,
+            Branches.Select(item => item.Branch).ToArray());
+        if (request is null)
+        {
+            return;
+        }
+
+        IsUpdatingBranch = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(
+            _localizer.Format(AvaGithubDesktopL.StatusRenamingBranchFormat, request.OldBranchName, request.NewBranchName)));
+
+        try
+        {
+            await _gitRepositoryService.RenameBranchAsync(
+                RootPath,
+                request.OldBranchName,
+                request.NewBranchName,
+                CancellationToken.None);
+            await ReloadRepositoryWorkspaceAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusRenamedBranchFormat, request.OldBranchName, request.NewBranchName)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusRenameBranchFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsUpdatingBranch = false;
+        }
+    }
+
+    private async Task DeleteBranchAsync(GitBranchItemViewModel branch)
+    {
+        if (!HasRepository || !CanRunRepositoryCommand || !branch.CanDelete)
+        {
+            return;
+        }
+
+        var confirmed = await _branchDialogService.ShowDeleteBranchConfirmationAsync(branch.Name);
+        if (!confirmed)
+        {
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusDeleteBranchCanceled)));
+            return;
+        }
+
+        IsUpdatingBranch = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(
+            _localizer.Format(AvaGithubDesktopL.StatusDeletingBranchFormat, branch.Name)));
+
+        try
+        {
+            await _gitRepositoryService.DeleteBranchAsync(RootPath, branch.Name, CancellationToken.None);
+            await ReloadRepositoryWorkspaceAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusDeletedBranchFormat, branch.Name)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusDeleteBranchFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsUpdatingBranch = false;
+        }
+    }
+
     private async Task CreateBranchAsync()
     {
         if (!CanCreateBranch)
@@ -2413,7 +2516,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         var request = await _branchDialogService.ShowCreateBranchDialogAsync(
             CurrentBranch,
-            Branches,
+            Branches.Select(branch => branch.Branch).ToArray(),
             BranchFilterText);
         if (request is null)
         {

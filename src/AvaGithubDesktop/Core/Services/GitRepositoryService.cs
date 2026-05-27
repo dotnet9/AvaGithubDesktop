@@ -164,6 +164,59 @@ public sealed class GitRepositoryService : IGitRepositoryService
         }
     }
 
+    public async Task RenameBranchAsync(
+        string repositoryPath,
+        string oldBranchName,
+        string newBranchName,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        if (string.IsNullOrWhiteSpace(oldBranchName))
+        {
+            throw new ArgumentException("A source branch name is required.", nameof(oldBranchName));
+        }
+
+        if (string.IsNullOrWhiteSpace(newBranchName))
+        {
+            throw new ArgumentException("A target branch name is required.", nameof(newBranchName));
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        // rename 同样使用 Git 自带校验，避免 UI 层遗漏 ref 边界规则。
+        var normalizedOldName = oldBranchName.Trim();
+        var normalizedNewName = newBranchName.Trim();
+        await RunRequiredGitAsync(root, cancellationToken, "check-ref-format", "--branch", normalizedNewName);
+        // 大小写-only 重命名在 Windows/macOS 的大小写不敏感文件系统上需要强制参数，Desktop 也对这类场景做了特殊处理。
+        var renameFlag = string.Equals(normalizedOldName, normalizedNewName, StringComparison.OrdinalIgnoreCase)
+                         && !string.Equals(normalizedOldName, normalizedNewName, StringComparison.Ordinal)
+            ? "-M"
+            : "-m";
+        await RunRequiredGitAsync(root, cancellationToken, "branch", renameFlag, normalizedOldName, normalizedNewName);
+    }
+
+    public async Task DeleteBranchAsync(
+        string repositoryPath,
+        string branchName,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        if (string.IsNullOrWhiteSpace(branchName))
+        {
+            throw new ArgumentException("A branch name is required.", nameof(branchName));
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        await RunRequiredGitAsync(root, cancellationToken, "branch", "-D", branchName.Trim());
+    }
+
     public async Task FetchAsync(
         string repositoryPath,
         string remoteName,

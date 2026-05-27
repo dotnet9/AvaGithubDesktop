@@ -35,6 +35,32 @@ public sealed class BranchDialogService : IBranchDialogService
         return await window.ShowDialog<BranchCreationRequest?>(owner);
     }
 
+    public async Task<BranchRenameRequest?> ShowRenameBranchDialogAsync(
+        string branchName,
+        IReadOnlyList<GitBranchItem> branches)
+    {
+        if (GetMainWindow() is not { } owner)
+        {
+            return null;
+        }
+
+        var viewModel = new RenameBranchWindowViewModel(branchName, branches, _localizer);
+        var window = new RenameBranchWindow(viewModel);
+        return await window.ShowDialog<BranchRenameRequest?>(owner);
+    }
+
+    public async Task<bool> ShowDeleteBranchConfirmationAsync(string branchName)
+    {
+        if (GetMainWindow() is not { } owner)
+        {
+            return false;
+        }
+
+        var viewModel = new DeleteBranchConfirmationWindowViewModel(branchName, _localizer);
+        var window = new DeleteBranchConfirmationWindow(viewModel);
+        return await window.ShowDialog<bool>(owner);
+    }
+
     private static Window? GetMainWindow()
     {
         return Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: { } mainWindow }

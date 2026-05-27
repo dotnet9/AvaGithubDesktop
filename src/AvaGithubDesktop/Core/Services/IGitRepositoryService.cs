@@ -27,6 +27,17 @@ public interface IGitRepositoryService
         bool checkoutBranch,
         CancellationToken cancellationToken);
 
+    Task RenameBranchAsync(
+        string repositoryPath,
+        string oldBranchName,
+        string newBranchName,
+        CancellationToken cancellationToken);
+
+    Task DeleteBranchAsync(
+        string repositoryPath,
+        string branchName,
+        CancellationToken cancellationToken);
+
     Task FetchAsync(
         string repositoryPath,
         string remoteName,

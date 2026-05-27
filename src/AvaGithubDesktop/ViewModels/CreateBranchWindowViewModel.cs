@@ -1,12 +1,11 @@
 using System.Reactive;
-using System.Text.RegularExpressions;
 using AvaGithubDesktop.Core.Models;
 using AvaGithubDesktop.Core.Services;
 using ReactiveUI;
 
 namespace AvaGithubDesktop.ViewModels;
 
-public sealed partial class CreateBranchWindowViewModel : ViewModelBase
+public sealed class CreateBranchWindowViewModel : ViewModelBase
 {
     private readonly HashSet<string> _branchNames;
     private readonly IAppLocalizer _localizer;
@@ -60,22 +59,11 @@ public sealed partial class CreateBranchWindowViewModel : ViewModelBase
         get
         {
             var trimmedName = BranchName.Trim();
-            if (string.IsNullOrWhiteSpace(trimmedName))
-            {
-                return _localizer.Get(AvaGithubDesktopL.BranchNameRequired);
-            }
-
-            if (_branchNames.Contains(trimmedName))
-            {
-                return _localizer.Format(AvaGithubDesktopL.BranchNameAlreadyExistsFormat, trimmedName);
-            }
-
-            if (!IsLikelyValidBranchName(trimmedName))
-            {
-                return _localizer.Get(AvaGithubDesktopL.BranchNameInvalid);
-            }
-
-            return string.Empty;
+            return BranchNameValidator.GetValidationError(
+                trimmedName,
+                _branchNames,
+                ignoredBranchName: null,
+                _localizer);
         }
     }
 
@@ -105,20 +93,4 @@ public sealed partial class CreateBranchWindowViewModel : ViewModelBase
     {
         return string.IsNullOrWhiteSpace(initialName) ? string.Empty : initialName.Trim();
     }
-
-    private static bool IsLikelyValidBranchName(string branchName)
-    {
-        // 这里覆盖 Git ref 常见限制，最终仍由 git check-ref-format 做权威校验。
-        return !branchName.StartsWith("/", StringComparison.Ordinal)
-            && !branchName.EndsWith("/", StringComparison.Ordinal)
-            && !branchName.EndsWith(".", StringComparison.Ordinal)
-            && !branchName.EndsWith(".lock", StringComparison.OrdinalIgnoreCase)
-            && !branchName.Contains("..", StringComparison.Ordinal)
-            && !branchName.Contains("//", StringComparison.Ordinal)
-            && !branchName.Contains("@{", StringComparison.Ordinal)
-            && !InvalidBranchNameCharactersRegex().IsMatch(branchName);
-    }
-
-    [GeneratedRegex(@"[\000-\037\177 ~^:?*\[\\]")]
-    private static partial Regex InvalidBranchNameCharactersRegex();
 }
