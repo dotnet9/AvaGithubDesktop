@@ -156,5 +156,6 @@ public interface IGitRepositoryService
         IReadOnlyList<string> includedPaths,
         string summary,
         string description,
+        bool amendLastCommit,
         CancellationToken cancellationToken);
 }

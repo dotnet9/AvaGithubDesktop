@@ -39,6 +39,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private string _remoteName = "-";
     private string _remoteUrl = "-";
     private string _lastCommit = "-";
+    private string _lastCommitSummary = string.Empty;
     private string _aheadBehindText = "-";
     private string _errorMessage = string.Empty;
     private string _commitSummary = string.Empty;
@@ -60,6 +61,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isDiscardingStash;
     private bool _isDiscardingChanges;
     private bool _isManagingRemote;
+    private bool _isAmendingLastCommit;
     private bool _isSigningIn;
     private bool _isOperationLogVisible;
     private bool _isInitialized;
@@ -509,6 +511,12 @@ public sealed class MainWindowViewModel : ViewModelBase
         private set => this.RaiseAndSetIfChanged(ref _lastCommit, value);
     }
 
+    public string LastCommitSummary
+    {
+        get => _lastCommitSummary;
+        private set => this.RaiseAndSetIfChanged(ref _lastCommitSummary, value);
+    }
+
     public string AheadBehindText
     {
         get => _aheadBehindText;
@@ -793,6 +801,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(HistoryHeaderText));
             this.RaisePropertyChanged(nameof(HasHistory));
             this.RaisePropertyChanged(nameof(HasNoHistory));
+            RaiseCommitStateChanged();
         }
     }
 
@@ -1227,6 +1236,26 @@ public sealed class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _commitDescription, value);
     }
 
+    public bool IsAmendingLastCommit
+    {
+        get => _isAmendingLastCommit;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _isAmendingLastCommit, value);
+            if (value && string.IsNullOrWhiteSpace(CommitSummary) && !string.IsNullOrWhiteSpace(LastCommitSummary))
+            {
+                CommitSummary = LastCommitSummary;
+            }
+
+            RaiseCommitStateChanged();
+        }
+    }
+
+    public bool CanToggleAmendLastCommit =>
+        HasRepository &&
+        HasHistory &&
+        CanRunRepositoryCommand;
+
     public string ChangesFilterText
     {
         get => _changesFilterText;
@@ -1275,7 +1304,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool CanCommit =>
         HasRepository &&
         CanRunRepositoryCommand &&
-        IncludedChangesCount > 0 &&
+        (IncludedChangesCount > 0 || IsAmendingLastCommit) &&
+        (!IsAmendingLastCommit || HasHistory) &&
         !string.IsNullOrWhiteSpace(CommitSummary);
 
     public string CommitButtonText
@@ -1289,7 +1319,14 @@ public sealed class MainWindowViewModel : ViewModelBase
 
             if (IncludedChangesCount <= 0)
             {
-                return _localizer.Get(AvaGithubDesktopL.SelectFilesToCommit);
+                return IsAmendingLastCommit
+                    ? _localizer.Get(AvaGithubDesktopL.AmendLastCommitButton)
+                    : _localizer.Get(AvaGithubDesktopL.SelectFilesToCommit);
+            }
+
+            if (IsAmendingLastCommit)
+            {
+                return _localizer.Get(AvaGithubDesktopL.AmendLastCommitButton);
             }
 
             var formatKey = IncludedChangesCount == 1
@@ -2216,6 +2253,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             RemoteName = "-";
             RemoteUrl = "-";
             OperationState = RepositoryOperationState.None;
+            LastCommitSummary = string.Empty;
             LastFetchedAt = null;
             CurrentBranchStash = null;
             ApplyBranches(Array.Empty<GitBranchItem>());
@@ -2247,11 +2285,14 @@ public sealed class MainWindowViewModel : ViewModelBase
             .Distinct(StringComparer.Ordinal)
             .ToArray();
         var committedSummary = CommitSummary.Trim();
+        var isAmending = IsAmendingLastCommit;
 
         IsCommitting = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(
-            _localizer.Format(AvaGithubDesktopL.StatusCommittingFormat, IncludedChangesCount, CurrentBranch)));
+        var startedMessage = isAmending
+            ? _localizer.Format(AvaGithubDesktopL.StatusAmendingCommitFormat, CurrentBranch)
+            : _localizer.Format(AvaGithubDesktopL.StatusCommittingFormat, IncludedChangesCount, CurrentBranch);
+        _eventBus.Publish(new StatusMessageChangedCommand(startedMessage));
 
         try
         {
@@ -2260,22 +2301,30 @@ public sealed class MainWindowViewModel : ViewModelBase
                 includedPaths,
                 CommitSummary,
                 CommitDescription,
+                isAmending,
                 CancellationToken.None);
 
             CommitSummary = string.Empty;
             CommitDescription = string.Empty;
+            IsAmendingLastCommit = false;
             var snapshot = await _gitRepositoryService.LoadRepositoryAsync(RootPath, CancellationToken.None);
             ApplySnapshot(snapshot);
             var branches = await _gitRepositoryService.LoadBranchesAsync(snapshot.RootPath, CancellationToken.None);
             ApplyBranches(branches);
             var history = await _gitRepositoryService.LoadHistoryAsync(snapshot.RootPath, HistoryCommitLimit, CancellationToken.None);
             ApplyHistory(history);
+            var completedFormat = isAmending
+                ? AvaGithubDesktopL.StatusAmendedCommitFormat
+                : AvaGithubDesktopL.StatusCommittedFormat;
             _eventBus.Publish(new StatusMessageChangedCommand(
-                _localizer.Format(AvaGithubDesktopL.StatusCommittedFormat, committedSummary)));
+                _localizer.Format(completedFormat, committedSummary)));
         }
         catch (Exception ex)
         {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusCommitFailedFormat, ex.Message);
+            var failedFormat = isAmending
+                ? AvaGithubDesktopL.StatusAmendCommitFailedFormat
+                : AvaGithubDesktopL.StatusCommitFailedFormat;
+            ErrorMessage = _localizer.Format(failedFormat, ex.Message);
             _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
         }
         finally
@@ -2619,6 +2668,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         OperationState = snapshot.OperationState;
         LastFetchedAt = snapshot.LastFetchedAt;
         LastCommit = snapshot.LastCommit;
+        LastCommitSummary = snapshot.LastCommitSummary;
         ChangedFilesCount = snapshot.ChangedFilesCount;
         StagedCount = snapshot.StagedCount;
         UnstagedCount = snapshot.UnstagedCount;
@@ -2671,6 +2721,11 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
 
         HistoryCommitCount = HistoryCommits.Count;
+        if (HistoryCommitCount == 0)
+        {
+            IsAmendingLastCommit = false;
+        }
+
         SelectedCommit = !string.IsNullOrWhiteSpace(selectedSha)
             ? HistoryCommits.FirstOrDefault(commit => commit.Sha == selectedSha) ?? HistoryCommits.FirstOrDefault()
             : HistoryCommits.FirstOrDefault();
@@ -2877,6 +2932,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private void RaiseCommitStateChanged()
     {
         this.RaisePropertyChanged(nameof(CanCommit));
+        this.RaisePropertyChanged(nameof(CanToggleAmendLastCommit));
         this.RaisePropertyChanged(nameof(CanCopySelectedCommitSha));
         this.RaisePropertyChanged(nameof(CanViewSelectedCommitOnGitHub));
         this.RaisePropertyChanged(nameof(CommitButtonText));

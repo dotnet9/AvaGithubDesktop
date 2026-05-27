@@ -131,6 +131,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
             RemoteUrl: string.IsNullOrWhiteSpace(remote) ? "-" : remote,
             LastFetchedAt: lastFetchedAt,
             LastCommit: FormatLastCommit(lastCommit),
+            LastCommitSummary: FormatLastCommitSummary(lastCommit),
             Ahead: ahead,
             Behind: behind,
             OperationState: operationState,
@@ -797,6 +798,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
         IReadOnlyList<string> includedPaths,
         string summary,
         string description,
+        bool amendLastCommit,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
@@ -814,7 +816,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
             .Distinct(StringComparer.Ordinal)
             .ToArray();
 
-        if (normalizedIncludedPaths.Length == 0)
+        if (!amendLastCommit && normalizedIncludedPaths.Length == 0)
         {
             throw new InvalidOperationException("Select one or more files to commit.");
         }
@@ -834,9 +836,19 @@ public sealed class GitRepositoryService : IGitRepositoryService
             await RunRequiredGitAsync(root, cancellationToken, CreatePathArguments("reset", trackedPaths));
         }
 
-        await RunRequiredGitAsync(root, cancellationToken, CreatePathArguments("add", normalizedIncludedPaths));
+        if (normalizedIncludedPaths.Length > 0)
+        {
+            await RunRequiredGitAsync(root, cancellationToken, CreatePathArguments("add", normalizedIncludedPaths));
+        }
 
-        var commitArguments = new List<string> { "commit", "-m", summary.Trim() };
+        var commitArguments = new List<string> { "commit" };
+        if (amendLastCommit)
+        {
+            commitArguments.Add("--amend");
+        }
+
+        commitArguments.Add("-m");
+        commitArguments.Add(summary.Trim());
         if (!string.IsNullOrWhiteSpace(description))
         {
             commitArguments.Add("-m");
@@ -1284,6 +1296,17 @@ public sealed class GitRepositoryService : IGitRepositoryService
         }
 
         return $"{parts[0]} {parts[1]} ({parts[2]})";
+    }
+
+    private static string FormatLastCommitSummary(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        var parts = value.Split('\t');
+        return parts.Length >= 2 ? parts[1].Trim() : value.Trim();
     }
 
     private static async Task<GitStashEntry?> LoadCurrentBranchStashAsync(

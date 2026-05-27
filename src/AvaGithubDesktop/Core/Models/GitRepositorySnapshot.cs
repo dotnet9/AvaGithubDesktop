@@ -10,6 +10,7 @@ public sealed record GitRepositorySnapshot(
     string RemoteUrl,
     DateTimeOffset? LastFetchedAt,
     string LastCommit,
+    string LastCommitSummary,
     int Ahead,
     int Behind,
     RepositoryOperationState OperationState,

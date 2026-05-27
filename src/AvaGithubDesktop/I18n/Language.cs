@@ -225,6 +225,8 @@ public static class AvaGithubDesktopL
     public static readonly string CleanWorkingTree = "AvaGithubDesktop.AvaGithubDesktopL.CleanWorkingTree";
     public static readonly string CommitSummaryPlaceholder = "AvaGithubDesktop.AvaGithubDesktopL.CommitSummaryPlaceholder";
     public static readonly string CommitDescriptionPlaceholder = "AvaGithubDesktop.AvaGithubDesktopL.CommitDescriptionPlaceholder";
+    public static readonly string AmendLastCommit = "AvaGithubDesktop.AvaGithubDesktopL.AmendLastCommit";
+    public static readonly string AmendLastCommitButton = "AvaGithubDesktop.AvaGithubDesktopL.AmendLastCommitButton";
     public static readonly string CommitFileToBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.CommitFileToBranchFormat";
     public static readonly string CommitFilesToBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.CommitFilesToBranchFormat";
     public static readonly string SelectFilesToCommit = "AvaGithubDesktop.AvaGithubDesktopL.SelectFilesToCommit";
@@ -238,6 +240,9 @@ public static class AvaGithubDesktopL
     public static readonly string StatusCommittingFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCommittingFormat";
     public static readonly string StatusCommittedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCommittedFormat";
     public static readonly string StatusCommitFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCommitFailedFormat";
+    public static readonly string StatusAmendingCommitFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusAmendingCommitFormat";
+    public static readonly string StatusAmendedCommitFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusAmendedCommitFormat";
+    public static readonly string StatusAmendCommitFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusAmendCommitFailedFormat";
     public static readonly string Committing = "AvaGithubDesktop.AvaGithubDesktopL.Committing";
     public static readonly string StashAllChanges = "AvaGithubDesktop.AvaGithubDesktopL.StashAllChanges";
     public static readonly string StashingChanges = "AvaGithubDesktop.AvaGithubDesktopL.StashingChanges";

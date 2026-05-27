@@ -790,6 +790,10 @@
                                 PlaceholderText="{i18n:I18n {x:Static l:AvaGithubDesktopL.CommitDescriptionPlaceholder}}"
                                 Text="{Binding CommitDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 TextWrapping="Wrap" />
+                            <CheckBox
+                                Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.AmendLastCommit}}"
+                                IsChecked="{Binding IsAmendingLastCommit, Mode=TwoWay}"
+                                IsEnabled="{Binding CanToggleAmendLastCommit}" />
                             <Button
                                 HorizontalAlignment="Stretch"
                                 Classes="stashButton"
