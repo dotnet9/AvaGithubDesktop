@@ -1358,6 +1358,11 @@ public sealed class MainWindowViewModel : ViewModelBase
             AvaGithubDesktopL.StatusCopyBranchNameFailedFormat);
     }
 
+    private async Task ViewBranchOnGitHubAsync(GitBranchItemViewModel branch)
+    {
+        await ViewBranchOnGitHubAsync(RemoteUrl, branch.Upstream);
+    }
+
     private async Task ViewRepositoryItemOnGitHubAsync(RepositoryListItemViewModel repository)
     {
         await ViewRepositoryRemoteOnGitHubAsync(repository.Entry.RemoteUrl);
@@ -1596,6 +1601,27 @@ public sealed class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenCommitOnGitHubFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+    }
+
+    private async Task ViewBranchOnGitHubAsync(string? remoteUrl, string upstream)
+    {
+        if (!RepositoryRemoteUrlHelper.TryGetGitHubBranchUrl(remoteUrl, upstream, out var webUrl))
+        {
+            ErrorMessage = _localizer.Get(AvaGithubDesktopL.StatusRepositoryHasNoGitHubRemote);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+            return;
+        }
+
+        try
+        {
+            await _repositoryShellService.OpenUrlAsync(webUrl);
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedBranchOnGitHub)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenBranchOnGitHubFailedFormat, ex.Message);
             _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
         }
     }
@@ -2168,7 +2194,9 @@ public sealed class MainWindowViewModel : ViewModelBase
                 branch,
                 RenameBranchAsync,
                 CopyBranchNameAsync,
-                DeleteBranchAsync));
+                ViewBranchOnGitHubAsync,
+                DeleteBranchAsync,
+                RepositoryRemoteUrlHelper.TryGetGitHubBranchUrl(RemoteUrl, branch.Upstream, out _)));
         }
 
         ApplyBranchFilter(selectedName, preferCurrentBranch: true);

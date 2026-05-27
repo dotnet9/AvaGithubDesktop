@@ -37,6 +37,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuDiscardStash = "AvaGithubDesktop.AvaGithubDesktopL.MenuDiscardStash";
     public static readonly string MenuRenameBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuRenameBranch";
     public static readonly string MenuCopyBranchName = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyBranchName";
+    public static readonly string MenuViewBranchOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.MenuViewBranchOnGitHub";
     public static readonly string MenuDeleteBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuDeleteBranch";
     public static readonly string MenuAbout = "AvaGithubDesktop.AvaGithubDesktopL.MenuAbout";
     public static readonly string SignInToGitHub = "AvaGithubDesktop.AvaGithubDesktopL.SignInToGitHub";
@@ -269,6 +270,8 @@ public static class AvaGithubDesktopL
     public static readonly string StatusDeleteBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusDeleteBranchFailedFormat";
     public static readonly string StatusCopiedBranchName = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopiedBranchName";
     public static readonly string StatusCopyBranchNameFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopyBranchNameFailedFormat";
+    public static readonly string StatusOpenedBranchOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedBranchOnGitHub";
+    public static readonly string StatusOpenBranchOnGitHubFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenBranchOnGitHubFailedFormat";
     public static readonly string StatusCheckingOutBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckingOutBranchFormat";
     public static readonly string StatusCheckedOutBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckedOutBranchFormat";
     public static readonly string StatusCheckoutBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckoutBranchFailedFormat";

@@ -320,6 +320,7 @@
                                                             <MenuFlyout>
                                                                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRenameBranch}}" Command="{Binding RenameCommand}" IsEnabled="{Binding CanRename}" />
                                                                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyBranchName}}" Command="{Binding CopyNameCommand}" />
+                                                                <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuViewBranchOnGitHub}}" Command="{Binding ViewOnGitHubCommand}" IsEnabled="{Binding CanViewOnGitHub}" IsVisible="{Binding CanViewOnGitHub}" />
                                                                 <Separator />
                                                                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuDeleteBranch}}" Command="{Binding DeleteCommand}" IsEnabled="{Binding CanDelete}" />
                                                             </MenuFlyout>

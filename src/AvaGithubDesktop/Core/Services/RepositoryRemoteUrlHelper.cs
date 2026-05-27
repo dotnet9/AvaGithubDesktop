@@ -38,6 +38,42 @@ public static class RepositoryRemoteUrlHelper
         return true;
     }
 
+    public static bool TryGetGitHubBranchUrl(string? remoteUrl, string? upstream, out string webUrl)
+    {
+        webUrl = string.Empty;
+        if (!TryGetGitHubWebUrl(remoteUrl, out var repositoryUrl))
+        {
+            return false;
+        }
+
+        var branchName = GetBranchNameWithoutRemote(upstream);
+        if (string.IsNullOrWhiteSpace(branchName))
+        {
+            return false;
+        }
+
+        // GitHub Desktop 只对有 upstream 的分支展示入口，并使用去掉远端名前缀后的真实远端分支名。
+        webUrl = $"{repositoryUrl}/tree/{Uri.EscapeDataString(branchName)}";
+        return true;
+    }
+
+    private static string? GetBranchNameWithoutRemote(string? upstream)
+    {
+        if (string.IsNullOrWhiteSpace(upstream) || upstream == "-")
+        {
+            return null;
+        }
+
+        var trimmed = upstream.Trim();
+        var separatorIndex = trimmed.IndexOf('/', StringComparison.Ordinal);
+        if (separatorIndex <= 0 || separatorIndex == trimmed.Length - 1)
+        {
+            return null;
+        }
+
+        return trimmed[(separatorIndex + 1)..];
+    }
+
     private static bool TryBuildGitHubUrl(string ownerAndRepository, out string webUrl)
     {
         webUrl = string.Empty;
