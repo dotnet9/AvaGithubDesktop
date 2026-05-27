@@ -82,6 +82,7 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuUnsetUpstream}}" Command="{Binding UnsetUpstreamCommand}" IsEnabled="{Binding CanUnsetUpstream}" />
                     <Separator />
                     <MenuItem Header="{Binding UpdateFromDefaultBranchMenuText}" Command="{Binding UpdateFromDefaultBranchCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyDefaultBranchName}}" Command="{Binding CopyDefaultBranchNameCommand}" IsEnabled="{Binding CanCopyDefaultBranchName}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuMergeBranch}}" Command="{Binding MergeBranchCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuSquashMergeBranch}}" Command="{Binding SquashMergeBranchCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRebaseBranch}}" Command="{Binding RebaseBranchCommand}" />

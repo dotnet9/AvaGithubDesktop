@@ -20,6 +20,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuSquashMergeBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuSquashMergeBranch";
     public static readonly string MenuRebaseBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuRebaseBranch";
     public static readonly string MenuSetCurrentBranchAsDefault = "AvaGithubDesktop.AvaGithubDesktopL.MenuSetCurrentBranchAsDefault";
+    public static readonly string MenuCopyDefaultBranchName = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopyDefaultBranchName";
     public static readonly string MenuContinueMerge = "AvaGithubDesktop.AvaGithubDesktopL.MenuContinueMerge";
     public static readonly string MenuAbortMerge = "AvaGithubDesktop.AvaGithubDesktopL.MenuAbortMerge";
     public static readonly string MenuContinueRebase = "AvaGithubDesktop.AvaGithubDesktopL.MenuContinueRebase";
@@ -455,6 +456,8 @@ public static class AvaGithubDesktopL
     public static readonly string StatusCopyBranchNameFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopyBranchNameFailedFormat";
     public static readonly string StatusCopiedUpstreamBranchName = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopiedUpstreamBranchName";
     public static readonly string StatusCopyUpstreamBranchNameFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopyUpstreamBranchNameFailedFormat";
+    public static readonly string StatusCopiedDefaultBranchName = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopiedDefaultBranchName";
+    public static readonly string StatusCopyDefaultBranchNameFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCopyDefaultBranchNameFailedFormat";
     public static readonly string StatusOpenedBranchOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedBranchOnGitHub";
     public static readonly string StatusOpenBranchOnGitHubFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenBranchOnGitHubFailedFormat";
     public static readonly string StatusOpenedBranchCompareOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedBranchCompareOnGitHub";

@@ -248,6 +248,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         SetCurrentBranchAsDefaultCommand = ReactiveCommand.CreateFromTask(
             SetCurrentBranchAsDefaultAsync,
             this.WhenAnyValue(model => model.CanSetCurrentBranchAsDefault));
+        CopyDefaultBranchNameCommand = ReactiveCommand.CreateFromTask(
+            CopyDefaultBranchNameAsync,
+            this.WhenAnyValue(model => model.CanCopyDefaultBranchName));
         UpdateFromDefaultBranchCommand = ReactiveCommand.CreateFromTask(
             UpdateFromDefaultBranchAsync,
             this.WhenAnyValue(model => model.CanUpdateFromDefaultBranch));
@@ -446,6 +449,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> UnsetUpstreamCommand { get; }
 
     public ReactiveCommand<Unit, Unit> SetCurrentBranchAsDefaultCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> CopyDefaultBranchNameCommand { get; }
 
     public ReactiveCommand<Unit, Unit> UpdateFromDefaultBranchCommand { get; }
 
@@ -1091,6 +1096,12 @@ public sealed class MainWindowViewModel : ViewModelBase
         CurrentBranch != "-" &&
         !CurrentBranch.StartsWith("HEAD", StringComparison.OrdinalIgnoreCase) &&
         !string.Equals(CurrentBranch, DefaultBranch, StringComparison.Ordinal);
+
+    public bool CanCopyDefaultBranchName =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        !string.IsNullOrWhiteSpace(DefaultBranch) &&
+        DefaultBranch != "-";
 
     public string UpdateFromDefaultBranchMenuText =>
         string.IsNullOrWhiteSpace(DefaultBranch) || DefaultBranch == "-"
@@ -2245,6 +2256,14 @@ public sealed class MainWindowViewModel : ViewModelBase
             Upstream,
             AvaGithubDesktopL.StatusCopiedUpstreamBranchName,
             AvaGithubDesktopL.StatusCopyUpstreamBranchNameFailedFormat);
+    }
+
+    private async Task CopyDefaultBranchNameAsync()
+    {
+        await CopyTextAsync(
+            DefaultBranch,
+            AvaGithubDesktopL.StatusCopiedDefaultBranchName,
+            AvaGithubDesktopL.StatusCopyDefaultBranchNameFailedFormat);
     }
 
     private async Task ViewBranchOnGitHubAsync(GitBranchItemViewModel branch)
@@ -3605,6 +3624,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private void RaiseDefaultBranchStateChanged()
     {
         this.RaisePropertyChanged(nameof(CanSetCurrentBranchAsDefault));
+        this.RaisePropertyChanged(nameof(CanCopyDefaultBranchName));
         this.RaisePropertyChanged(nameof(CanUpdateFromDefaultBranch));
         this.RaisePropertyChanged(nameof(UpdateFromDefaultBranchMenuText));
     }
