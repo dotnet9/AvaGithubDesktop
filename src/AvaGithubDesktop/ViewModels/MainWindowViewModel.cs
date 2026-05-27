@@ -1003,15 +1003,37 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
-    public string SyncActionIcon => IsSyncing
-        ? "..."
-        : CanPublishCurrentBranch
-            ? "↑"
-        : _behind > 0
-            ? "↓"
-            : _ahead > 0
-                ? "↑"
-                : "↻";
+    public bool IsSyncRefreshIconVisible =>
+        IsSyncing ||
+        (!CanPublishCurrentBranch && _behind <= 0 && _ahead <= 0);
+
+    public bool IsSyncDownloadIconVisible =>
+        !IsSyncing &&
+        !CanPublishCurrentBranch &&
+        _behind > 0;
+
+    public bool IsSyncUploadIconVisible =>
+        !IsSyncing &&
+        (CanPublishCurrentBranch || (!CanPublishCurrentBranch && _behind <= 0 && _ahead > 0));
+
+    public bool HasSyncAheadBehind =>
+        !IsSyncing &&
+        HasRemote &&
+        (_ahead > 0 || _behind > 0);
+
+    public bool HasSyncAhead =>
+        !IsSyncing &&
+        HasRemote &&
+        _ahead > 0;
+
+    public bool HasSyncBehind =>
+        !IsSyncing &&
+        HasRemote &&
+        _behind > 0;
+
+    public int AheadCount => _ahead;
+
+    public int BehindCount => _behind;
 
     public GitChangeItemViewModel? SelectedChange
     {
@@ -2669,7 +2691,14 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(CanPublishCurrentBranch));
         this.RaisePropertyChanged(nameof(SyncActionTitle));
         this.RaisePropertyChanged(nameof(SyncActionDescription));
-        this.RaisePropertyChanged(nameof(SyncActionIcon));
+        this.RaisePropertyChanged(nameof(IsSyncRefreshIconVisible));
+        this.RaisePropertyChanged(nameof(IsSyncDownloadIconVisible));
+        this.RaisePropertyChanged(nameof(IsSyncUploadIconVisible));
+        this.RaisePropertyChanged(nameof(HasSyncAheadBehind));
+        this.RaisePropertyChanged(nameof(HasSyncAhead));
+        this.RaisePropertyChanged(nameof(HasSyncBehind));
+        this.RaisePropertyChanged(nameof(AheadCount));
+        this.RaisePropertyChanged(nameof(BehindCount));
     }
 
     private void ShowChanges()

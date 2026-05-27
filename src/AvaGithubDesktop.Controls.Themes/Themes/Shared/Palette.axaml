@@ -27,6 +27,7 @@
             <SolidColorBrush x:Key="ToolbarHoverBackgroundBrush" Color="#1B2A33" />
             <SolidColorBrush x:Key="ToolbarTextBrush" Color="#FFFFFF" />
             <SolidColorBrush x:Key="ToolbarSecondaryTextBrush" Color="#B7CBD6" />
+            <SolidColorBrush x:Key="ToolbarBadgeBackgroundBrush" Color="#243846" />
             <SolidColorBrush x:Key="ToolbarSplitBorderBrush" Color="#0A1116" />
             <SolidColorBrush x:Key="DiffViewerBackgroundBrush" Color="#FFFFFF" />
             <SolidColorBrush x:Key="DiffLineBackgroundBrush" Color="#FFFFFF" />

@@ -101,3 +101,4 @@
 - 默认界面配色优化为冷色科技风
 - 账号登录和语言切换入口收纳到标题栏菜单，工具栏保留核心仓库、分支和同步入口
 - 顶部仓库和分支入口使用 GitHub Desktop 同源 Octicon 风格矢量图标
+- Desktop 风格同步按钮使用 Octicon 风格矢量图标、ahead/behind 计数徽标和独立 Fetch/Pull/Push 下拉入口

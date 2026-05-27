@@ -193,7 +193,9 @@
                                             </Button.Flyout>
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <TextBlock Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.AddRepository}}" />
-                                                <TextBlock FontWeight="SemiBold" Text="v" />
+                                                <PathIcon
+                                                    Classes="repositoryAddArrow"
+                                                    Data="m4.427 7.427 3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427Z" />
                                             </StackPanel>
                                         </Button>
                                     </Grid>
@@ -284,11 +286,11 @@
                                 Text="{Binding RepositorySelectorTitle}"
                                 TextTrimming="CharacterEllipsis" />
                         </StackPanel>
-                        <TextBlock
+                        <PathIcon
                             Grid.Column="2"
                             VerticalAlignment="Center"
-                            FontWeight="SemiBold"
-                            Text="v" />
+                            Classes="toolbarOcticon"
+                            Data="m4.427 7.427 3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427Z" />
                     </Grid>
                 </Button>
                 <Button
@@ -398,38 +400,114 @@
                                 Text="{Binding CurrentBranch}"
                                 TextTrimming="CharacterEllipsis" />
                         </StackPanel>
-                        <TextBlock
+                        <PathIcon
                             Grid.Column="2"
                             VerticalAlignment="Center"
-                            FontWeight="SemiBold"
-                            Text="v" />
+                            Classes="toolbarOcticon"
+                            Data="m4.427 7.427 3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427Z" />
                     </Grid>
                 </Button>
-                <Button
-                    Grid.Column="2"
-                    Classes="syncToolbar toolbarSplit"
-                    Command="{Binding SynchronizeRepositoryCommand}"
-                    HorizontalAlignment="Stretch"
-                    IsEnabled="{Binding CanSynchronize}">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            FontSize="16"
-                            FontWeight="SemiBold"
-                            Text="{Binding SyncActionIcon}" />
-                        <StackPanel Grid.Column="1" Spacing="1">
-                            <TextBlock
-                                FontWeight="SemiBold"
-                                Text="{Binding SyncActionTitle}"
-                                TextTrimming="CharacterEllipsis" />
-                            <TextBlock
-                                Classes="muted"
-                                FontSize="11"
-                                Text="{Binding SyncActionDescription}"
-                                TextTrimming="CharacterEllipsis" />
-                        </StackPanel>
-                    </Grid>
-                </Button>
+                <Grid Grid.Column="2" ColumnDefinitions="*,39">
+                    <Button
+                        Classes="syncToolbar toolbarSplit"
+                        Command="{Binding SynchronizeRepositoryCommand}"
+                        HorizontalAlignment="Stretch"
+                        IsEnabled="{Binding CanSynchronize}">
+                        <Grid ColumnDefinitions="18,*,Auto" ColumnSpacing="8">
+                            <Grid Width="16" Height="16" VerticalAlignment="Center">
+                                <PathIcon
+                                    Classes="toolbarOcticon"
+                                    Data="M8 2.5c1.645 0 3.123.722 4.131 1.869l-1.204 1.204a.25.25 0 0 0 .177.427h3.646a.25.25 0 0 0 .25-.25V2.104a.25.25 0 0 0-.427-.177l-1.38 1.38A7.001 7.001 0 0 0 1.05 7.16a.75.75 0 1 0 1.49.178A5.501 5.501 0 0 1 8 2.5zm6.294 5.505a.75.75 0 0 0-.833.656 5.501 5.501 0 0 1-9.592 2.97l1.204-1.204A.25.25 0 0 0 4.896 10H1.25a.25.25 0 0 0-.25.25v3.646c0 .223.27.335.427.177l1.38-1.38A7.001 7.001 0 0 0 14.95 8.84a.75.75 0 0 0-.657-.834z"
+                                    IsVisible="{Binding IsSyncRefreshIconVisible}" />
+                                <PathIcon
+                                    Classes="toolbarOcticon"
+                                    Data="M13.03 8.22a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L3.47 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l2.97 2.97V3.75a.75.75 0 0 1 1.5 0v7.44l2.97-2.97a.75.75 0 0 1 1.06 0Z"
+                                    IsVisible="{Binding IsSyncDownloadIconVisible}" />
+                                <PathIcon
+                                    Classes="toolbarOcticon"
+                                    Data="M3.47 7.78a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0l4.25 4.25a.751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018L9 4.81v7.44a.75.75 0 0 1-1.5 0V4.81L4.53 7.78a.75.75 0 0 1-1.06 0Z"
+                                    IsVisible="{Binding IsSyncUploadIconVisible}" />
+                            </Grid>
+                            <StackPanel Grid.Column="1" Spacing="1">
+                                <TextBlock
+                                    FontWeight="SemiBold"
+                                    Text="{Binding SyncActionTitle}"
+                                    TextTrimming="CharacterEllipsis" />
+                                <TextBlock
+                                    Classes="muted"
+                                    FontSize="11"
+                                    Text="{Binding SyncActionDescription}"
+                                    TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                            <Border
+                                Grid.Column="2"
+                                Classes="syncAheadBehindBadge"
+                                IsVisible="{Binding HasSyncAheadBehind}">
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <StackPanel
+                                        IsVisible="{Binding HasSyncAhead}"
+                                        Orientation="Horizontal"
+                                        Spacing="2">
+                                        <TextBlock Classes="syncBadgeText" Text="{Binding AheadCount}" />
+                                        <PathIcon
+                                            Classes="syncBadgeIcon"
+                                            Data="M3.47 7.78a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0l4.25 4.25a.751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018L9 4.81v7.44a.75.75 0 0 1-1.5 0V4.81L4.53 7.78a.75.75 0 0 1-1.06 0Z" />
+                                    </StackPanel>
+                                    <StackPanel
+                                        IsVisible="{Binding HasSyncBehind}"
+                                        Orientation="Horizontal"
+                                        Spacing="2">
+                                        <TextBlock Classes="syncBadgeText" Text="{Binding BehindCount}" />
+                                        <PathIcon
+                                            Classes="syncBadgeIcon"
+                                            Data="M13.03 8.22a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L3.47 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l2.97 2.97V3.75a.75.75 0 0 1 1.5 0v7.44l2.97-2.97a.75.75 0 0 1 1.06 0Z" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Button>
+                    <Button
+                        Grid.Column="1"
+                        Classes="syncDropdownArrow toolbarSplit"
+                        HorizontalAlignment="Stretch"
+                        IsEnabled="{Binding CanSynchronize}">
+                        <Button.Flyout>
+                            <Flyout>
+                                <Border Classes="syncFlyout">
+                                    <StackPanel Width="230" Spacing="2">
+                                        <Button Classes="syncFlyoutMenu" Command="{Binding FetchRepositoryCommand}">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <PathIcon
+                                                    Classes="syncFlyoutIcon"
+                                                    Data="M8 2.5c1.645 0 3.123.722 4.131 1.869l-1.204 1.204a.25.25 0 0 0 .177.427h3.646a.25.25 0 0 0 .25-.25V2.104a.25.25 0 0 0-.427-.177l-1.38 1.38A7.001 7.001 0 0 0 1.05 7.16a.75.75 0 1 0 1.49.178A5.501 5.501 0 0 1 8 2.5zm6.294 5.505a.75.75 0 0 0-.833.656 5.501 5.501 0 0 1-9.592 2.97l1.204-1.204A.25.25 0 0 0 4.896 10H1.25a.25.25 0 0 0-.25.25v3.646c0 .223.27.335.427.177l1.38-1.38A7.001 7.001 0 0 0 14.95 8.84a.75.75 0 0 0-.657-.834z" />
+                                                <TextBlock Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFetch}}" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Classes="syncFlyoutMenu" Command="{Binding PullRepositoryCommand}">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <PathIcon
+                                                    Classes="syncFlyoutIcon"
+                                                    Data="M13.03 8.22a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L3.47 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l2.97 2.97V3.75a.75.75 0 0 1 1.5 0v7.44l2.97-2.97a.75.75 0 0 1 1.06 0Z" />
+                                                <TextBlock Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuPull}}" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Classes="syncFlyoutMenu" Command="{Binding PushRepositoryCommand}">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <PathIcon
+                                                    Classes="syncFlyoutIcon"
+                                                    Data="M3.47 7.78a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0l4.25 4.25a.751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018L9 4.81v7.44a.75.75 0 0 1-1.5 0V4.81L4.53 7.78a.75.75 0 0 1-1.06 0Z" />
+                                                <TextBlock Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuPush}}" />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                </Border>
+                            </Flyout>
+                        </Button.Flyout>
+                        <PathIcon
+                            Classes="toolbarOcticon"
+                            Data="m4.427 7.427 3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427Z" />
+                    </Button>
+                </Grid>
             </Grid>
         </Border>
 
