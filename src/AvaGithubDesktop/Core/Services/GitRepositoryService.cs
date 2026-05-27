@@ -598,6 +598,14 @@ public sealed class GitRepositoryService : IGitRepositoryService
         await RunRequiredGitAsync(root, cancellationToken, "fetch", "--all", "--prune", "--recurse-submodules=on-demand");
     }
 
+    public async Task UpdateSubmodulesAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken)
+    {
+        var root = await ResolveRootAsync(repositoryPath, cancellationToken);
+        await RunRequiredGitAsync(root, cancellationToken, "submodule", "update", "--init", "--recursive");
+    }
+
     public async Task PullAsync(
         string repositoryPath,
         string remoteName,

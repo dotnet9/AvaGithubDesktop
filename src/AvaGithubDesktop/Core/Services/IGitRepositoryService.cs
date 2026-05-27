@@ -143,6 +143,10 @@ public interface IGitRepositoryService
         string repositoryPath,
         CancellationToken cancellationToken);
 
+    Task UpdateSubmodulesAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken);
+
     Task PullAsync(
         string repositoryPath,
         string remoteName,

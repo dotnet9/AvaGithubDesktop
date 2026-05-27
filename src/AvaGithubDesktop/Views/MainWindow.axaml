@@ -56,6 +56,7 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuPull}}" Command="{Binding PullRepositoryCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFetch}}" Command="{Binding FetchRepositoryCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFetchAllRemotes}}" Command="{Binding FetchAllRemotesCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuUpdateSubmodules}}" Command="{Binding UpdateSubmodulesCommand}" IsEnabled="{Binding CanUpdateSubmodules}" />
                     <Separator />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Open}}" Command="{Binding OpenRepositoryCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Refresh}}" Command="{Binding RefreshRepositoryCommand}" />

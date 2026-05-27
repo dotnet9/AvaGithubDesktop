@@ -207,6 +207,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         PullRepositoryCommand = ReactiveCommand.CreateFromTask(PullRepositoryAsync, canSynchronize);
         PushRepositoryCommand = ReactiveCommand.CreateFromTask(PushRepositoryAsync, canSynchronize);
         PushTagsCommand = ReactiveCommand.CreateFromTask(PushTagsAsync, canSynchronize);
+        UpdateSubmodulesCommand = ReactiveCommand.CreateFromTask(
+            UpdateSubmodulesAsync,
+            this.WhenAnyValue(model => model.CanUpdateSubmodules));
 
         var canCommit = this.WhenAnyValue(model => model.CanCommit);
         CommitCommand = ReactiveCommand.CreateFromTask(CommitChangesAsync, canCommit);
@@ -379,6 +382,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> PushRepositoryCommand { get; }
 
     public ReactiveCommand<Unit, Unit> PushTagsCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> UpdateSubmodulesCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ShowChangesCommand { get; }
 
@@ -1239,6 +1244,11 @@ public sealed class MainWindowViewModel : ViewModelBase
         CanRunRepositoryCommand &&
         !HasRepositoryOperationInProgress;
 
+    public bool CanUpdateSubmodules =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        !HasRepositoryOperationInProgress;
+
     public bool CanPublishCurrentBranch =>
         HasRemote &&
         string.Equals(Upstream, "-", StringComparison.Ordinal) &&
@@ -1260,6 +1270,7 @@ public sealed class MainWindowViewModel : ViewModelBase
                 return _activeSyncOperation switch
                 {
                     RepositorySyncOperation.FetchAll => _localizer.Get(AvaGithubDesktopL.SyncFetchingAllRemotesTitle),
+                    RepositorySyncOperation.UpdateSubmodules => _localizer.Get(AvaGithubDesktopL.SyncUpdatingSubmodulesTitle),
                     RepositorySyncOperation.Pull => _localizer.Format(AvaGithubDesktopL.SyncPullingTitleFormat, RemoteName),
                     RepositorySyncOperation.Publish => _localizer.Get(AvaGithubDesktopL.SyncPublishingBranchTitle),
                     RepositorySyncOperation.Push => _localizer.Format(AvaGithubDesktopL.SyncPushingTitleFormat, RemoteName),
@@ -2728,6 +2739,36 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private async Task UpdateSubmodulesAsync()
+    {
+        if (!CanUpdateSubmodules)
+        {
+            return;
+        }
+
+        _activeSyncOperation = RepositorySyncOperation.UpdateSubmodules;
+        IsSyncing = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusUpdatingSubmodules)));
+
+        try
+        {
+            await _gitRepositoryService.UpdateSubmodulesAsync(RootPath, CancellationToken.None);
+            await ReloadRepositoryWorkspaceAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusUpdatedSubmodules)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusUpdateSubmodulesFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            _activeSyncOperation = RepositorySyncOperation.None;
+            IsSyncing = false;
+        }
+    }
+
     private Task PublishBranchAsync() =>
         RunRemoteOperationAsync(RepositorySyncOperation.Publish);
 
@@ -3363,6 +3404,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         this.RaisePropertyChanged(nameof(HasRemote));
         this.RaisePropertyChanged(nameof(CanSynchronize));
+        this.RaisePropertyChanged(nameof(CanUpdateSubmodules));
         this.RaisePropertyChanged(nameof(CanPublishCurrentBranch));
         this.RaisePropertyChanged(nameof(SyncActionTitle));
         this.RaisePropertyChanged(nameof(SyncActionDescription));
@@ -3444,6 +3486,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(CanAbortRevert));
         this.RaisePropertyChanged(nameof(CanContinueCherryPick));
         this.RaisePropertyChanged(nameof(CanAbortCherryPick));
+        this.RaisePropertyChanged(nameof(CanUpdateSubmodules));
         this.RaisePropertyChanged(nameof(ShowRepositoryOperationBanner));
         this.RaisePropertyChanged(nameof(RepositoryOperationBannerTitle));
         this.RaisePropertyChanged(nameof(RepositoryOperationBannerDetail));
@@ -4278,6 +4321,7 @@ public enum RepositorySyncOperation
     None,
     Fetch,
     FetchAll,
+    UpdateSubmodules,
     Pull,
     Publish,
     Push
