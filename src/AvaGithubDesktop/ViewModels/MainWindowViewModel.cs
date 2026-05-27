@@ -200,6 +200,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         FetchRepositoryCommand = ReactiveCommand.CreateFromTask(FetchRepositoryAsync, canSynchronize);
         PullRepositoryCommand = ReactiveCommand.CreateFromTask(PullRepositoryAsync, canSynchronize);
         PushRepositoryCommand = ReactiveCommand.CreateFromTask(PushRepositoryAsync, canSynchronize);
+        PushTagsCommand = ReactiveCommand.CreateFromTask(PushTagsAsync, canSynchronize);
 
         var canCommit = this.WhenAnyValue(model => model.CanCommit);
         CommitCommand = ReactiveCommand.CreateFromTask(CommitChangesAsync, canCommit);
@@ -347,6 +348,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> PullRepositoryCommand { get; }
 
     public ReactiveCommand<Unit, Unit> PushRepositoryCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> PushTagsCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ShowChangesCommand { get; }
 
@@ -2497,6 +2500,40 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private Task PushRepositoryAsync() =>
         RunRemoteOperationAsync(RepositorySyncOperation.Push);
+
+    private async Task PushTagsAsync()
+    {
+        if (!CanSynchronize)
+        {
+            ErrorMessage = _localizer.Get(AvaGithubDesktopL.SyncNoRemoteDescription);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+            return;
+        }
+
+        _activeSyncOperation = RepositorySyncOperation.Push;
+        IsSyncing = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(
+            _localizer.Format(AvaGithubDesktopL.StatusPushingTagsFormat, RemoteName)));
+
+        try
+        {
+            await _gitRepositoryService.PushTagsAsync(RootPath, RemoteName, CancellationToken.None);
+            await ReloadRepositoryWorkspaceAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusPushedTagsFormat, RemoteName)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusPushTagsFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            _activeSyncOperation = RepositorySyncOperation.None;
+            IsSyncing = false;
+        }
+    }
 
     private Task PublishBranchAsync() =>
         RunRemoteOperationAsync(RepositorySyncOperation.Publish);

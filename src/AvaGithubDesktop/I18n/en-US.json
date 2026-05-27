@@ -27,6 +27,7 @@
       "MenuCloneRepository": "Clone repository...",
       "MenuRefresh": "Refresh",
       "MenuPush": "Push",
+      "MenuPushTags": "Push tags",
       "MenuPull": "Pull",
       "MenuFetch": "Fetch",
       "MenuManageRemote": "Manage remote...",
@@ -439,6 +440,9 @@
       "StatusPushingFormat": "Pushing {0}...",
       "StatusPushedFormat": "Pushed {0}.",
       "StatusPushFailedFormat": "Push failed: {0}",
+      "StatusPushingTagsFormat": "Pushing tags to {0}...",
+      "StatusPushedTagsFormat": "Pushed tags to {0}.",
+      "StatusPushTagsFailedFormat": "Push tags failed: {0}",
       "StatusPublishingBranchFormat": "Publishing branch {0} to {1}...",
       "StatusPublishedBranchFormat": "Published branch {0} to {1}.",
       "StatusPublishBranchFailedFormat": "Publish branch failed: {0}"

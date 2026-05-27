@@ -27,6 +27,7 @@
       "MenuCloneRepository": "克隆仓库...",
       "MenuRefresh": "刷新",
       "MenuPush": "推送",
+      "MenuPushTags": "推送标签",
       "MenuPull": "拉取",
       "MenuFetch": "获取",
       "MenuManageRemote": "管理远端...",
@@ -439,6 +440,9 @@
       "StatusPushingFormat": "正在推送 {0}...",
       "StatusPushedFormat": "已推送 {0}。",
       "StatusPushFailedFormat": "推送失败：{0}",
+      "StatusPushingTagsFormat": "正在推送标签到 {0}...",
+      "StatusPushedTagsFormat": "已推送标签到 {0}。",
+      "StatusPushTagsFailedFormat": "推送标签失败：{0}",
       "StatusPublishingBranchFormat": "正在发布分支 {0} 到 {1}...",
       "StatusPublishedBranchFormat": "已发布分支 {0} 到 {1}。",
       "StatusPublishBranchFailedFormat": "发布分支失败：{0}"

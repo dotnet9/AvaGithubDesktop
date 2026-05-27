@@ -113,6 +113,11 @@ public interface IGitRepositoryService
         string branchName,
         CancellationToken cancellationToken);
 
+    Task PushTagsAsync(
+        string repositoryPath,
+        string remoteName,
+        CancellationToken cancellationToken);
+
     Task<bool> CreateStashAsync(
         string repositoryPath,
         string branchName,

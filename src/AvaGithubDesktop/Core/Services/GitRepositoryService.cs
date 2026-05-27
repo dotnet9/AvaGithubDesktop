@@ -540,6 +540,20 @@ public sealed class GitRepositoryService : IGitRepositoryService
         await RunRequiredGitAsync(root, cancellationToken, "push", remoteName, branchName);
     }
 
+    public async Task PushTagsAsync(
+        string repositoryPath,
+        string remoteName,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(remoteName) || remoteName == "-")
+        {
+            throw new ArgumentException("A remote name is required.", nameof(remoteName));
+        }
+
+        var root = await ResolveRootAsync(repositoryPath, cancellationToken);
+        await RunRequiredGitAsync(root, cancellationToken, "push", remoteName.Trim(), "--tags");
+    }
+
     public async Task<bool> CreateStashAsync(
         string repositoryPath,
         string branchName,

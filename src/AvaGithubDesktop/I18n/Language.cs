@@ -32,6 +32,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuCloneRepository = "AvaGithubDesktop.AvaGithubDesktopL.MenuCloneRepository";
     public static readonly string MenuRefresh = "AvaGithubDesktop.AvaGithubDesktopL.MenuRefresh";
     public static readonly string MenuPush = "AvaGithubDesktop.AvaGithubDesktopL.MenuPush";
+    public static readonly string MenuPushTags = "AvaGithubDesktop.AvaGithubDesktopL.MenuPushTags";
     public static readonly string MenuPull = "AvaGithubDesktop.AvaGithubDesktopL.MenuPull";
     public static readonly string MenuFetch = "AvaGithubDesktop.AvaGithubDesktopL.MenuFetch";
     public static readonly string MenuManageRemote = "AvaGithubDesktop.AvaGithubDesktopL.MenuManageRemote";
@@ -444,6 +445,9 @@ public static class AvaGithubDesktopL
     public static readonly string StatusPushingFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPushingFormat";
     public static readonly string StatusPushedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPushedFormat";
     public static readonly string StatusPushFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPushFailedFormat";
+    public static readonly string StatusPushingTagsFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPushingTagsFormat";
+    public static readonly string StatusPushedTagsFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPushedTagsFormat";
+    public static readonly string StatusPushTagsFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPushTagsFailedFormat";
     public static readonly string StatusPublishingBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPublishingBranchFormat";
     public static readonly string StatusPublishedBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPublishedBranchFormat";
     public static readonly string StatusPublishBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPublishBranchFailedFormat";
