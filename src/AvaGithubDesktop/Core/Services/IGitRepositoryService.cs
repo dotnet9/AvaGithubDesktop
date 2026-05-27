@@ -120,6 +120,14 @@ public interface IGitRepositoryService
         string repositoryPath,
         CancellationToken cancellationToken);
 
+    Task ContinueCherryPickAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken);
+
+    Task AbortCherryPickAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken);
+
     Task FetchAsync(
         string repositoryPath,
         string remoteName,
@@ -199,6 +207,11 @@ public interface IGitRepositoryService
         CancellationToken cancellationToken);
 
     Task RevertCommitAsync(
+        string repositoryPath,
+        string sha,
+        CancellationToken cancellationToken);
+
+    Task CherryPickCommitAsync(
         string repositoryPath,
         string sha,
         CancellationToken cancellationToken);

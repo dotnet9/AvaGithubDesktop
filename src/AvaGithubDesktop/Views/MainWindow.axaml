@@ -85,6 +85,8 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAbortRebase}}" Command="{Binding AbortRebaseCommand}" IsVisible="{Binding HasRebaseInProgress}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuContinueRevert}}" Command="{Binding ContinueRevertCommand}" IsVisible="{Binding HasRevertInProgress}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAbortRevert}}" Command="{Binding AbortRevertCommand}" IsVisible="{Binding HasRevertInProgress}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuContinueCherryPick}}" Command="{Binding ContinueCherryPickCommand}" IsVisible="{Binding HasCherryPickInProgress}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAbortCherryPick}}" Command="{Binding AbortCherryPickCommand}" IsVisible="{Binding HasCherryPickInProgress}" />
                     <Separator IsVisible="{Binding HasRepositoryOperationInProgress}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCompareOnGitHub}}" Command="{Binding CompareCurrentBranchOnGitHubCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuViewBranchOnGitHub}}" Command="{Binding ViewCurrentBranchOnGitHubCommand}" />
@@ -938,6 +940,11 @@
                                             Command="{Binding CreateTagCommand}"
                                             Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.CreateTag}}"
                                             IsEnabled="{Binding CanCreateTag}" />
+                                        <Button
+                                            Classes="inlineAction"
+                                            Command="{Binding CherryPickSelectedCommitCommand}"
+                                            Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.CherryPickCommit}}"
+                                            IsEnabled="{Binding CanCherryPickSelectedCommit}" />
                                         <Button
                                             Classes="inlineAction"
                                             Command="{Binding RevertSelectedCommitCommand}"

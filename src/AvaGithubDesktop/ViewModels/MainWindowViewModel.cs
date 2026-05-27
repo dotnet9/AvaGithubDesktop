@@ -65,6 +65,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isAmendingLastCommit;
     private bool _isCreatingTag;
     private bool _isRevertingCommit;
+    private bool _isCherryPickingCommit;
     private bool _isSigningIn;
     private bool _isOperationLogVisible;
     private bool _isInitialized;
@@ -190,6 +191,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         RevertSelectedCommitCommand = ReactiveCommand.CreateFromTask(
             RevertSelectedCommitAsync,
             this.WhenAnyValue(model => model.CanRevertSelectedCommit));
+        CherryPickSelectedCommitCommand = ReactiveCommand.CreateFromTask(
+            CherryPickSelectedCommitAsync,
+            this.WhenAnyValue(model => model.CanCherryPickSelectedCommit));
         ToggleOperationLogCommand = ReactiveCommand.Create(ToggleOperationLog);
         SelectThemeCommand = ReactiveCommand.Create<string?>(SelectThemeByKey);
         SelectSimplifiedChineseCommand = ReactiveCommand.Create(() => SelectLanguageByCulture("zh-CN"));
@@ -249,6 +253,12 @@ public sealed class MainWindowViewModel : ViewModelBase
         AbortRevertCommand = ReactiveCommand.CreateFromTask(
             AbortRevertAsync,
             this.WhenAnyValue(model => model.CanAbortRevert));
+        ContinueCherryPickCommand = ReactiveCommand.CreateFromTask(
+            ContinueCherryPickAsync,
+            this.WhenAnyValue(model => model.CanContinueCherryPick));
+        AbortCherryPickCommand = ReactiveCommand.CreateFromTask(
+            AbortCherryPickAsync,
+            this.WhenAnyValue(model => model.CanAbortCherryPick));
         CompareCurrentBranchOnGitHubCommand = ReactiveCommand.CreateFromTask(
             CompareCurrentBranchOnGitHubAsync,
             this.WhenAnyValue(
@@ -375,6 +385,8 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> RevertSelectedCommitCommand { get; }
 
+    public ReactiveCommand<Unit, Unit> CherryPickSelectedCommitCommand { get; }
+
     public ReactiveCommand<Unit, Unit> ToggleOperationLogCommand { get; }
 
     public ReactiveCommand<string?, Unit> SelectThemeCommand { get; }
@@ -416,6 +428,10 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ContinueRevertCommand { get; }
 
     public ReactiveCommand<Unit, Unit> AbortRevertCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ContinueCherryPickCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> AbortCherryPickCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CompareCurrentBranchOnGitHubCommand { get; }
 
@@ -648,7 +664,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         !IsDiscardingChanges &&
         !IsManagingRemote &&
         !IsCreatingTag &&
-        !IsRevertingCommit;
+        !IsRevertingCommit &&
+        !IsCherryPickingCommit;
 
     public bool IsLoading
     {
@@ -802,6 +819,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    public bool IsCherryPickingCommit
+    {
+        get => _isCherryPickingCommit;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isCherryPickingCommit, value);
+            RaiseOperationStateChanged();
+        }
+    }
+
     public int ChangedFilesCount
     {
         get => _changedFilesCount;
@@ -889,6 +916,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(CanViewSelectedCommitOnGitHub));
             this.RaisePropertyChanged(nameof(CanCreateTag));
             this.RaisePropertyChanged(nameof(CanRevertSelectedCommit));
+            this.RaisePropertyChanged(nameof(CanCherryPickSelectedCommit));
             ApplySelectedCommitFiles(value, selectedFilePath);
         }
     }
@@ -913,6 +941,12 @@ public sealed class MainWindowViewModel : ViewModelBase
         SelectedCommit is not null;
 
     public bool CanRevertSelectedCommit =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        !HasRepositoryOperationInProgress &&
+        SelectedCommit is not null;
+
+    public bool CanCherryPickSelectedCommit =>
         HasRepository &&
         CanRunRepositoryCommand &&
         !HasRepositoryOperationInProgress &&
@@ -1049,13 +1083,18 @@ public sealed class MainWindowViewModel : ViewModelBase
     }
 
     public bool HasRepositoryOperationInProgress =>
-        OperationState is RepositoryOperationState.Merge or RepositoryOperationState.Rebase or RepositoryOperationState.Revert;
+        OperationState is RepositoryOperationState.Merge
+            or RepositoryOperationState.Rebase
+            or RepositoryOperationState.Revert
+            or RepositoryOperationState.CherryPick;
 
     public bool HasMergeInProgress => OperationState == RepositoryOperationState.Merge;
 
     public bool HasRebaseInProgress => OperationState == RepositoryOperationState.Rebase;
 
     public bool HasRevertInProgress => OperationState == RepositoryOperationState.Revert;
+
+    public bool HasCherryPickInProgress => OperationState == RepositoryOperationState.CherryPick;
 
     public bool CanContinueMerge =>
         HasRepository &&
@@ -1079,6 +1118,13 @@ public sealed class MainWindowViewModel : ViewModelBase
         HasRevertInProgress;
 
     public bool CanAbortRevert => CanContinueRevert;
+
+    public bool CanContinueCherryPick =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        HasCherryPickInProgress;
+
+    public bool CanAbortCherryPick => CanContinueCherryPick;
 
     public bool HasCurrentBranchStash => CurrentBranchStash is not null;
 
@@ -1956,6 +2002,38 @@ public sealed class MainWindowViewModel : ViewModelBase
         finally
         {
             IsRevertingCommit = false;
+        }
+    }
+
+    private async Task CherryPickSelectedCommitAsync()
+    {
+        if (!CanCherryPickSelectedCommit || SelectedCommit is null)
+        {
+            return;
+        }
+
+        var targetCommit = SelectedCommit;
+        IsCherryPickingCommit = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(
+            _localizer.Format(AvaGithubDesktopL.StatusCherryPickingCommitFormat, targetCommit.ShortSha)));
+
+        try
+        {
+            await _gitRepositoryService.CherryPickCommitAsync(RootPath, targetCommit.Sha, CancellationToken.None);
+            await ReloadRepositoryWorkspaceAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusCherryPickedCommitFormat, targetCommit.ShortSha)));
+        }
+        catch (Exception ex)
+        {
+            await TryReloadRepositoryWorkspaceAsync();
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusCherryPickCommitFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsCherryPickingCommit = false;
         }
     }
 
@@ -3165,6 +3243,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(CanViewSelectedCommitOnGitHub));
         this.RaisePropertyChanged(nameof(CanCreateTag));
         this.RaisePropertyChanged(nameof(CanRevertSelectedCommit));
+        this.RaisePropertyChanged(nameof(CanCherryPickSelectedCommit));
         this.RaisePropertyChanged(nameof(CommitButtonText));
         this.RaisePropertyChanged(nameof(SelectedChangesStatusText));
     }
@@ -3272,6 +3351,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(HasMergeInProgress));
         this.RaisePropertyChanged(nameof(HasRebaseInProgress));
         this.RaisePropertyChanged(nameof(HasRevertInProgress));
+        this.RaisePropertyChanged(nameof(HasCherryPickInProgress));
         this.RaisePropertyChanged(nameof(CanContinueMerge));
         this.RaisePropertyChanged(nameof(CanAbortMerge));
         this.RaisePropertyChanged(nameof(CanContinueRebase));
@@ -3279,6 +3359,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(CanAbortRebase));
         this.RaisePropertyChanged(nameof(CanContinueRevert));
         this.RaisePropertyChanged(nameof(CanAbortRevert));
+        this.RaisePropertyChanged(nameof(CanContinueCherryPick));
+        this.RaisePropertyChanged(nameof(CanAbortCherryPick));
         RaiseBranchStateChanged();
         RaiseSyncStateChanged();
         RaiseStashStateChanged();
@@ -3718,6 +3800,22 @@ public sealed class MainWindowViewModel : ViewModelBase
             AvaGithubDesktopL.StatusAbortRevertFailedFormat,
             () => _gitRepositoryService.AbortRevertAsync(RootPath, CancellationToken.None));
 
+    private Task ContinueCherryPickAsync() =>
+        RunCherryPickOperationStateCommandAsync(
+            CanContinueCherryPick,
+            AvaGithubDesktopL.StatusContinuingCherryPick,
+            AvaGithubDesktopL.StatusContinuedCherryPick,
+            AvaGithubDesktopL.StatusContinueCherryPickFailedFormat,
+            () => _gitRepositoryService.ContinueCherryPickAsync(RootPath, CancellationToken.None));
+
+    private Task AbortCherryPickAsync() =>
+        RunCherryPickOperationStateCommandAsync(
+            CanAbortCherryPick,
+            AvaGithubDesktopL.StatusAbortingCherryPick,
+            AvaGithubDesktopL.StatusAbortedCherryPick,
+            AvaGithubDesktopL.StatusAbortCherryPickFailedFormat,
+            () => _gitRepositoryService.AbortCherryPickAsync(RootPath, CancellationToken.None));
+
     private async Task RunRevertOperationStateCommandAsync(
         bool canRun,
         string startedKey,
@@ -3749,6 +3847,40 @@ public sealed class MainWindowViewModel : ViewModelBase
         finally
         {
             IsRevertingCommit = false;
+        }
+    }
+
+    private async Task RunCherryPickOperationStateCommandAsync(
+        bool canRun,
+        string startedKey,
+        string completedKey,
+        string failedFormatKey,
+        Func<Task> operation)
+    {
+        if (!canRun)
+        {
+            return;
+        }
+
+        IsCherryPickingCommit = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(startedKey)));
+
+        try
+        {
+            await operation();
+            await ReloadRepositoryWorkspaceAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(completedKey)));
+        }
+        catch (Exception ex)
+        {
+            await TryReloadRepositoryWorkspaceAsync();
+            ErrorMessage = _localizer.Format(failedFormatKey, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsCherryPickingCommit = false;
         }
     }
 

@@ -26,6 +26,8 @@ public static class AvaGithubDesktopL
     public static readonly string MenuAbortRebase = "AvaGithubDesktop.AvaGithubDesktopL.MenuAbortRebase";
     public static readonly string MenuContinueRevert = "AvaGithubDesktop.AvaGithubDesktopL.MenuContinueRevert";
     public static readonly string MenuAbortRevert = "AvaGithubDesktop.AvaGithubDesktopL.MenuAbortRevert";
+    public static readonly string MenuContinueCherryPick = "AvaGithubDesktop.AvaGithubDesktopL.MenuContinueCherryPick";
+    public static readonly string MenuAbortCherryPick = "AvaGithubDesktop.AvaGithubDesktopL.MenuAbortCherryPick";
     public static readonly string MenuView = "AvaGithubDesktop.AvaGithubDesktopL.MenuView";
     public static readonly string MenuHelp = "AvaGithubDesktop.AvaGithubDesktopL.MenuHelp";
     public static readonly string ShowOperationLog = "AvaGithubDesktop.AvaGithubDesktopL.ShowOperationLog";
@@ -332,6 +334,7 @@ public static class AvaGithubDesktopL
     public static readonly string ViewCommitOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.ViewCommitOnGitHub";
     public static readonly string CreateTag = "AvaGithubDesktop.AvaGithubDesktopL.CreateTag";
     public static readonly string RevertCommit = "AvaGithubDesktop.AvaGithubDesktopL.RevertCommit";
+    public static readonly string CherryPickCommit = "AvaGithubDesktop.AvaGithubDesktopL.CherryPickCommit";
     public static readonly string CreateTagTitle = "AvaGithubDesktop.AvaGithubDesktopL.CreateTagTitle";
     public static readonly string CreateTagNameLabel = "AvaGithubDesktop.AvaGithubDesktopL.CreateTagNameLabel";
     public static readonly string CreateTagNamePlaceholder = "AvaGithubDesktop.AvaGithubDesktopL.CreateTagNamePlaceholder";
@@ -407,6 +410,12 @@ public static class AvaGithubDesktopL
     public static readonly string StatusAbortingRevert = "AvaGithubDesktop.AvaGithubDesktopL.StatusAbortingRevert";
     public static readonly string StatusAbortedRevert = "AvaGithubDesktop.AvaGithubDesktopL.StatusAbortedRevert";
     public static readonly string StatusAbortRevertFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusAbortRevertFailedFormat";
+    public static readonly string StatusContinuingCherryPick = "AvaGithubDesktop.AvaGithubDesktopL.StatusContinuingCherryPick";
+    public static readonly string StatusContinuedCherryPick = "AvaGithubDesktop.AvaGithubDesktopL.StatusContinuedCherryPick";
+    public static readonly string StatusContinueCherryPickFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusContinueCherryPickFailedFormat";
+    public static readonly string StatusAbortingCherryPick = "AvaGithubDesktop.AvaGithubDesktopL.StatusAbortingCherryPick";
+    public static readonly string StatusAbortedCherryPick = "AvaGithubDesktop.AvaGithubDesktopL.StatusAbortedCherryPick";
+    public static readonly string StatusAbortCherryPickFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusAbortCherryPickFailedFormat";
     public static readonly string StatusRenamingBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRenamingBranchFormat";
     public static readonly string StatusRenamedBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRenamedBranchFormat";
     public static readonly string StatusRenameBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRenameBranchFailedFormat";
@@ -435,6 +444,9 @@ public static class AvaGithubDesktopL
     public static readonly string StatusRevertingCommitFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRevertingCommitFormat";
     public static readonly string StatusRevertedCommitFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRevertedCommitFormat";
     public static readonly string StatusRevertCommitFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRevertCommitFailedFormat";
+    public static readonly string StatusCherryPickingCommitFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCherryPickingCommitFormat";
+    public static readonly string StatusCherryPickedCommitFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCherryPickedCommitFormat";
+    public static readonly string StatusCherryPickCommitFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCherryPickCommitFailedFormat";
     public static readonly string StatusCheckingOutBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckingOutBranchFormat";
     public static readonly string StatusCheckedOutBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckedOutBranchFormat";
     public static readonly string StatusCheckoutBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckoutBranchFailedFormat";

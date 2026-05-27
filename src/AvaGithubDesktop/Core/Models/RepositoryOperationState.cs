@@ -5,5 +5,6 @@ public enum RepositoryOperationState
     None,
     Merge,
     Rebase,
-    Revert
+    Revert,
+    CherryPick
 }
