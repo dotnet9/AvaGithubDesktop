@@ -7,4 +7,6 @@ public sealed record AppSettings
     public string? CultureName { get; init; }
 
     public string? ThemeKey { get; init; }
+
+    public string? LastRepositoryPath { get; init; }
 }

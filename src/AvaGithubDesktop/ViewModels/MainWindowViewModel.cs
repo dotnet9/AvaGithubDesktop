@@ -118,7 +118,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _eventBus = eventBus;
         StatusBar = statusBar;
         _isOperationLogVisible = _settingsStore.Current.IsOperationLogVisible ?? true;
-        _repositoryPath = ResolveDefaultRepositoryPath();
+        _repositoryPath = ResolveDefaultRepositoryPath(_settingsStore.Current.LastRepositoryPath);
 
         Languages = new ObservableCollection<LanguageOption>
         {
@@ -1936,6 +1936,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             var history = await _gitRepositoryService.LoadHistoryAsync(snapshot.RootPath, HistoryCommitLimit, CancellationToken.None);
             ApplyHistory(history);
             await _repositoryHistoryService.AddOrUpdateAsync(snapshot.RootPath, CancellationToken.None);
+            _settingsStore.Update(settings => settings with { LastRepositoryPath = snapshot.RootPath });
             await LoadRepositoryHistoryAsync();
             _eventBus.Publish(new RepositoryOpenedCommand(snapshot.RepositoryName, snapshot.ChangedFilesCount));
         }
@@ -3163,8 +3164,14 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private static string ResolveDefaultRepositoryPath()
+    private static string ResolveDefaultRepositoryPath(string? lastRepositoryPath)
     {
+        if (!string.IsNullOrWhiteSpace(lastRepositoryPath) && Directory.Exists(lastRepositoryPath))
+        {
+            return lastRepositoryPath;
+        }
+
+        // 开发环境首次启动时仍优先展示 GitHub Desktop 源码仓库，后续启动则恢复用户最后打开的仓库。
         const string desktopRepositoryPath = @"D:\github\desktop";
         if (OperatingSystem.IsWindows() && Directory.Exists(desktopRepositoryPath))
         {
