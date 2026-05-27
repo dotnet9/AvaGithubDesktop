@@ -21,6 +21,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly IAccountDialogService _accountDialogService;
     private readonly IHelpService _helpService;
     private readonly IConfirmationDialogService _confirmationDialogService;
+    private readonly IBranchDialogService _branchDialogService;
     private readonly IAppSettingsStore _settingsStore;
     private readonly IThemeService _themeService;
     private readonly IAppLocalizer _localizer;
@@ -44,6 +45,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isLoading;
     private bool _isCommitting;
     private bool _isCheckingOutBranch;
+    private bool _isCreatingBranch;
     private bool _isSyncing;
     private bool _isStashing;
     private bool _isRestoringStash;
@@ -90,6 +92,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         IAccountDialogService accountDialogService,
         IHelpService helpService,
         IConfirmationDialogService confirmationDialogService,
+        IBranchDialogService branchDialogService,
         IAppSettingsStore settingsStore,
         IThemeService themeService,
         IAppLocalizer localizer,
@@ -104,6 +107,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _accountDialogService = accountDialogService;
         _helpService = helpService;
         _confirmationDialogService = confirmationDialogService;
+        _branchDialogService = branchDialogService;
         _settingsStore = settingsStore;
         _themeService = themeService;
         _localizer = localizer;
@@ -167,6 +171,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         var canCheckoutBranch = this.WhenAnyValue(model => model.CanCheckoutBranch);
         CheckoutBranchCommand = ReactiveCommand.CreateFromTask(CheckoutSelectedBranchAsync, canCheckoutBranch);
+        CreateBranchCommand = ReactiveCommand.CreateFromTask(CreateBranchAsync, this.WhenAnyValue(model => model.CanCreateBranch));
         StashAllChangesCommand = ReactiveCommand.CreateFromTask(StashAllChangesAsync, this.WhenAnyValue(model => model.CanStashChanges));
         RestoreStashCommand = ReactiveCommand.CreateFromTask(RestoreStashAsync, this.WhenAnyValue(model => model.CanRestoreStash));
         DiscardStashCommand = ReactiveCommand.CreateFromTask(DiscardStashAsync, this.WhenAnyValue(model => model.CanDiscardStash));
@@ -260,6 +265,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> SelectEnglishCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CheckoutBranchCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> CreateBranchCommand { get; }
 
     public ReactiveCommand<Unit, Unit> StashAllChangesCommand { get; }
 
@@ -451,6 +458,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         !IsLoading &&
         !IsCommitting &&
         !IsCheckingOutBranch &&
+        !IsCreatingBranch &&
         !IsSyncing &&
         !IsStashing &&
         !IsRestoringStash &&
@@ -485,6 +493,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         private set
         {
             this.RaiseAndSetIfChanged(ref _isCheckingOutBranch, value);
+            RaiseOperationStateChanged();
+        }
+    }
+
+    public bool IsCreatingBranch
+    {
+        get => _isCreatingBranch;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isCreatingBranch, value);
             RaiseOperationStateChanged();
         }
     }
@@ -678,6 +696,10 @@ public sealed class MainWindowViewModel : ViewModelBase
         CanRunRepositoryCommand &&
         SelectedBranch is not null &&
         !SelectedBranch.IsCurrent;
+
+    public bool CanCreateBranch =>
+        HasRepository &&
+        CanRunRepositoryCommand;
 
     public int FilteredBranchesCount => FilteredBranches.Count;
 
@@ -2354,6 +2376,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private void RaiseBranchStateChanged()
     {
         this.RaisePropertyChanged(nameof(CanCheckoutBranch));
+        this.RaisePropertyChanged(nameof(CanCreateBranch));
         this.RaisePropertyChanged(nameof(FilteredBranchesCount));
         this.RaisePropertyChanged(nameof(HasActiveBranchFilter));
         this.RaisePropertyChanged(nameof(HasNoFilteredBranches));
@@ -2379,6 +2402,57 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(AccountNameText));
         this.RaisePropertyChanged(nameof(AccountEndpointText));
         this.RaisePropertyChanged(nameof(AccountInitials));
+    }
+
+    private async Task CreateBranchAsync()
+    {
+        if (!CanCreateBranch)
+        {
+            return;
+        }
+
+        var request = await _branchDialogService.ShowCreateBranchDialogAsync(
+            CurrentBranch,
+            Branches,
+            BranchFilterText);
+        if (request is null)
+        {
+            return;
+        }
+
+        IsCreatingBranch = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(
+            _localizer.Format(AvaGithubDesktopL.StatusCreatingBranchFormat, request.BranchName, CurrentBranch)));
+
+        try
+        {
+            await _gitRepositoryService.CreateBranchAsync(
+                RootPath,
+                request.BranchName,
+                request.StartPoint,
+                request.CheckoutBranch,
+                CancellationToken.None);
+
+            BranchFilterText = string.Empty;
+            var snapshot = await _gitRepositoryService.LoadRepositoryAsync(RootPath, CancellationToken.None);
+            ApplySnapshot(snapshot);
+            var branches = await _gitRepositoryService.LoadBranchesAsync(snapshot.RootPath, CancellationToken.None);
+            ApplyBranches(branches);
+            var history = await _gitRepositoryService.LoadHistoryAsync(snapshot.RootPath, HistoryCommitLimit, CancellationToken.None);
+            ApplyHistory(history);
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusCreatedBranchFormat, request.BranchName)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusCreateBranchFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsCreatingBranch = false;
+        }
     }
 
     private async Task CheckoutSelectedBranchAsync()

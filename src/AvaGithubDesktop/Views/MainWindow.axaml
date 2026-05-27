@@ -60,6 +60,8 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowInFileManager}}" Command="{Binding ShowRepositoryInFileManagerCommand}" />
                 </MenuItem>
                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuBranch}}">
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuNewBranch}}" Command="{Binding CreateBranchCommand}" />
+                    <Separator />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuStashAllChanges}}" Command="{Binding StashAllChangesCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRestoreStash}}" Command="{Binding RestoreStashCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuDiscardStash}}" Command="{Binding DiscardStashCommand}" />
@@ -280,7 +282,7 @@
                     <Button.Flyout>
                         <Flyout>
                             <Border Classes="branchFlyout">
-                                <Grid Width="365" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="10">
+                                <Grid Width="365" RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="10">
                                     <Grid ColumnDefinitions="*,Auto">
                                         <TextBlock
                                             VerticalAlignment="Center"
@@ -298,7 +300,14 @@
                                         Classes="branchFilter"
                                         PlaceholderText="{i18n:I18n {x:Static l:AvaGithubDesktopL.BranchFilterPlaceholder}}"
                                         Text="{Binding BranchFilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                    <Grid Grid.Row="2">
+                                    <Button
+                                        Grid.Row="2"
+                                        HorizontalAlignment="Stretch"
+                                        Classes="newBranch"
+                                        Command="{Binding CreateBranchCommand}"
+                                        Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.NewBranch}}"
+                                        IsEnabled="{Binding CanCreateBranch}" />
+                                    <Grid Grid.Row="3">
                                         <ListBox
                                             Classes="branchSelector"
                                             Height="260"
@@ -339,7 +348,7 @@
                                             Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.NoBranchesFound}}" />
                                     </Grid>
                                     <Button
-                                        Grid.Row="3"
+                                        Grid.Row="4"
                                         HorizontalAlignment="Stretch"
                                         Classes="branchCheckout"
                                         Command="{Binding CheckoutBranchCommand}"

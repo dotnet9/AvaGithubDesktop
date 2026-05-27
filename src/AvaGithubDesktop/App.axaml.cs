@@ -52,6 +52,7 @@ public partial class App : PrismApplication
         containerRegistry.RegisterSingleton<IAccountDialogService, AccountDialogService>();
         containerRegistry.RegisterSingleton<IHelpService, HelpService>();
         containerRegistry.RegisterSingleton<IConfirmationDialogService, ConfirmationDialogService>();
+        containerRegistry.RegisterSingleton<IBranchDialogService, BranchDialogService>();
         containerRegistry.RegisterSingleton<ShellStatusViewModel>();
         containerRegistry.RegisterSingleton<MainWindowViewModel>();
         containerRegistry.Register<MainWindow>();

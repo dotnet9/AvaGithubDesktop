@@ -128,6 +128,42 @@ public sealed class GitRepositoryService : IGitRepositoryService
         await RunRequiredGitAsync(root, cancellationToken, "checkout", branchName);
     }
 
+    public async Task CreateBranchAsync(
+        string repositoryPath,
+        string branchName,
+        string? startPoint,
+        bool checkoutBranch,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        if (string.IsNullOrWhiteSpace(branchName))
+        {
+            throw new ArgumentException("A branch name is required.", nameof(branchName));
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        // 先让 Git 校验 ref 名称，避免 UI 规则和 Git 自身规则不一致时创建出异常分支。
+        await RunRequiredGitAsync(root, cancellationToken, "check-ref-format", "--branch", branchName.Trim());
+
+        if (string.IsNullOrWhiteSpace(startPoint))
+        {
+            await RunRequiredGitAsync(root, cancellationToken, "branch", branchName.Trim());
+        }
+        else
+        {
+            await RunRequiredGitAsync(root, cancellationToken, "branch", branchName.Trim(), startPoint.Trim());
+        }
+
+        if (checkoutBranch)
+        {
+            await RunRequiredGitAsync(root, cancellationToken, "checkout", branchName.Trim());
+        }
+    }
+
     public async Task FetchAsync(
         string repositoryPath,
         string remoteName,

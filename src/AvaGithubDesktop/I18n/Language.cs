@@ -13,6 +13,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuFile = "AvaGithubDesktop.AvaGithubDesktopL.MenuFile";
     public static readonly string MenuRepository = "AvaGithubDesktop.AvaGithubDesktopL.MenuRepository";
     public static readonly string MenuBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuBranch";
+    public static readonly string MenuNewBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuNewBranch";
     public static readonly string MenuView = "AvaGithubDesktop.AvaGithubDesktopL.MenuView";
     public static readonly string MenuHelp = "AvaGithubDesktop.AvaGithubDesktopL.MenuHelp";
     public static readonly string ShowOperationLog = "AvaGithubDesktop.AvaGithubDesktopL.ShowOperationLog";
@@ -71,6 +72,16 @@ public static class AvaGithubDesktopL
     public static readonly string Branches = "AvaGithubDesktop.AvaGithubDesktopL.Branches";
     public static readonly string Branch = "AvaGithubDesktop.AvaGithubDesktopL.Branch";
     public static readonly string BranchFilterPlaceholder = "AvaGithubDesktop.AvaGithubDesktopL.BranchFilterPlaceholder";
+    public static readonly string NewBranch = "AvaGithubDesktop.AvaGithubDesktopL.NewBranch";
+    public static readonly string CreateBranchTitle = "AvaGithubDesktop.AvaGithubDesktopL.CreateBranchTitle";
+    public static readonly string CreateBranchNameLabel = "AvaGithubDesktop.AvaGithubDesktopL.CreateBranchNameLabel";
+    public static readonly string CreateBranchNamePlaceholder = "AvaGithubDesktop.AvaGithubDesktopL.CreateBranchNamePlaceholder";
+    public static readonly string CreateBranchBaseTitle = "AvaGithubDesktop.AvaGithubDesktopL.CreateBranchBaseTitle";
+    public static readonly string CreateBranchBaseDescriptionFormat = "AvaGithubDesktop.AvaGithubDesktopL.CreateBranchBaseDescriptionFormat";
+    public static readonly string CreateBranchButton = "AvaGithubDesktop.AvaGithubDesktopL.CreateBranchButton";
+    public static readonly string BranchNameRequired = "AvaGithubDesktop.AvaGithubDesktopL.BranchNameRequired";
+    public static readonly string BranchNameAlreadyExistsFormat = "AvaGithubDesktop.AvaGithubDesktopL.BranchNameAlreadyExistsFormat";
+    public static readonly string BranchNameInvalid = "AvaGithubDesktop.AvaGithubDesktopL.BranchNameInvalid";
     public static readonly string BranchCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.BranchCountFormat";
     public static readonly string BranchesCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.BranchesCountFormat";
     public static readonly string BranchesFilteredCountFormat = "AvaGithubDesktop.AvaGithubDesktopL.BranchesFilteredCountFormat";
@@ -234,6 +245,9 @@ public static class AvaGithubDesktopL
     public static readonly string BinaryFileChanged = "AvaGithubDesktop.AvaGithubDesktopL.BinaryFileChanged";
     public static readonly string OpenBinaryFileInExternalProgram = "AvaGithubDesktop.AvaGithubDesktopL.OpenBinaryFileInExternalProgram";
     public static readonly string Checkout = "AvaGithubDesktop.AvaGithubDesktopL.Checkout";
+    public static readonly string StatusCreatingBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCreatingBranchFormat";
+    public static readonly string StatusCreatedBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCreatedBranchFormat";
+    public static readonly string StatusCreateBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCreateBranchFailedFormat";
     public static readonly string StatusCheckingOutBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckingOutBranchFormat";
     public static readonly string StatusCheckedOutBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckedOutBranchFormat";
     public static readonly string StatusCheckoutBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckoutBranchFailedFormat";

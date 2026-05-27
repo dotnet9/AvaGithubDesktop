@@ -20,6 +20,13 @@ public interface IGitRepositoryService
         string branchName,
         CancellationToken cancellationToken);
 
+    Task CreateBranchAsync(
+        string repositoryPath,
+        string branchName,
+        string? startPoint,
+        bool checkoutBranch,
+        CancellationToken cancellationToken);
+
     Task FetchAsync(
         string repositoryPath,
         string remoteName,

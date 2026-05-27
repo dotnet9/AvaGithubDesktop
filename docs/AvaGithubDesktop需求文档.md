@@ -38,9 +38,10 @@
 17. 将国际化也放菜单Menu提供切换，需要记录在App.config
 18. 添加Semi 6、7种主题切换，也放菜单Menu提供切换，需要记录在App.config，参考D:\github\Vex
 19. 一个代码文件不要写太长，特别是6、700行这行，要按逻辑拆分UserControl及ViewModel，尽量不要用partial，拆分要有实际意义，也不能为了拆分耍拆分
-20. 桌面运行了Github Desktop程序，你可运行它，截取我们正在做的功能截图与它对比，但主要功能和样式还是参考它的源码D:\github\desktop
-21. 尽量做到使用AvaGithubDesktop软件替换git功能，常用git命令都能在当前软件上实现，且不需要安装git
-22. 开发过程中将功能点简单列在本文档中，不列详细，只简单列功能，整个需求文档你按实际开发调整，按正常人可理解的完善
+20. git diff展示使用CodeWF.Markdown NuGet包(D:\github\CodeWF.Markdown)，如果展示效果不好，你可以修改本地仓库，然后通过本地打包的方式引用，我验证会上传CodeWF.Markdown到NuGet平台
+21. 桌面运行了Github Desktop程序，你可运行它，截取我们正在做的功能截图与它对比，但主要功能和样式还是参考它的源码D:\github\desktop
+22. 尽量做到使用AvaGithubDesktop软件替换git功能，常用git命令都能在当前软件上实现，且不需要安装git
+23. 开发过程中将功能点简单列在本文档中，不列详细，只简单列功能，整个需求文档你按实际开发调整，按正常人可理解的完善
 
 ## 功能点
 
@@ -81,3 +82,4 @@
 - 菜单提供 Semi 主题切换并将当前主题写入 App.config
 - Desktop 风格图片与二进制文件 Diff 预览
 - Desktop 风格未跟踪文本文件新增 Diff 预览
+- Desktop 风格 Branch 菜单与 Current Branch 弹出层创建分支
