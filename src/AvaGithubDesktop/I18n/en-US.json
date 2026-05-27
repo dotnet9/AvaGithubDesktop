@@ -27,6 +27,7 @@
       "MenuView": "View",
       "MenuHelp": "Help",
       "ShowOperationLog": "Show operation log",
+      "ShowConflictsOnly": "Conflicts",
       "MenuNewRepository": "New repository...",
       "MenuAddLocalRepository": "Add Local Repository...",
       "MenuCloneRepository": "Clone repository...",

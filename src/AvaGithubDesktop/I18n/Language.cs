@@ -32,6 +32,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuView = "AvaGithubDesktop.AvaGithubDesktopL.MenuView";
     public static readonly string MenuHelp = "AvaGithubDesktop.AvaGithubDesktopL.MenuHelp";
     public static readonly string ShowOperationLog = "AvaGithubDesktop.AvaGithubDesktopL.ShowOperationLog";
+    public static readonly string ShowConflictsOnly = "AvaGithubDesktop.AvaGithubDesktopL.ShowConflictsOnly";
     public static readonly string MenuNewRepository = "AvaGithubDesktop.AvaGithubDesktopL.MenuNewRepository";
     public static readonly string MenuAddLocalRepository = "AvaGithubDesktop.AvaGithubDesktopL.MenuAddLocalRepository";
     public static readonly string MenuCloneRepository = "AvaGithubDesktop.AvaGithubDesktopL.MenuCloneRepository";

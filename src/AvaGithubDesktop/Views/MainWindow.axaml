@@ -602,19 +602,25 @@
                                 IsEnabled="{Binding HasRepository}"
                                 PlaceholderText="{i18n:I18n {x:Static l:AvaGithubDesktopL.ChangesFilterPlaceholder}}"
                                 Text="{Binding ChangesFilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                            <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                            <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
                                 <CheckBox
                                     VerticalAlignment="Center"
                                     IsChecked="{Binding AreAllChangesIncluded, Mode=TwoWay}"
                                     IsThreeState="True" />
-                                <TextBlock
+                                <CheckBox
                                     Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.ShowConflictsOnly}}"
+                                    IsChecked="{Binding ShowConflictsOnly, Mode=TwoWay}"
+                                    IsVisible="{Binding HasConflictFiles}" />
+                                <TextBlock
+                                    Grid.Column="2"
                                     VerticalAlignment="Center"
                                     FontWeight="SemiBold"
                                     Text="{Binding ChangedFilesHeaderText}"
                                     TextTrimming="CharacterEllipsis" />
                                 <TextBlock
-                                    Grid.Column="2"
+                                    Grid.Column="3"
                                     VerticalAlignment="Center"
                                     Classes="muted"
                                     FontSize="12"

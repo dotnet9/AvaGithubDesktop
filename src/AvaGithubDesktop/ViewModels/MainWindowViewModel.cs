@@ -66,6 +66,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isCreatingTag;
     private bool _isRevertingCommit;
     private bool _isCherryPickingCommit;
+    private bool _showConflictsOnly;
     private bool _isSigningIn;
     private bool _isOperationLogVisible;
     private bool _isInitialized;
@@ -1459,6 +1460,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    public bool ShowConflictsOnly
+    {
+        get => _showConflictsOnly;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _showConflictsOnly, value);
+            ApplyChangesFilter();
+        }
+    }
+
     public string BranchFilterText
     {
         get => _branchFilterText;
@@ -1550,7 +1561,11 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public int FilteredChangedFilesCount => FilteredChangedFiles.Count;
 
-    public bool HasActiveChangesFilter => !string.IsNullOrWhiteSpace(ChangesFilterText);
+    public int ConflictFilesCount => ChangedFiles.Count(change => change.IsConflict);
+
+    public bool HasConflictFiles => ConflictFilesCount > 0;
+
+    public bool HasActiveChangesFilter => !string.IsNullOrWhiteSpace(ChangesFilterText) || ShowConflictsOnly;
 
     public string SelectedChangesStatusText =>
         _localizer.Format(AvaGithubDesktopL.SelectedFilesCountFormat, IncludedChangesCount, ChangedFilesCount);
@@ -3051,6 +3066,14 @@ public sealed class MainWindowViewModel : ViewModelBase
             ChangedFiles.Add(changeViewModel);
         }
 
+        if (ShowConflictsOnly && ChangedFiles.All(change => !change.IsConflict))
+        {
+            _showConflictsOnly = false;
+            this.RaisePropertyChanged(nameof(ShowConflictsOnly));
+        }
+
+        this.RaisePropertyChanged(nameof(ConflictFilesCount));
+        this.RaisePropertyChanged(nameof(HasConflictFiles));
         UpdateIncludedState();
         ApplyChangesFilter(selectedPath);
     }
@@ -3213,15 +3236,20 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         // 过滤集合单独维护，提交仍读取全量 ChangedFiles，避免隐藏文件被意外移出提交选择。
         var filterText = ChangesFilterText.Trim();
+        var showConflictsOnly = ShowConflictsOnly;
         var selectedPath = preferredSelectedPath ?? SelectedChange?.Path;
         FilteredChangedFiles.Clear();
 
-        foreach (var change in ChangedFiles.Where(change => MatchesChangesFilter(change, filterText)))
+        foreach (var change in ChangedFiles.Where(change =>
+                     (!showConflictsOnly || change.IsConflict) &&
+                     MatchesChangesFilter(change, filterText)))
         {
             FilteredChangedFiles.Add(change);
         }
 
         this.RaisePropertyChanged(nameof(FilteredChangedFilesCount));
+        this.RaisePropertyChanged(nameof(ConflictFilesCount));
+        this.RaisePropertyChanged(nameof(HasConflictFiles));
         this.RaisePropertyChanged(nameof(HasActiveChangesFilter));
         this.RaisePropertyChanged(nameof(ChangedFilesHeaderText));
 

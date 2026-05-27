@@ -27,6 +27,7 @@
       "MenuView": "查看",
       "MenuHelp": "帮助",
       "ShowOperationLog": "显示操作日志",
+      "ShowConflictsOnly": "仅冲突",
       "MenuNewRepository": "新建仓库...",
       "MenuAddLocalRepository": "添加本地仓库...",
       "MenuCloneRepository": "克隆仓库...",
