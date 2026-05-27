@@ -39,6 +39,10 @@ public interface IGitRepositoryService
         string repositoryPath,
         CancellationToken cancellationToken);
 
+    Task<IReadOnlyList<GitBranchItem>> LoadRemoteBranchesAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken);
+
     Task CheckoutBranchAsync(
         string repositoryPath,
         string branchName,
@@ -65,6 +69,12 @@ public interface IGitRepositoryService
     Task UnsetUpstreamAsync(
         string repositoryPath,
         string branchName,
+        CancellationToken cancellationToken);
+
+    Task SetUpstreamAsync(
+        string repositoryPath,
+        string branchName,
+        string upstreamBranchName,
         CancellationToken cancellationToken);
 
     Task<GitMergeResult> MergeBranchAsync(

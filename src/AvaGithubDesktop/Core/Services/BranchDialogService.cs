@@ -91,6 +91,20 @@ public sealed class BranchDialogService : IBranchDialogService
         return await window.ShowDialog<BranchRebaseRequest?>(owner);
     }
 
+    public async Task<BranchUpstreamRequest?> ShowSetUpstreamDialogAsync(
+        string currentBranch,
+        IReadOnlyList<GitBranchItem> remoteBranches)
+    {
+        if (GetMainWindow() is not { } owner)
+        {
+            return null;
+        }
+
+        var viewModel = new SetUpstreamBranchWindowViewModel(currentBranch, remoteBranches, _localizer);
+        var window = new SetUpstreamBranchWindow(viewModel);
+        return await window.ShowDialog<BranchUpstreamRequest?>(owner);
+    }
+
     public async Task<bool> ShowDeleteBranchConfirmationAsync(string branchName)
     {
         if (GetMainWindow() is not { } owner)

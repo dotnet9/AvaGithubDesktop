@@ -214,6 +214,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         DeleteCurrentBranchCommand = ReactiveCommand.CreateFromTask(
             DeleteCurrentBranchAsync,
             this.WhenAnyValue(model => model.CanDeleteCurrentBranch));
+        SetUpstreamCommand = ReactiveCommand.CreateFromTask(
+            SetUpstreamAsync,
+            this.WhenAnyValue(model => model.CanSetUpstream));
         UnsetUpstreamCommand = ReactiveCommand.CreateFromTask(
             UnsetUpstreamAsync,
             this.WhenAnyValue(model => model.CanUnsetUpstream));
@@ -388,6 +391,8 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> DeleteCurrentBranchCommand { get; }
 
+    public ReactiveCommand<Unit, Unit> SetUpstreamCommand { get; }
+
     public ReactiveCommand<Unit, Unit> UnsetUpstreamCommand { get; }
 
     public ReactiveCommand<Unit, Unit> UpdateFromDefaultBranchCommand { get; }
@@ -487,6 +492,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             this.RaiseAndSetIfChanged(ref _currentBranch, value);
             this.RaisePropertyChanged(nameof(CommitButtonText));
+            RaiseBranchStateChanged();
             RaiseDefaultBranchStateChanged();
             RaiseSyncStateChanged();
         }
@@ -519,6 +525,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         private set
         {
             this.RaiseAndSetIfChanged(ref _remoteName, value);
+            RaiseBranchStateChanged();
             RaiseSyncStateChanged();
         }
     }
@@ -967,6 +974,15 @@ public sealed class MainWindowViewModel : ViewModelBase
         CanRunRepositoryCommand &&
         !HasRepositoryOperationInProgress &&
         CurrentBranchItem?.CanDelete == true;
+
+    public bool CanSetUpstream =>
+        HasRepository &&
+        HasRemote &&
+        CanRunRepositoryCommand &&
+        !HasRepositoryOperationInProgress &&
+        !string.IsNullOrWhiteSpace(CurrentBranch) &&
+        CurrentBranch != "-" &&
+        !CurrentBranch.StartsWith("HEAD", StringComparison.OrdinalIgnoreCase);
 
     public bool CanUnsetUpstream =>
         HasRepository &&
@@ -3227,6 +3243,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(CanCreateBranch));
         this.RaisePropertyChanged(nameof(CanRenameCurrentBranch));
         this.RaisePropertyChanged(nameof(CanDeleteCurrentBranch));
+        this.RaisePropertyChanged(nameof(CanSetUpstream));
         this.RaisePropertyChanged(nameof(CanUnsetUpstream));
         this.RaisePropertyChanged(nameof(CanUpdateFromDefaultBranch));
         this.RaisePropertyChanged(nameof(UpdateFromDefaultBranchMenuText));
@@ -3338,6 +3355,59 @@ public sealed class MainWindowViewModel : ViewModelBase
         if (CurrentBranchItem is { } branch)
         {
             await DeleteBranchAsync(branch);
+        }
+    }
+
+    private async Task SetUpstreamAsync()
+    {
+        if (!CanSetUpstream)
+        {
+            return;
+        }
+
+        var branchName = CurrentBranch;
+        IReadOnlyList<GitBranchItem> remoteBranches;
+        try
+        {
+            remoteBranches = await _gitRepositoryService.LoadRemoteBranchesAsync(RootPath, CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusSetUpstreamFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+            return;
+        }
+
+        var request = await _branchDialogService.ShowSetUpstreamDialogAsync(branchName, remoteBranches);
+        if (request is null)
+        {
+            return;
+        }
+
+        IsUpdatingBranch = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(
+            _localizer.Format(AvaGithubDesktopL.StatusSettingUpstreamFormat, branchName, request.UpstreamBranchName)));
+
+        try
+        {
+            await _gitRepositoryService.SetUpstreamAsync(
+                RootPath,
+                branchName,
+                request.UpstreamBranchName,
+                CancellationToken.None);
+            await ReloadRepositoryWorkspaceAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusSetUpstreamFormat, branchName, request.UpstreamBranchName)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusSetUpstreamFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsUpdatingBranch = false;
         }
     }
 

@@ -243,6 +243,21 @@ public sealed class GitRepositoryService : IGitRepositoryService
         return ParseBranches(branches);
     }
 
+    public async Task<IReadOnlyList<GitBranchItem>> LoadRemoteBranchesAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken)
+    {
+        var root = await ResolveRootAsync(repositoryPath, cancellationToken);
+        var branches = await RunOptionalGitAsync(
+            root,
+            cancellationToken,
+            "for-each-ref",
+            "--format=%(refname:short)%09%(committerdate:relative)",
+            "--sort=-committerdate",
+            "refs/remotes");
+        return ParseRemoteBranches(branches);
+    }
+
     public async Task CheckoutBranchAsync(
         string repositoryPath,
         string branchName,
@@ -363,6 +378,32 @@ public sealed class GitRepositoryService : IGitRepositoryService
         }
 
         await RunRequiredGitAsync(root, cancellationToken, "branch", "--unset-upstream", branchName.Trim());
+    }
+
+    public async Task SetUpstreamAsync(
+        string repositoryPath,
+        string branchName,
+        string upstreamBranchName,
+        CancellationToken cancellationToken)
+    {
+        var root = await ResolveRootAsync(repositoryPath, cancellationToken);
+        if (string.IsNullOrWhiteSpace(branchName) || branchName.StartsWith("HEAD", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("A local branch name is required.", nameof(branchName));
+        }
+
+        if (string.IsNullOrWhiteSpace(upstreamBranchName) || upstreamBranchName.StartsWith("-", StringComparison.Ordinal))
+        {
+            throw new ArgumentException("An upstream branch name is required.", nameof(upstreamBranchName));
+        }
+
+        await RunRequiredGitAsync(
+            root,
+            cancellationToken,
+            "branch",
+            "--set-upstream-to",
+            upstreamBranchName.Trim(),
+            branchName.Trim());
     }
 
     public async Task<GitMergeResult> MergeBranchAsync(
@@ -1361,6 +1402,35 @@ public sealed class GitRepositoryService : IGitRepositoryService
             Upstream: upstream,
             RelativeDate: relativeDate,
             IsCurrent: fields.Length >= 4 && fields[3].Trim() == "*");
+    }
+
+    private static IReadOnlyList<GitBranchItem> ParseRemoteBranches(string branches)
+    {
+        if (string.IsNullOrWhiteSpace(branches))
+        {
+            return Array.Empty<GitBranchItem>();
+        }
+
+        return branches
+            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(ParseRemoteBranch)
+            .Where(branch => !string.IsNullOrWhiteSpace(branch.Name) && !branch.Name.EndsWith("/HEAD", StringComparison.Ordinal))
+            .ToArray();
+    }
+
+    private static GitBranchItem ParseRemoteBranch(string line)
+    {
+        var fields = line.Split('\t');
+        if (fields.Length < 1)
+        {
+            return new GitBranchItem(string.Empty, "-", string.Empty, false);
+        }
+
+        return new GitBranchItem(
+            Name: fields[0],
+            Upstream: "-",
+            RelativeDate: fields.Length >= 2 ? fields[1] : string.Empty,
+            IsCurrent: false);
     }
 
     private static (int Ahead, int Behind) ParseAheadBehind(string status)

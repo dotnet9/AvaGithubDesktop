@@ -25,5 +25,9 @@ public interface IBranchDialogService
         string currentBranch,
         IReadOnlyList<GitBranchItem> branches);
 
+    Task<BranchUpstreamRequest?> ShowSetUpstreamDialogAsync(
+        string currentBranch,
+        IReadOnlyList<GitBranchItem> remoteBranches);
+
     Task<bool> ShowDeleteBranchConfirmationAsync(string branchName);
 }

@@ -58,6 +58,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuViewBranchOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.MenuViewBranchOnGitHub";
     public static readonly string MenuCreatePullRequest = "AvaGithubDesktop.AvaGithubDesktopL.MenuCreatePullRequest";
     public static readonly string MenuDeleteBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuDeleteBranch";
+    public static readonly string MenuSetUpstream = "AvaGithubDesktop.AvaGithubDesktopL.MenuSetUpstream";
     public static readonly string MenuUnsetUpstream = "AvaGithubDesktop.AvaGithubDesktopL.MenuUnsetUpstream";
     public static readonly string MenuAbout = "AvaGithubDesktop.AvaGithubDesktopL.MenuAbout";
     public static readonly string SignInToGitHub = "AvaGithubDesktop.AvaGithubDesktopL.SignInToGitHub";
@@ -120,6 +121,10 @@ public static class AvaGithubDesktopL
     public static readonly string RebaseBranchDescriptionFormat = "AvaGithubDesktop.AvaGithubDesktopL.RebaseBranchDescriptionFormat";
     public static readonly string RebaseBranchFilterPlaceholder = "AvaGithubDesktop.AvaGithubDesktopL.RebaseBranchFilterPlaceholder";
     public static readonly string RebaseBranchButton = "AvaGithubDesktop.AvaGithubDesktopL.RebaseBranchButton";
+    public static readonly string SetUpstreamTitle = "AvaGithubDesktop.AvaGithubDesktopL.SetUpstreamTitle";
+    public static readonly string SetUpstreamDescriptionFormat = "AvaGithubDesktop.AvaGithubDesktopL.SetUpstreamDescriptionFormat";
+    public static readonly string SetUpstreamFilterPlaceholder = "AvaGithubDesktop.AvaGithubDesktopL.SetUpstreamFilterPlaceholder";
+    public static readonly string SetUpstreamButton = "AvaGithubDesktop.AvaGithubDesktopL.SetUpstreamButton";
     public static readonly string RenameBranchTitle = "AvaGithubDesktop.AvaGithubDesktopL.RenameBranchTitle";
     public static readonly string RenameBranchNameLabel = "AvaGithubDesktop.AvaGithubDesktopL.RenameBranchNameLabel";
     public static readonly string RenameBranchDescriptionFormat = "AvaGithubDesktop.AvaGithubDesktopL.RenameBranchDescriptionFormat";
@@ -409,6 +414,9 @@ public static class AvaGithubDesktopL
     public static readonly string StatusDeletingBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusDeletingBranchFormat";
     public static readonly string StatusDeletedBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusDeletedBranchFormat";
     public static readonly string StatusDeleteBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusDeleteBranchFailedFormat";
+    public static readonly string StatusSettingUpstreamFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusSettingUpstreamFormat";
+    public static readonly string StatusSetUpstreamFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusSetUpstreamFormat";
+    public static readonly string StatusSetUpstreamFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusSetUpstreamFailedFormat";
     public static readonly string StatusUnsettingUpstreamFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusUnsettingUpstreamFormat";
     public static readonly string StatusUnsetUpstreamFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusUnsetUpstreamFormat";
     public static readonly string StatusUnsetUpstreamFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusUnsetUpstreamFailedFormat";
