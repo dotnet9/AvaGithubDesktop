@@ -26,6 +26,42 @@ public sealed class GitRepositoryService : IGitRepositoryService
         "!!GitHub_Desktop<(?<branch>.+)>$",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
+    public async Task CloneRepositoryAsync(
+        string sourceUrl,
+        string destinationPath,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(sourceUrl))
+        {
+            throw new ArgumentException("A repository URL is required.", nameof(sourceUrl));
+        }
+
+        if (string.IsNullOrWhiteSpace(destinationPath))
+        {
+            throw new ArgumentException("A destination path is required.", nameof(destinationPath));
+        }
+
+        var normalizedDestination = Path.GetFullPath(destinationPath);
+        if (Directory.Exists(normalizedDestination) || File.Exists(normalizedDestination))
+        {
+            throw new IOException($"The destination path already exists: {normalizedDestination}");
+        }
+
+        var parentDirectory = Path.GetDirectoryName(normalizedDestination);
+        if (string.IsNullOrWhiteSpace(parentDirectory) || !Directory.Exists(parentDirectory))
+        {
+            throw new DirectoryNotFoundException(parentDirectory);
+        }
+
+        await RunRequiredGitAsync(
+            parentDirectory,
+            cancellationToken,
+            "clone",
+            "--",
+            sourceUrl.Trim(),
+            normalizedDestination);
+    }
+
     public async Task<GitRepositorySnapshot> LoadRepositoryAsync(
         string repositoryPath,
         CancellationToken cancellationToken)

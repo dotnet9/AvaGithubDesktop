@@ -41,6 +41,7 @@
             <Menu Classes="titleBar">
                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFile}}">
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAddLocalRepository}}" Command="{Binding BrowseRepositoryCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCloneRepository}}" Command="{Binding CloneRepositoryCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRefresh}}" Command="{Binding RefreshRepositoryCommand}" />
                     <Separator />
                     <MenuItem Header="{Binding AccountButtonText}" IsEnabled="False" IsVisible="{Binding IsSignedIn}" />
@@ -188,6 +189,10 @@
                                                             Classes="repositoryAddMenu"
                                                             Command="{Binding BrowseRepositoryCommand}"
                                                             Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.AddExistingRepository}}" />
+                                                        <Button
+                                                            Classes="repositoryAddMenu"
+                                                            Command="{Binding CloneRepositoryCommand}"
+                                                            Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.CloneRepository}}" />
                                                     </StackPanel>
                                                 </Flyout>
                                             </Button.Flyout>

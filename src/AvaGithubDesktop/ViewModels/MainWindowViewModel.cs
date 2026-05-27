@@ -15,6 +15,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private const int HistoryCommitLimit = 50;
     private readonly IGitRepositoryService _gitRepositoryService;
     private readonly IRepositoryPickerService _repositoryPickerService;
+    private readonly IRepositoryCloneDialogService _repositoryCloneDialogService;
     private readonly IRepositoryHistoryService _repositoryHistoryService;
     private readonly IRepositoryShellService _repositoryShellService;
     private readonly IGitHubAccountService _gitHubAccountService;
@@ -90,6 +91,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel(
         IGitRepositoryService gitRepositoryService,
         IRepositoryPickerService repositoryPickerService,
+        IRepositoryCloneDialogService repositoryCloneDialogService,
         IRepositoryHistoryService repositoryHistoryService,
         IRepositoryShellService repositoryShellService,
         IGitHubAccountService gitHubAccountService,
@@ -105,6 +107,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         _gitRepositoryService = gitRepositoryService;
         _repositoryPickerService = repositoryPickerService;
+        _repositoryCloneDialogService = repositoryCloneDialogService;
         _repositoryHistoryService = repositoryHistoryService;
         _repositoryShellService = repositoryShellService;
         _gitHubAccountService = gitHubAccountService;
@@ -137,6 +140,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         var canExecuteRepositoryCommand = this.WhenAnyValue(model => model.CanRunRepositoryCommand);
         BrowseRepositoryCommand = ReactiveCommand.CreateFromTask(BrowseRepositoryAsync, canExecuteRepositoryCommand);
+        CloneRepositoryCommand = ReactiveCommand.CreateFromTask(CloneRepositoryAsync, canExecuteRepositoryCommand);
         OpenRepositoryCommand = ReactiveCommand.CreateFromTask(OpenRepositoryAsync, canExecuteRepositoryCommand);
         RefreshRepositoryCommand = ReactiveCommand.CreateFromTask(OpenRepositoryAsync, canExecuteRepositoryCommand);
         var canUseCurrentRepository = this.WhenAnyValue(
@@ -272,6 +276,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ShellStatusViewModel StatusBar { get; }
 
     public ReactiveCommand<Unit, Unit> BrowseRepositoryCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> CloneRepositoryCommand { get; }
 
     public ReactiveCommand<Unit, Unit> OpenRepositoryCommand { get; }
 
@@ -1330,6 +1336,42 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         RepositoryPath = selectedPath;
         await OpenRepositoryAsync();
+    }
+
+    private async Task CloneRepositoryAsync()
+    {
+        var request = await _repositoryCloneDialogService.ShowCloneRepositoryDialogAsync();
+        if (request is null)
+        {
+            return;
+        }
+
+        IsLoading = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(
+            _localizer.Format(AvaGithubDesktopL.StatusCloningRepositoryFormat, request.SourceUrl)));
+
+        try
+        {
+            await _gitRepositoryService.CloneRepositoryAsync(
+                request.SourceUrl,
+                request.DestinationPath,
+                CancellationToken.None);
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusClonedRepositoryFormat, Path.GetFileName(request.DestinationPath))));
+
+            RepositoryPath = request.DestinationPath;
+            await OpenRepositoryAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusCloneRepositoryFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     private async Task OpenKnownRepositoryAsync(RepositoryListItemViewModel repository)

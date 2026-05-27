@@ -4,6 +4,11 @@ namespace AvaGithubDesktop.Core.Services;
 
 public interface IGitRepositoryService
 {
+    Task CloneRepositoryAsync(
+        string sourceUrl,
+        string destinationPath,
+        CancellationToken cancellationToken);
+
     Task<GitRepositorySnapshot> LoadRepositoryAsync(string repositoryPath, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<GitCommitItem>> LoadHistoryAsync(

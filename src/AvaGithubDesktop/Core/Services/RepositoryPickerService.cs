@@ -15,6 +15,16 @@ public sealed class RepositoryPickerService : IRepositoryPickerService
 
     public async Task<string?> PickRepositoryAsync()
     {
+        return await PickFolderAsync(_localizer.Get(AvaGithubDesktopL.DialogOpenRepositoryTitle));
+    }
+
+    public async Task<string?> PickCloneParentDirectoryAsync()
+    {
+        return await PickFolderAsync(_localizer.Get(AvaGithubDesktopL.DialogCloneParentDirectoryTitle));
+    }
+
+    private static async Task<string?> PickFolderAsync(string title)
+    {
         if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime { MainWindow: { } window })
         {
             return null;
@@ -22,7 +32,7 @@ public sealed class RepositoryPickerService : IRepositoryPickerService
 
         var folders = await window.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
-            Title = _localizer.Get(AvaGithubDesktopL.DialogOpenRepositoryTitle),
+            Title = title,
             AllowMultiple = false
         });
 
