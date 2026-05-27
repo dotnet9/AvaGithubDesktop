@@ -73,6 +73,26 @@ public interface IGitRepositoryService
         string baseBranchName,
         CancellationToken cancellationToken);
 
+    Task ContinueMergeAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken);
+
+    Task AbortMergeAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken);
+
+    Task ContinueRebaseAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken);
+
+    Task SkipRebaseAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken);
+
+    Task AbortRebaseAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken);
+
     Task FetchAsync(
         string repositoryPath,
         string remoteName,

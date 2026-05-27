@@ -81,6 +81,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private GitBranchItemViewModel? _selectedBranch;
     private GitHubAccount? _currentAccount;
     private GitStashEntry? _currentBranchStash;
+    private RepositoryOperationState _operationState = RepositoryOperationState.None;
     private RepositorySection _selectedSection = RepositorySection.Changes;
     private int _historyCommitCount;
     private int _diffRequestVersion;
@@ -207,6 +208,21 @@ public sealed class MainWindowViewModel : ViewModelBase
             SquashMergeBranchAsync,
             this.WhenAnyValue(model => model.CanMergeBranch));
         RebaseBranchCommand = ReactiveCommand.CreateFromTask(RebaseBranchAsync, this.WhenAnyValue(model => model.CanRebaseBranch));
+        ContinueMergeCommand = ReactiveCommand.CreateFromTask(
+            ContinueMergeAsync,
+            this.WhenAnyValue(model => model.CanContinueMerge));
+        AbortMergeCommand = ReactiveCommand.CreateFromTask(
+            AbortMergeAsync,
+            this.WhenAnyValue(model => model.CanAbortMerge));
+        ContinueRebaseCommand = ReactiveCommand.CreateFromTask(
+            ContinueRebaseAsync,
+            this.WhenAnyValue(model => model.CanContinueRebase));
+        SkipRebaseCommand = ReactiveCommand.CreateFromTask(
+            SkipRebaseAsync,
+            this.WhenAnyValue(model => model.CanSkipRebase));
+        AbortRebaseCommand = ReactiveCommand.CreateFromTask(
+            AbortRebaseAsync,
+            this.WhenAnyValue(model => model.CanAbortRebase));
         CompareCurrentBranchOnGitHubCommand = ReactiveCommand.CreateFromTask(
             CompareCurrentBranchOnGitHubAsync,
             this.WhenAnyValue(
@@ -350,6 +366,16 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> SquashMergeBranchCommand { get; }
 
     public ReactiveCommand<Unit, Unit> RebaseBranchCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ContinueMergeCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> AbortMergeCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ContinueRebaseCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> SkipRebaseCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> AbortRebaseCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CompareCurrentBranchOnGitHubCommand { get; }
 
@@ -838,21 +864,25 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool CanCheckoutBranch =>
         HasRepository &&
         CanRunRepositoryCommand &&
+        !HasRepositoryOperationInProgress &&
         SelectedBranch is not null &&
         !SelectedBranch.IsCurrent;
 
     public bool CanCreateBranch =>
         HasRepository &&
-        CanRunRepositoryCommand;
+        CanRunRepositoryCommand &&
+        !HasRepositoryOperationInProgress;
 
     public bool CanRenameCurrentBranch =>
         HasRepository &&
         CanRunRepositoryCommand &&
+        !HasRepositoryOperationInProgress &&
         CurrentBranchItem?.CanRename == true;
 
     public bool CanDeleteCurrentBranch =>
         HasRepository &&
         CanRunRepositoryCommand &&
+        !HasRepositoryOperationInProgress &&
         CurrentBranchItem?.CanDelete == true;
 
     public string UpdateFromDefaultBranchMenuText =>
@@ -863,6 +893,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool CanUpdateFromDefaultBranch =>
         HasRepository &&
         CanRunRepositoryCommand &&
+        !HasRepositoryOperationInProgress &&
         !string.IsNullOrWhiteSpace(DefaultBranch) &&
         DefaultBranch != "-" &&
         !string.Equals(CurrentBranch, DefaultBranch, StringComparison.Ordinal);
@@ -870,11 +901,13 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool CanMergeBranch =>
         HasRepository &&
         CanRunRepositoryCommand &&
+        !HasRepositoryOperationInProgress &&
         Branches.Any(branch => !branch.IsCurrent);
 
     public bool CanRebaseBranch =>
         HasRepository &&
         CanRunRepositoryCommand &&
+        !HasRepositoryOperationInProgress &&
         Branches.Any(branch => !branch.IsCurrent);
 
     public int FilteredBranchesCount => FilteredBranches.Count;
@@ -896,17 +929,52 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    public RepositoryOperationState OperationState
+    {
+        get => _operationState;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _operationState, value);
+            RaiseRepositoryOperationStateChanged();
+        }
+    }
+
+    public bool HasRepositoryOperationInProgress =>
+        OperationState is RepositoryOperationState.Merge or RepositoryOperationState.Rebase;
+
+    public bool HasMergeInProgress => OperationState == RepositoryOperationState.Merge;
+
+    public bool HasRebaseInProgress => OperationState == RepositoryOperationState.Rebase;
+
+    public bool CanContinueMerge =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        HasMergeInProgress;
+
+    public bool CanAbortMerge => CanContinueMerge;
+
+    public bool CanContinueRebase =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        HasRebaseInProgress;
+
+    public bool CanSkipRebase => CanContinueRebase;
+
+    public bool CanAbortRebase => CanContinueRebase;
+
     public bool HasCurrentBranchStash => CurrentBranchStash is not null;
 
     public bool CanStashChanges =>
         HasRepository &&
         CanRunRepositoryCommand &&
+        !HasRepositoryOperationInProgress &&
         ChangedFilesCount > 0 &&
         !HasCurrentBranchStash;
 
     public bool CanRestoreStash =>
         HasRepository &&
         CanRunRepositoryCommand &&
+        !HasRepositoryOperationInProgress &&
         CurrentBranchStash is not null;
 
     public bool CanDiscardStash => CanRestoreStash;
@@ -962,7 +1030,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool CanSynchronize =>
         HasRepository &&
         HasRemote &&
-        CanRunRepositoryCommand;
+        CanRunRepositoryCommand &&
+        !HasRepositoryOperationInProgress;
 
     public bool CanPublishCurrentBranch =>
         HasRemote &&
@@ -2146,6 +2215,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             HasRepository = false;
             RemoteName = "-";
             RemoteUrl = "-";
+            OperationState = RepositoryOperationState.None;
             LastFetchedAt = null;
             CurrentBranchStash = null;
             ApplyBranches(Array.Empty<GitBranchItem>());
@@ -2546,6 +2616,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         Upstream = snapshot.Upstream;
         RemoteName = snapshot.RemoteName;
         RemoteUrl = snapshot.RemoteUrl;
+        OperationState = snapshot.OperationState;
         LastFetchedAt = snapshot.LastFetchedAt;
         LastCommit = snapshot.LastCommit;
         ChangedFilesCount = snapshot.ChangedFilesCount;
@@ -2800,6 +2871,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         RaiseBranchStateChanged();
         RaiseSyncStateChanged();
         RaiseStashStateChanged();
+        RaiseRepositoryOperationStateChanged();
     }
 
     private void RaiseCommitStateChanged()
@@ -2904,6 +2976,21 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(CanDiscardChanges));
         this.RaisePropertyChanged(nameof(StashAllChangesButtonText));
         this.RaisePropertyChanged(nameof(StashDescriptionText));
+    }
+
+    private void RaiseRepositoryOperationStateChanged()
+    {
+        this.RaisePropertyChanged(nameof(HasRepositoryOperationInProgress));
+        this.RaisePropertyChanged(nameof(HasMergeInProgress));
+        this.RaisePropertyChanged(nameof(HasRebaseInProgress));
+        this.RaisePropertyChanged(nameof(CanContinueMerge));
+        this.RaisePropertyChanged(nameof(CanAbortMerge));
+        this.RaisePropertyChanged(nameof(CanContinueRebase));
+        this.RaisePropertyChanged(nameof(CanSkipRebase));
+        this.RaisePropertyChanged(nameof(CanAbortRebase));
+        RaiseBranchStateChanged();
+        RaiseSyncStateChanged();
+        RaiseStashStateChanged();
     }
 
     private void RaiseDefaultBranchStateChanged()
@@ -3191,6 +3278,101 @@ public sealed class MainWindowViewModel : ViewModelBase
         finally
         {
             IsRebasingBranch = false;
+        }
+    }
+
+    private Task ContinueMergeAsync() =>
+        RunRepositoryOperationStateCommandAsync(
+            CanContinueMerge,
+            isRebaseOperation: false,
+            AvaGithubDesktopL.StatusContinuingMerge,
+            AvaGithubDesktopL.StatusContinuedMerge,
+            AvaGithubDesktopL.StatusContinueMergeFailedFormat,
+            () => _gitRepositoryService.ContinueMergeAsync(RootPath, CancellationToken.None));
+
+    private Task AbortMergeAsync() =>
+        RunRepositoryOperationStateCommandAsync(
+            CanAbortMerge,
+            isRebaseOperation: false,
+            AvaGithubDesktopL.StatusAbortingMerge,
+            AvaGithubDesktopL.StatusAbortedMerge,
+            AvaGithubDesktopL.StatusAbortMergeFailedFormat,
+            () => _gitRepositoryService.AbortMergeAsync(RootPath, CancellationToken.None));
+
+    private Task ContinueRebaseAsync() =>
+        RunRepositoryOperationStateCommandAsync(
+            CanContinueRebase,
+            isRebaseOperation: true,
+            AvaGithubDesktopL.StatusContinuingRebase,
+            AvaGithubDesktopL.StatusContinuedRebase,
+            AvaGithubDesktopL.StatusContinueRebaseFailedFormat,
+            () => _gitRepositoryService.ContinueRebaseAsync(RootPath, CancellationToken.None));
+
+    private Task SkipRebaseAsync() =>
+        RunRepositoryOperationStateCommandAsync(
+            CanSkipRebase,
+            isRebaseOperation: true,
+            AvaGithubDesktopL.StatusSkippingRebase,
+            AvaGithubDesktopL.StatusSkippedRebase,
+            AvaGithubDesktopL.StatusSkipRebaseFailedFormat,
+            () => _gitRepositoryService.SkipRebaseAsync(RootPath, CancellationToken.None));
+
+    private Task AbortRebaseAsync() =>
+        RunRepositoryOperationStateCommandAsync(
+            CanAbortRebase,
+            isRebaseOperation: true,
+            AvaGithubDesktopL.StatusAbortingRebase,
+            AvaGithubDesktopL.StatusAbortedRebase,
+            AvaGithubDesktopL.StatusAbortRebaseFailedFormat,
+            () => _gitRepositoryService.AbortRebaseAsync(RootPath, CancellationToken.None));
+
+    private async Task RunRepositoryOperationStateCommandAsync(
+        bool canRun,
+        bool isRebaseOperation,
+        string startedKey,
+        string completedKey,
+        string failedFormatKey,
+        Func<Task> operation)
+    {
+        if (!canRun)
+        {
+            return;
+        }
+
+        if (isRebaseOperation)
+        {
+            IsRebasingBranch = true;
+        }
+        else
+        {
+            IsMergingBranch = true;
+        }
+
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(startedKey)));
+
+        try
+        {
+            await operation();
+            await ReloadRepositoryWorkspaceAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(completedKey)));
+        }
+        catch (Exception ex)
+        {
+            await TryReloadRepositoryWorkspaceAsync();
+            ErrorMessage = _localizer.Format(failedFormatKey, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            if (isRebaseOperation)
+            {
+                IsRebasingBranch = false;
+            }
+            else
+            {
+                IsMergingBranch = false;
+            }
         }
     }
 

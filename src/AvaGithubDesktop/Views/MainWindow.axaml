@@ -74,6 +74,13 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuMergeBranch}}" Command="{Binding MergeBranchCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuSquashMergeBranch}}" Command="{Binding SquashMergeBranchCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRebaseBranch}}" Command="{Binding RebaseBranchCommand}" />
+                    <Separator IsVisible="{Binding HasRepositoryOperationInProgress}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuContinueMerge}}" Command="{Binding ContinueMergeCommand}" IsVisible="{Binding HasMergeInProgress}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAbortMerge}}" Command="{Binding AbortMergeCommand}" IsVisible="{Binding HasMergeInProgress}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuContinueRebase}}" Command="{Binding ContinueRebaseCommand}" IsVisible="{Binding HasRebaseInProgress}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuSkipRebase}}" Command="{Binding SkipRebaseCommand}" IsVisible="{Binding HasRebaseInProgress}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAbortRebase}}" Command="{Binding AbortRebaseCommand}" IsVisible="{Binding HasRebaseInProgress}" />
+                    <Separator IsVisible="{Binding HasRepositoryOperationInProgress}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCompareOnGitHub}}" Command="{Binding CompareCurrentBranchOnGitHubCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuViewBranchOnGitHub}}" Command="{Binding ViewCurrentBranchOnGitHubCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCreatePullRequest}}" Command="{Binding CreatePullRequestCommand}" />

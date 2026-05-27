@@ -118,6 +118,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
         var changes = ParseChanges(status);
         var (ahead, behind) = ParseAheadBehind(status);
         var lastFetchedAt = await ResolveLastFetchedAtAsync(root, cancellationToken);
+        var operationState = await ResolveOperationStateAsync(root, cancellationToken);
         var currentBranchStash = await LoadCurrentBranchStashAsync(root, branch, cancellationToken);
 
         return new GitRepositorySnapshot(
@@ -132,6 +133,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
             LastCommit: FormatLastCommit(lastCommit),
             Ahead: ahead,
             Behind: behind,
+            OperationState: operationState,
             CurrentBranchStash: currentBranchStash,
             Changes: changes);
     }
@@ -411,6 +413,46 @@ public sealed class GitRepositoryService : IGitRepositoryService
         return output.Contains("up to date", StringComparison.OrdinalIgnoreCase)
             ? GitRebaseResult.AlreadyUpToDate
             : GitRebaseResult.Success;
+    }
+
+    public async Task ContinueMergeAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken)
+    {
+        var root = await ResolveRootAsync(repositoryPath, cancellationToken);
+        await RunRequiredGitAsync(root, cancellationToken, "commit", "--no-edit");
+    }
+
+    public async Task AbortMergeAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken)
+    {
+        var root = await ResolveRootAsync(repositoryPath, cancellationToken);
+        await RunRequiredGitAsync(root, cancellationToken, "merge", "--abort");
+    }
+
+    public async Task ContinueRebaseAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken)
+    {
+        var root = await ResolveRootAsync(repositoryPath, cancellationToken);
+        await RunRequiredGitAsync(root, cancellationToken, "rebase", "--continue");
+    }
+
+    public async Task SkipRebaseAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken)
+    {
+        var root = await ResolveRootAsync(repositoryPath, cancellationToken);
+        await RunRequiredGitAsync(root, cancellationToken, "rebase", "--skip");
+    }
+
+    public async Task AbortRebaseAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken)
+    {
+        var root = await ResolveRootAsync(repositoryPath, cancellationToken);
+        await RunRequiredGitAsync(root, cancellationToken, "rebase", "--abort");
     }
 
     public async Task FetchAsync(
@@ -816,6 +858,18 @@ public sealed class GitRepositoryService : IGitRepositoryService
         return string.IsNullOrWhiteSpace(shortSha) ? "HEAD" : $"HEAD ({shortSha})";
     }
 
+    private static async Task<string> ResolveRootAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        return await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+    }
+
     private static string ResolveRemoteName(string upstream, string remotes)
     {
         // 优先使用当前 upstream 的远端名；没有 upstream 时回退到 origin 或第一个远端。
@@ -939,6 +993,30 @@ public sealed class GitRepositoryService : IGitRepositoryService
         return File.Exists(fetchHeadPath)
             ? new DateTimeOffset(File.GetLastWriteTime(fetchHeadPath))
             : null;
+    }
+
+    private static async Task<RepositoryOperationState> ResolveOperationStateAsync(
+        string root,
+        CancellationToken cancellationToken)
+    {
+        var gitDirectory = await RunOptionalGitAsync(root, cancellationToken, "rev-parse", "--git-dir");
+        if (string.IsNullOrWhiteSpace(gitDirectory))
+        {
+            return RepositoryOperationState.None;
+        }
+
+        var fullGitDirectory = Path.IsPathFullyQualified(gitDirectory)
+            ? gitDirectory
+            : Path.GetFullPath(Path.Combine(root, gitDirectory));
+        if (Directory.Exists(Path.Combine(fullGitDirectory, "rebase-merge"))
+            || Directory.Exists(Path.Combine(fullGitDirectory, "rebase-apply")))
+        {
+            return RepositoryOperationState.Rebase;
+        }
+
+        return File.Exists(Path.Combine(fullGitDirectory, "MERGE_HEAD"))
+            ? RepositoryOperationState.Merge
+            : RepositoryOperationState.None;
     }
 
     private static IReadOnlyList<GitChangeItem> ParseChanges(string status)
@@ -1567,6 +1645,8 @@ public sealed class GitRepositoryService : IGitRepositoryService
             UseShellExecute = false,
             CreateNoWindow = true
         };
+        startInfo.Environment["GIT_EDITOR"] = "true";
+        startInfo.Environment["GIT_MERGE_AUTOEDIT"] = "no";
 
         foreach (var argument in arguments)
         {

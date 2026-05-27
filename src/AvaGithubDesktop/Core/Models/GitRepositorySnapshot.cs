@@ -12,6 +12,7 @@ public sealed record GitRepositorySnapshot(
     string LastCommit,
     int Ahead,
     int Behind,
+    RepositoryOperationState OperationState,
     GitStashEntry? CurrentBranchStash,
     IReadOnlyList<GitChangeItem> Changes)
 {
