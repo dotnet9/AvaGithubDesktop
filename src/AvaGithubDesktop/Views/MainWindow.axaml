@@ -57,6 +57,7 @@
                     <Separator />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Open}}" Command="{Binding OpenRepositoryCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Refresh}}" Command="{Binding RefreshRepositoryCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuManageRemote}}" Command="{Binding ManageRemoteCommand}" />
                     <Separator />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuViewOnGitHub}}" Command="{Binding ViewRepositoryOnGitHubCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCreateIssueOnGitHub}}" Command="{Binding CreateIssueOnGitHubCommand}" />

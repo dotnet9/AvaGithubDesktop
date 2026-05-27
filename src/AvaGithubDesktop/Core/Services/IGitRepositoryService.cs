@@ -15,6 +15,17 @@ public interface IGitRepositoryService
 
     Task<GitRepositorySnapshot> LoadRepositoryAsync(string repositoryPath, CancellationToken cancellationToken);
 
+    Task SetRemoteAsync(
+        string repositoryPath,
+        string remoteName,
+        string remoteUrl,
+        CancellationToken cancellationToken);
+
+    Task RemoveRemoteAsync(
+        string repositoryPath,
+        string remoteName,
+        CancellationToken cancellationToken);
+
     Task<IReadOnlyList<GitCommitItem>> LoadHistoryAsync(
         string repositoryPath,
         int maxCount,

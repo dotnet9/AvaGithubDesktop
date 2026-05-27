@@ -136,6 +136,55 @@ public sealed class GitRepositoryService : IGitRepositoryService
             Changes: changes);
     }
 
+    public async Task SetRemoteAsync(
+        string repositoryPath,
+        string remoteName,
+        string remoteUrl,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        var normalizedRemoteName = NormalizeRemoteName(remoteName);
+        if (string.IsNullOrWhiteSpace(remoteUrl))
+        {
+            throw new ArgumentException("A remote URL is required.", nameof(remoteUrl));
+        }
+
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        var remotes = await RunOptionalGitAsync(root, cancellationToken, "remote");
+        if (RemoteExists(remotes, normalizedRemoteName))
+        {
+            await RunRequiredGitAsync(root, cancellationToken, "remote", "set-url", normalizedRemoteName, remoteUrl.Trim());
+            return;
+        }
+
+        await RunRequiredGitAsync(root, cancellationToken, "remote", "add", normalizedRemoteName, remoteUrl.Trim());
+    }
+
+    public async Task RemoveRemoteAsync(
+        string repositoryPath,
+        string remoteName,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
+        {
+            throw new DirectoryNotFoundException(repositoryPath);
+        }
+
+        var normalizedRemoteName = NormalizeRemoteName(remoteName);
+        var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        var remotes = await RunOptionalGitAsync(root, cancellationToken, "remote");
+        if (!RemoteExists(remotes, normalizedRemoteName))
+        {
+            return;
+        }
+
+        await RunRequiredGitAsync(root, cancellationToken, "remote", "remove", normalizedRemoteName);
+    }
+
     public async Task<IReadOnlyList<GitCommitItem>> LoadHistoryAsync(
         string repositoryPath,
         int maxCount,
@@ -788,6 +837,30 @@ public sealed class GitRepositoryService : IGitRepositoryService
 
         return remoteNames.FirstOrDefault(remote => remote.Equals("origin", StringComparison.OrdinalIgnoreCase))
             ?? remoteNames[0];
+    }
+
+    private static string NormalizeRemoteName(string remoteName)
+    {
+        if (string.IsNullOrWhiteSpace(remoteName))
+        {
+            throw new ArgumentException("A remote name is required.", nameof(remoteName));
+        }
+
+        var normalizedRemoteName = remoteName.Trim();
+        if (normalizedRemoteName.StartsWith("-", StringComparison.Ordinal)
+            || normalizedRemoteName.Any(char.IsWhiteSpace))
+        {
+            throw new ArgumentException("The remote name is invalid.", nameof(remoteName));
+        }
+
+        return normalizedRemoteName;
+    }
+
+    private static bool RemoteExists(string remotes, string remoteName)
+    {
+        return remotes
+            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Any(remote => string.Equals(remote, remoteName, StringComparison.Ordinal));
     }
 
     private static async Task<string> ResolveDefaultBranchAsync(

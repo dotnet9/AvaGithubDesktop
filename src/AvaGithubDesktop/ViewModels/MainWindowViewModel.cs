@@ -18,6 +18,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly IRepositoryCloneDialogService _repositoryCloneDialogService;
     private readonly IRepositoryCreationDialogService _repositoryCreationDialogService;
     private readonly IRepositoryOpenDialogService _repositoryOpenDialogService;
+    private readonly IRepositoryRemoteDialogService _repositoryRemoteDialogService;
     private readonly IRepositoryHistoryService _repositoryHistoryService;
     private readonly IRepositoryShellService _repositoryShellService;
     private readonly IGitHubAccountService _gitHubAccountService;
@@ -58,6 +59,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isRestoringStash;
     private bool _isDiscardingStash;
     private bool _isDiscardingChanges;
+    private bool _isManagingRemote;
     private bool _isSigningIn;
     private bool _isOperationLogVisible;
     private bool _isInitialized;
@@ -96,6 +98,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         IRepositoryCloneDialogService repositoryCloneDialogService,
         IRepositoryCreationDialogService repositoryCreationDialogService,
         IRepositoryOpenDialogService repositoryOpenDialogService,
+        IRepositoryRemoteDialogService repositoryRemoteDialogService,
         IRepositoryHistoryService repositoryHistoryService,
         IRepositoryShellService repositoryShellService,
         IGitHubAccountService gitHubAccountService,
@@ -114,6 +117,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _repositoryCloneDialogService = repositoryCloneDialogService;
         _repositoryCreationDialogService = repositoryCreationDialogService;
         _repositoryOpenDialogService = repositoryOpenDialogService;
+        _repositoryRemoteDialogService = repositoryRemoteDialogService;
         _repositoryHistoryService = repositoryHistoryService;
         _repositoryShellService = repositoryShellService;
         _gitHubAccountService = gitHubAccountService;
@@ -157,6 +161,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         OpenRepositoryInShellCommand = ReactiveCommand.CreateFromTask(OpenRepositoryInShellAsync, canUseCurrentRepository);
         OpenRepositoryInExternalEditorCommand = ReactiveCommand.CreateFromTask(OpenRepositoryInExternalEditorAsync, canUseCurrentRepository);
         ShowRepositoryInFileManagerCommand = ReactiveCommand.CreateFromTask(ShowRepositoryInFileManagerAsync, canUseCurrentRepository);
+        ManageRemoteCommand = ReactiveCommand.CreateFromTask(ManageRemoteAsync, canUseCurrentRepository);
         var canViewCurrentRepositoryOnGitHub = this.WhenAnyValue(
             model => model.HasRepository,
             model => model.RemoteUrl,
@@ -297,6 +302,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> OpenRepositoryInExternalEditorCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ShowRepositoryInFileManagerCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ManageRemoteCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ViewRepositoryOnGitHubCommand { get; }
 
@@ -559,7 +566,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         !IsStashing &&
         !IsRestoringStash &&
         !IsDiscardingStash &&
-        !IsDiscardingChanges;
+        !IsDiscardingChanges &&
+        !IsManagingRemote;
 
     public bool IsLoading
     {
@@ -679,6 +687,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         private set
         {
             this.RaiseAndSetIfChanged(ref _isDiscardingChanges, value);
+            RaiseOperationStateChanged();
+        }
+    }
+
+    public bool IsManagingRemote
+    {
+        get => _isManagingRemote;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isManagingRemote, value);
             RaiseOperationStateChanged();
         }
     }
@@ -1525,6 +1543,60 @@ public sealed class MainWindowViewModel : ViewModelBase
     private async Task CreateIssueOnGitHubAsync()
     {
         await OpenIssueCreationOnGitHubAsync(RemoteUrl);
+    }
+
+    private async Task ManageRemoteAsync()
+    {
+        if (!HasRepository || !CanRunRepositoryCommand)
+        {
+            return;
+        }
+
+        var request = await _repositoryRemoteDialogService.ShowManageRemoteDialogAsync(RemoteName, RemoteUrl, HasRemote);
+        if (request is null)
+        {
+            return;
+        }
+
+        IsManagingRemote = true;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            if (request.Action == RepositoryRemoteAction.Remove)
+            {
+                _eventBus.Publish(new StatusMessageChangedCommand(
+                    _localizer.Format(AvaGithubDesktopL.StatusRemovingRemoteFormat, request.RemoteName)));
+                await _gitRepositoryService.RemoveRemoteAsync(RootPath, request.RemoteName, CancellationToken.None);
+                await ReloadRepositoryWorkspaceAsync();
+                _eventBus.Publish(new StatusMessageChangedCommand(
+                    _localizer.Format(AvaGithubDesktopL.StatusRemovedRemoteFormat, request.RemoteName)));
+                return;
+            }
+
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusSettingRemoteFormat, request.RemoteName)));
+            await _gitRepositoryService.SetRemoteAsync(
+                RootPath,
+                request.RemoteName,
+                request.RemoteUrl,
+                CancellationToken.None);
+            await ReloadRepositoryWorkspaceAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusSetRemoteFormat, request.RemoteName)));
+        }
+        catch (Exception ex)
+        {
+            var errorFormat = request.Action == RepositoryRemoteAction.Remove
+                ? AvaGithubDesktopL.StatusRemoveRemoteFailedFormat
+                : AvaGithubDesktopL.StatusSetRemoteFailedFormat;
+            ErrorMessage = _localizer.Format(errorFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsManagingRemote = false;
+        }
     }
 
     private void ToggleOperationLog()

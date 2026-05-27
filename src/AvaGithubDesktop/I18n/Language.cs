@@ -29,6 +29,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuPush = "AvaGithubDesktop.AvaGithubDesktopL.MenuPush";
     public static readonly string MenuPull = "AvaGithubDesktop.AvaGithubDesktopL.MenuPull";
     public static readonly string MenuFetch = "AvaGithubDesktop.AvaGithubDesktopL.MenuFetch";
+    public static readonly string MenuManageRemote = "AvaGithubDesktop.AvaGithubDesktopL.MenuManageRemote";
     public static readonly string MenuOpenInShell = "AvaGithubDesktop.AvaGithubDesktopL.MenuOpenInShell";
     public static readonly string MenuOpenInExternalEditor = "AvaGithubDesktop.AvaGithubDesktopL.MenuOpenInExternalEditor";
     public static readonly string MenuShowInFileManager = "AvaGithubDesktop.AvaGithubDesktopL.MenuShowInFileManager";
@@ -172,6 +173,12 @@ public static class AvaGithubDesktopL
     public static readonly string StatusCreatingRepositoryFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCreatingRepositoryFormat";
     public static readonly string StatusCreatedRepositoryFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCreatedRepositoryFormat";
     public static readonly string StatusCreateRepositoryFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCreateRepositoryFailedFormat";
+    public static readonly string StatusSettingRemoteFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusSettingRemoteFormat";
+    public static readonly string StatusSetRemoteFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusSetRemoteFormat";
+    public static readonly string StatusSetRemoteFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusSetRemoteFailedFormat";
+    public static readonly string StatusRemovingRemoteFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRemovingRemoteFormat";
+    public static readonly string StatusRemovedRemoteFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRemovedRemoteFormat";
+    public static readonly string StatusRemoveRemoteFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRemoveRemoteFailedFormat";
     public static readonly string ErrorInvalidRepository = "AvaGithubDesktop.AvaGithubDesktopL.ErrorInvalidRepository";
     public static readonly string DialogOpenRepositoryTitle = "AvaGithubDesktop.AvaGithubDesktopL.DialogOpenRepositoryTitle";
     public static readonly string DialogCreateRepositoryParentDirectoryTitle = "AvaGithubDesktop.AvaGithubDesktopL.DialogCreateRepositoryParentDirectoryTitle";
@@ -199,6 +206,16 @@ public static class AvaGithubDesktopL
     public static readonly string CloneRepositoryNameRequired = "AvaGithubDesktop.AvaGithubDesktopL.CloneRepositoryNameRequired";
     public static readonly string CloneRepositoryNameInvalid = "AvaGithubDesktop.AvaGithubDesktopL.CloneRepositoryNameInvalid";
     public static readonly string CloneRepositoryDestinationExists = "AvaGithubDesktop.AvaGithubDesktopL.CloneRepositoryDestinationExists";
+    public static readonly string ManageRemoteTitle = "AvaGithubDesktop.AvaGithubDesktopL.ManageRemoteTitle";
+    public static readonly string ManageRemoteDescription = "AvaGithubDesktop.AvaGithubDesktopL.ManageRemoteDescription";
+    public static readonly string ManageRemoteNameLabel = "AvaGithubDesktop.AvaGithubDesktopL.ManageRemoteNameLabel";
+    public static readonly string ManageRemoteUrlLabel = "AvaGithubDesktop.AvaGithubDesktopL.ManageRemoteUrlLabel";
+    public static readonly string ManageRemoteUrlWatermark = "AvaGithubDesktop.AvaGithubDesktopL.ManageRemoteUrlWatermark";
+    public static readonly string ManageRemoteSaveButton = "AvaGithubDesktop.AvaGithubDesktopL.ManageRemoteSaveButton";
+    public static readonly string ManageRemoteRemoveButton = "AvaGithubDesktop.AvaGithubDesktopL.ManageRemoteRemoveButton";
+    public static readonly string RemoteNameRequired = "AvaGithubDesktop.AvaGithubDesktopL.RemoteNameRequired";
+    public static readonly string RemoteNameInvalid = "AvaGithubDesktop.AvaGithubDesktopL.RemoteNameInvalid";
+    public static readonly string RemoteUrlRequired = "AvaGithubDesktop.AvaGithubDesktopL.RemoteUrlRequired";
     public static readonly string AheadBehindFormat = "AvaGithubDesktop.AvaGithubDesktopL.AheadBehindFormat";
     public static readonly string CleanWorkingTree = "AvaGithubDesktop.AvaGithubDesktopL.CleanWorkingTree";
     public static readonly string CommitSummaryPlaceholder = "AvaGithubDesktop.AvaGithubDesktopL.CommitSummaryPlaceholder";
