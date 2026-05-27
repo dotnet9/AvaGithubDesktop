@@ -2286,9 +2286,11 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         if (filteredRepositories.Length > 1)
         {
+            // GitHub Desktop 的当前仓库只在所属分组中高亮；Recent 只作为快速入口，避免重复蓝点造成视觉噪声。
             AddRepositoryGroup(
                 _localizer.Get(AvaGithubDesktopL.RecentRepositories),
                 filteredRepositories
+                    .Where(repository => !repository.IsCurrent)
                     .OrderByDescending(repository => repository.LastOpenedAt)
                     .ThenBy(repository => repository.Name, StringComparer.OrdinalIgnoreCase)
                     .Take(5));

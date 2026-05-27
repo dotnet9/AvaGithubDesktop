@@ -91,17 +91,26 @@
     </Style>
 
     <Style Selector="Button.repositoryListItem">
+        <Setter Property="Width" Value="330" />
+        <Setter Property="Height" Value="29" />
         <Setter Property="MinHeight" Value="29" />
-        <Setter Property="Padding" Value="8,0" />
+        <Setter Property="MaxHeight" Value="29" />
+        <Setter Property="Padding" Value="10,0" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="CornerRadius" Value="0" />
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
     <Style Selector="Button.repositoryListItem:pointerover">
         <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.repositoryListItem.current">
+        <Setter Property="Background" Value="{DynamicResource SelectionBackgroundBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
     </Style>
 
@@ -111,5 +120,31 @@
 
     <Style Selector="Button.repositoryListItem TextBlock.muted">
         <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.repositoryListItem PathIcon.repositoryIcon">
+        <Setter Property="Width" Value="16" />
+        <Setter Property="Height" Value="16" />
+        <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.repositoryListItem TextBlock.repositoryName">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+    </Style>
+
+    <Style Selector="Button.repositoryListItem.current TextBlock.repositoryName">
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Button.repositoryListItem Ellipse.repositoryCurrentIndicator">
+        <Setter Property="Width" Value="7" />
+        <Setter Property="Height" Value="7" />
+        <Setter Property="Fill" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 </Styles>
