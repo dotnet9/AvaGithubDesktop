@@ -77,6 +77,7 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuMergeBranch}}" Command="{Binding MergeBranchCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuSquashMergeBranch}}" Command="{Binding SquashMergeBranchCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRebaseBranch}}" Command="{Binding RebaseBranchCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuSetCurrentBranchAsDefault}}" Command="{Binding SetCurrentBranchAsDefaultCommand}" IsEnabled="{Binding CanSetCurrentBranchAsDefault}" />
                     <Separator IsVisible="{Binding HasRepositoryOperationInProgress}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuContinueMerge}}" Command="{Binding ContinueMergeCommand}" IsVisible="{Binding HasMergeInProgress}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAbortMerge}}" Command="{Binding AbortMergeCommand}" IsVisible="{Binding HasMergeInProgress}" />

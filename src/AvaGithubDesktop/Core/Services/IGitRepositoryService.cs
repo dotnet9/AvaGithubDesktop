@@ -26,6 +26,12 @@ public interface IGitRepositoryService
         string remoteName,
         CancellationToken cancellationToken);
 
+    Task SetDefaultBranchAsync(
+        string repositoryPath,
+        string remoteName,
+        string branchName,
+        CancellationToken cancellationToken);
+
     Task<IReadOnlyList<GitCommitItem>> LoadHistoryAsync(
         string repositoryPath,
         int maxCount,

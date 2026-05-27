@@ -224,6 +224,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         UnsetUpstreamCommand = ReactiveCommand.CreateFromTask(
             UnsetUpstreamAsync,
             this.WhenAnyValue(model => model.CanUnsetUpstream));
+        SetCurrentBranchAsDefaultCommand = ReactiveCommand.CreateFromTask(
+            SetCurrentBranchAsDefaultAsync,
+            this.WhenAnyValue(model => model.CanSetCurrentBranchAsDefault));
         UpdateFromDefaultBranchCommand = ReactiveCommand.CreateFromTask(
             UpdateFromDefaultBranchAsync,
             this.WhenAnyValue(model => model.CanUpdateFromDefaultBranch));
@@ -407,6 +410,8 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> UnsetUpstreamCommand { get; }
 
+    public ReactiveCommand<Unit, Unit> SetCurrentBranchAsDefaultCommand { get; }
+
     public ReactiveCommand<Unit, Unit> UpdateFromDefaultBranchCommand { get; }
 
     public ReactiveCommand<Unit, Unit> MergeBranchCommand { get; }
@@ -542,6 +547,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             this.RaiseAndSetIfChanged(ref _remoteName, value);
             RaiseBranchStateChanged();
+            RaiseDefaultBranchStateChanged();
             RaiseSyncStateChanged();
         }
     }
@@ -1027,6 +1033,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         !CurrentBranch.StartsWith("HEAD", StringComparison.OrdinalIgnoreCase) &&
         !string.IsNullOrWhiteSpace(Upstream) &&
         Upstream != "-";
+
+    public bool CanSetCurrentBranchAsDefault =>
+        HasRepository &&
+        HasRemote &&
+        CanRunRepositoryCommand &&
+        !HasRepositoryOperationInProgress &&
+        !string.IsNullOrWhiteSpace(CurrentBranch) &&
+        CurrentBranch != "-" &&
+        !CurrentBranch.StartsWith("HEAD", StringComparison.OrdinalIgnoreCase) &&
+        !string.Equals(CurrentBranch, DefaultBranch, StringComparison.Ordinal);
 
     public string UpdateFromDefaultBranchMenuText =>
         string.IsNullOrWhiteSpace(DefaultBranch) || DefaultBranch == "-"
@@ -3252,6 +3268,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(CanOpenDiffFileInExternalEditor));
         RaiseCommitStateChanged();
         RaiseBranchStateChanged();
+        RaiseDefaultBranchStateChanged();
         RaiseSyncStateChanged();
         RaiseStashStateChanged();
         RaiseRepositoryOperationStateChanged();
@@ -3389,6 +3406,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(ShowRepositoryOperationBanner));
         this.RaisePropertyChanged(nameof(RepositoryOperationBannerTitle));
         this.RaisePropertyChanged(nameof(RepositoryOperationBannerDetail));
+        RaiseDefaultBranchStateChanged();
         RaiseBranchStateChanged();
         RaiseSyncStateChanged();
         RaiseStashStateChanged();
@@ -3396,6 +3414,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private void RaiseDefaultBranchStateChanged()
     {
+        this.RaisePropertyChanged(nameof(CanSetCurrentBranchAsDefault));
         this.RaisePropertyChanged(nameof(CanUpdateFromDefaultBranch));
         this.RaisePropertyChanged(nameof(UpdateFromDefaultBranchMenuText));
     }
@@ -3582,6 +3601,42 @@ public sealed class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusDeleteBranchFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsUpdatingBranch = false;
+        }
+    }
+
+    private async Task SetCurrentBranchAsDefaultAsync()
+    {
+        if (!CanSetCurrentBranchAsDefault)
+        {
+            return;
+        }
+
+        var branchName = CurrentBranch;
+        var remoteName = RemoteName;
+        IsUpdatingBranch = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(
+            _localizer.Format(AvaGithubDesktopL.StatusSettingDefaultBranchFormat, branchName, remoteName)));
+
+        try
+        {
+            await _gitRepositoryService.SetDefaultBranchAsync(
+                RootPath,
+                remoteName,
+                branchName,
+                CancellationToken.None);
+            await ReloadRepositoryWorkspaceAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusSetDefaultBranchFormat, branchName)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusSetDefaultBranchFailedFormat, ex.Message);
             _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
         }
         finally

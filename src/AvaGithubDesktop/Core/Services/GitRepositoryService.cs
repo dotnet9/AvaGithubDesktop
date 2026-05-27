@@ -188,6 +188,22 @@ public sealed class GitRepositoryService : IGitRepositoryService
         await RunRequiredGitAsync(root, cancellationToken, "remote", "remove", normalizedRemoteName);
     }
 
+    public async Task SetDefaultBranchAsync(
+        string repositoryPath,
+        string remoteName,
+        string branchName,
+        CancellationToken cancellationToken)
+    {
+        var root = await ResolveRootAsync(repositoryPath, cancellationToken);
+        var normalizedRemoteName = NormalizeRemoteName(remoteName);
+        if (string.IsNullOrWhiteSpace(branchName) || branchName.StartsWith("HEAD", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("A local branch name is required.", nameof(branchName));
+        }
+
+        await RunRequiredGitAsync(root, cancellationToken, "remote", "set-head", normalizedRemoteName, branchName.Trim());
+    }
+
     public async Task<IReadOnlyList<GitCommitItem>> LoadHistoryAsync(
         string repositoryPath,
         int maxCount,
