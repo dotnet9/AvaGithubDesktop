@@ -76,6 +76,10 @@ public static class AvaGithubDesktopL
     public static readonly string AddRepository = "AvaGithubDesktop.AvaGithubDesktopL.AddRepository";
     public static readonly string NewRepository = "AvaGithubDesktop.AvaGithubDesktopL.NewRepository";
     public static readonly string AddExistingRepository = "AvaGithubDesktop.AvaGithubDesktopL.AddExistingRepository";
+    public static readonly string AddExistingRepositoryTitle = "AvaGithubDesktop.AvaGithubDesktopL.AddExistingRepositoryTitle";
+    public static readonly string AddExistingRepositoryPathLabel = "AvaGithubDesktop.AvaGithubDesktopL.AddExistingRepositoryPathLabel";
+    public static readonly string AddExistingRepositoryPathRequired = "AvaGithubDesktop.AvaGithubDesktopL.AddExistingRepositoryPathRequired";
+    public static readonly string AddExistingRepositoryPathMissing = "AvaGithubDesktop.AvaGithubDesktopL.AddExistingRepositoryPathMissing";
     public static readonly string CloneRepository = "AvaGithubDesktop.AvaGithubDesktopL.CloneRepository";
     public static readonly string RecentRepositories = "AvaGithubDesktop.AvaGithubDesktopL.RecentRepositories";
     public static readonly string NoRepositoriesFound = "AvaGithubDesktop.AvaGithubDesktopL.NoRepositoriesFound";

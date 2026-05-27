@@ -1,0 +1,82 @@
+<codewf:CodeWFWindow
+    x:Class="AvaGithubDesktop.Views.OpenRepositoryWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:codewf="https://codewf.com"
+    xmlns:i18n="https://codewf.com"
+    xmlns:l="clr-namespace:AvaGithubDesktop"
+    xmlns:vm="using:AvaGithubDesktop.ViewModels"
+    x:DataType="vm:OpenRepositoryWindowViewModel"
+    Width="620"
+    Height="280"
+    MinWidth="560"
+    MinHeight="260"
+    Background="{DynamicResource PanelBackgroundBrush}"
+    CanMaximize="False"
+    CanMinimize="False"
+    CanResize="False"
+    Icon="/Assets/app-logo.ico"
+    ShowInTaskbar="False"
+    Title="{Binding Title}"
+    TitleBarBackground="{DynamicResource ToolbarBackgroundBrush}"
+    TitleBarBorderBrush="{DynamicResource ToolbarBorderBrush}"
+    TitleBarForeground="{DynamicResource ToolbarTextBrush}"
+    TitleBarHeight="34"
+    WindowStartupLocation="CenterOwner">
+
+    <codewf:CodeWFWindow.LeftContent>
+        <TextBlock
+            Margin="12,0,0,0"
+            VerticalAlignment="Center"
+            FontSize="13"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource ToolbarTextBrush}"
+            Text="{Binding Title}" />
+    </codewf:CodeWFWindow.LeftContent>
+
+    <Border Padding="24" Background="{DynamicResource PanelBackgroundBrush}">
+        <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="12">
+            <TextBlock
+                Classes="heading"
+                Text="{Binding Title}"
+                TextWrapping="Wrap" />
+
+            <StackPanel Grid.Row="1" Spacing="5">
+                <TextBlock Classes="formLabel" Text="{Binding RepositoryPathLabel}" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <TextBox
+                        Classes="branchNameInput"
+                        Text="{Binding RepositoryPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button
+                        Grid.Column="1"
+                        MinWidth="86"
+                        Command="{Binding BrowseRepositoryCommand}"
+                        Content="{Binding BrowseButtonText}" />
+                </Grid>
+            </StackPanel>
+
+            <TextBlock
+                Grid.Row="2"
+                Classes="warning"
+                IsVisible="{Binding HasValidationMessage}"
+                Text="{Binding ValidationMessage}"
+                TextWrapping="Wrap" />
+
+            <StackPanel
+                Grid.Row="3"
+                HorizontalAlignment="Right"
+                Orientation="Horizontal"
+                Spacing="8">
+                <Button
+                    MinWidth="86"
+                    Command="{Binding CancelCommand}"
+                    Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.Cancel}}" />
+                <Button
+                    Classes="dialogPrimary"
+                    MinWidth="112"
+                    Command="{Binding OpenCommand}"
+                    Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.Open}}" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</codewf:CodeWFWindow>

@@ -48,6 +48,7 @@ public partial class App : PrismApplication
         containerRegistry.RegisterSingleton<IRepositoryPickerService, RepositoryPickerService>();
         containerRegistry.RegisterSingleton<IRepositoryCloneDialogService, RepositoryCloneDialogService>();
         containerRegistry.RegisterSingleton<IRepositoryCreationDialogService, RepositoryCreationDialogService>();
+        containerRegistry.RegisterSingleton<IRepositoryOpenDialogService, RepositoryOpenDialogService>();
         containerRegistry.RegisterSingleton<IRepositoryHistoryService, RepositoryHistoryService>();
         containerRegistry.RegisterSingleton<IRepositoryShellService, RepositoryShellService>();
         containerRegistry.RegisterSingleton<IGitHubAccountService, GitHubAccountService>();

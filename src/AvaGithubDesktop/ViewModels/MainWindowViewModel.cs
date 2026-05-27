@@ -17,6 +17,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly IRepositoryPickerService _repositoryPickerService;
     private readonly IRepositoryCloneDialogService _repositoryCloneDialogService;
     private readonly IRepositoryCreationDialogService _repositoryCreationDialogService;
+    private readonly IRepositoryOpenDialogService _repositoryOpenDialogService;
     private readonly IRepositoryHistoryService _repositoryHistoryService;
     private readonly IRepositoryShellService _repositoryShellService;
     private readonly IGitHubAccountService _gitHubAccountService;
@@ -94,6 +95,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         IRepositoryPickerService repositoryPickerService,
         IRepositoryCloneDialogService repositoryCloneDialogService,
         IRepositoryCreationDialogService repositoryCreationDialogService,
+        IRepositoryOpenDialogService repositoryOpenDialogService,
         IRepositoryHistoryService repositoryHistoryService,
         IRepositoryShellService repositoryShellService,
         IGitHubAccountService gitHubAccountService,
@@ -111,6 +113,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _repositoryPickerService = repositoryPickerService;
         _repositoryCloneDialogService = repositoryCloneDialogService;
         _repositoryCreationDialogService = repositoryCreationDialogService;
+        _repositoryOpenDialogService = repositoryOpenDialogService;
         _repositoryHistoryService = repositoryHistoryService;
         _repositoryShellService = repositoryShellService;
         _gitHubAccountService = gitHubAccountService;
@@ -1334,13 +1337,13 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private async Task BrowseRepositoryAsync()
     {
-        var selectedPath = await _repositoryPickerService.PickRepositoryAsync();
-        if (string.IsNullOrWhiteSpace(selectedPath))
+        var request = await _repositoryOpenDialogService.ShowOpenRepositoryDialogAsync(RepositoryPath);
+        if (request is null)
         {
             return;
         }
 
-        RepositoryPath = selectedPath;
+        RepositoryPath = request.RepositoryPath;
         await OpenRepositoryAsync();
     }
 
