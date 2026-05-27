@@ -4,7 +4,11 @@ public sealed record GitChangeItem(string StatusCode, string Path, GitChangeKind
 {
     public IReadOnlyList<string> GitPaths => ResolveGitPaths(Path);
 
-    public string DisplayStatus => StatusCode.Trim() switch
+    public bool IsConflict => IsConflictStatus(StatusCode);
+
+    public string DisplayStatus => IsConflict
+        ? "Conflict"
+        : StatusCode.Trim() switch
     {
         "??" => "Untracked",
         "A" => "Added",
@@ -17,14 +21,18 @@ public sealed record GitChangeItem(string StatusCode, string Path, GitChangeKind
         var code => code
     };
 
-    public string StatusBackground => Kind switch
+    public string StatusBackground => IsConflict
+        ? "#FDE7E9"
+        : Kind switch
     {
         GitChangeKind.Staged => "#DFF6DD",
         GitChangeKind.Untracked => "#FFF4CE",
         _ => "#EAF2FF"
     };
 
-    public string StatusForeground => Kind switch
+    public string StatusForeground => IsConflict
+        ? "#A4262C"
+        : Kind switch
     {
         GitChangeKind.Staged => "#0E6F32",
         GitChangeKind.Untracked => "#8A5A00",
@@ -49,5 +57,10 @@ public sealed record GitChangeItem(string StatusCode, string Path, GitChangeKind
         return string.IsNullOrWhiteSpace(oldPath) || string.IsNullOrWhiteSpace(newPath)
             ? new[] { path }
             : new[] { oldPath, newPath };
+    }
+
+    private static bool IsConflictStatus(string statusCode)
+    {
+        return statusCode.Trim() is "DD" or "AU" or "UD" or "UA" or "DU" or "AA" or "UU" or "U";
     }
 }

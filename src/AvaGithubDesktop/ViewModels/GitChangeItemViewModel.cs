@@ -45,6 +45,8 @@ public sealed class GitChangeItemViewModel : ReactiveObject
 
     public GitChangeKind Kind => Change.Kind;
 
+    public bool IsConflict => Change.IsConflict;
+
     public string DisplayStatus => Change.DisplayStatus;
 
     public string StatusBackground => Change.StatusBackground;
