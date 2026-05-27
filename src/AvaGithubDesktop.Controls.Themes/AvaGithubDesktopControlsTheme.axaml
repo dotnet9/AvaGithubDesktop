@@ -6,6 +6,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="Themes/Shared/Palette.axaml" />
+                <ResourceInclude Source="Themes/Shared/Octicons.axaml" />
                 <ResourceInclude Source="Themes/Controls/UnifiedDiffViewer.axaml" />
                 <ResourceInclude Source="Themes/Controls/OperationLogView.axaml" />
             </ResourceDictionary.MergedDictionaries>
