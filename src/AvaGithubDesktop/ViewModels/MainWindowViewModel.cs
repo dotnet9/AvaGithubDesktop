@@ -1770,6 +1770,30 @@ public sealed class MainWindowViewModel : ViewModelBase
         await OpenRepositoryAsync();
     }
 
+    private async Task RemoveKnownRepositoryAsync(RepositoryListItemViewModel repository)
+    {
+        try
+        {
+            ErrorMessage = string.Empty;
+            await _repositoryHistoryService.RemoveAsync(repository.Path, CancellationToken.None);
+            _knownRepositories = _knownRepositories
+                .Where(item => !string.Equals(
+                    NormalizePathForComparison(item.Path),
+                    NormalizePathForComparison(repository.Path),
+                    StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+            RebuildRepositoryGroups();
+
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusRemovedRepositoryFromListFormat, repository.Name)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusRemoveRepositoryFromListFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+    }
+
     private async Task LoadAccountsAsync()
     {
         try
@@ -2980,7 +3004,8 @@ public sealed class MainWindowViewModel : ViewModelBase
                 ShowRepositoryItemInFileManagerAsync,
                 CopyRepositoryNameAsync,
                 CopyRepositoryPathAsync,
-                ViewRepositoryItemOnGitHubAsync))
+                ViewRepositoryItemOnGitHubAsync,
+                RemoveKnownRepositoryAsync))
             .ToArray();
         UpdateCurrentRepositoryIndicators();
         RebuildRepositoryGroups();

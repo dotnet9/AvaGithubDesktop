@@ -15,6 +15,7 @@ public sealed class RepositoryListItemViewModel : ViewModelBase
     private readonly Func<RepositoryListItemViewModel, Task> _copyNameAsync;
     private readonly Func<RepositoryListItemViewModel, Task> _copyPathAsync;
     private readonly Func<RepositoryListItemViewModel, Task> _viewOnGitHubAsync;
+    private readonly Func<RepositoryListItemViewModel, Task> _removeFromListAsync;
     private bool _isCurrent;
 
     public RepositoryListItemViewModel(
@@ -25,7 +26,8 @@ public sealed class RepositoryListItemViewModel : ViewModelBase
         Func<RepositoryListItemViewModel, Task> showInFileManagerAsync,
         Func<RepositoryListItemViewModel, Task> copyNameAsync,
         Func<RepositoryListItemViewModel, Task> copyPathAsync,
-        Func<RepositoryListItemViewModel, Task> viewOnGitHubAsync)
+        Func<RepositoryListItemViewModel, Task> viewOnGitHubAsync,
+        Func<RepositoryListItemViewModel, Task> removeFromListAsync)
     {
         Entry = entry;
         _openAsync = openAsync;
@@ -35,6 +37,7 @@ public sealed class RepositoryListItemViewModel : ViewModelBase
         _copyNameAsync = copyNameAsync;
         _copyPathAsync = copyPathAsync;
         _viewOnGitHubAsync = viewOnGitHubAsync;
+        _removeFromListAsync = removeFromListAsync;
         OpenCommand = ReactiveCommand.CreateFromTask(OpenAsync);
         OpenInExternalEditorCommand = ReactiveCommand.CreateFromTask(OpenInExternalEditorAsync);
         OpenInShellCommand = ReactiveCommand.CreateFromTask(OpenInShellAsync);
@@ -42,6 +45,7 @@ public sealed class RepositoryListItemViewModel : ViewModelBase
         CopyNameCommand = ReactiveCommand.CreateFromTask(CopyNameAsync);
         CopyPathCommand = ReactiveCommand.CreateFromTask(CopyPathAsync);
         ViewOnGitHubCommand = ReactiveCommand.CreateFromTask(ViewOnGitHubAsync, Observable.Return(CanViewOnGitHub));
+        RemoveFromListCommand = ReactiveCommand.CreateFromTask(RemoveFromListAsync);
     }
 
     public RepositoryHistoryEntry Entry { get; }
@@ -76,6 +80,8 @@ public sealed class RepositoryListItemViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> ViewOnGitHubCommand { get; }
 
+    public ReactiveCommand<Unit, Unit> RemoveFromListCommand { get; }
+
     private Task OpenAsync()
     {
         return _openAsync(this);
@@ -109,5 +115,10 @@ public sealed class RepositoryListItemViewModel : ViewModelBase
     private Task ViewOnGitHubAsync()
     {
         return _viewOnGitHubAsync(this);
+    }
+
+    private Task RemoveFromListAsync()
+    {
+        return _removeFromListAsync(this);
     }
 }

@@ -41,6 +41,21 @@ public sealed class RepositoryHistoryService : IRepositoryHistoryService
         entries.RemoveAll(existing => string.Equals(NormalizePath(existing.Path), normalizedPath, StringComparison.OrdinalIgnoreCase));
         entries.Insert(0, entry);
 
+        await WriteStoredRepositoriesAsync(entries, cancellationToken);
+    }
+
+    public async Task RemoveAsync(string repositoryPath, CancellationToken cancellationToken)
+    {
+        var normalizedPath = NormalizePath(repositoryPath);
+        var entries = await ReadStoredRepositoriesAsync(cancellationToken);
+        entries.RemoveAll(existing => string.Equals(NormalizePath(existing.Path), normalizedPath, StringComparison.OrdinalIgnoreCase));
+        await WriteStoredRepositoriesAsync(entries, cancellationToken);
+    }
+
+    private static async Task WriteStoredRepositoriesAsync(
+        IReadOnlyList<RepositoryHistoryEntry> entries,
+        CancellationToken cancellationToken)
+    {
         Directory.CreateDirectory(StoreDirectory);
         await using var stream = File.Create(StorePath);
         await JsonSerializer.SerializeAsync(
