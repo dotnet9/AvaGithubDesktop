@@ -203,6 +203,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var canSynchronize = this.WhenAnyValue(model => model.CanSynchronize);
         SynchronizeRepositoryCommand = ReactiveCommand.CreateFromTask(SynchronizeRepositoryAsync, canSynchronize);
         FetchRepositoryCommand = ReactiveCommand.CreateFromTask(FetchRepositoryAsync, canSynchronize);
+        FetchAllRemotesCommand = ReactiveCommand.CreateFromTask(FetchAllRemotesAsync, canSynchronize);
         PullRepositoryCommand = ReactiveCommand.CreateFromTask(PullRepositoryAsync, canSynchronize);
         PushRepositoryCommand = ReactiveCommand.CreateFromTask(PushRepositoryAsync, canSynchronize);
         PushTagsCommand = ReactiveCommand.CreateFromTask(PushTagsAsync, canSynchronize);
@@ -370,6 +371,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> SynchronizeRepositoryCommand { get; }
 
     public ReactiveCommand<Unit, Unit> FetchRepositoryCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> FetchAllRemotesCommand { get; }
 
     public ReactiveCommand<Unit, Unit> PullRepositoryCommand { get; }
 
@@ -1256,6 +1259,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             {
                 return _activeSyncOperation switch
                 {
+                    RepositorySyncOperation.FetchAll => _localizer.Get(AvaGithubDesktopL.SyncFetchingAllRemotesTitle),
                     RepositorySyncOperation.Pull => _localizer.Format(AvaGithubDesktopL.SyncPullingTitleFormat, RemoteName),
                     RepositorySyncOperation.Publish => _localizer.Get(AvaGithubDesktopL.SyncPublishingBranchTitle),
                     RepositorySyncOperation.Push => _localizer.Format(AvaGithubDesktopL.SyncPushingTitleFormat, RemoteName),
@@ -2681,6 +2685,9 @@ public sealed class MainWindowViewModel : ViewModelBase
     private Task FetchRepositoryAsync() =>
         RunRemoteOperationAsync(RepositorySyncOperation.Fetch);
 
+    private Task FetchAllRemotesAsync() =>
+        RunRemoteOperationAsync(RepositorySyncOperation.FetchAll);
+
     private Task PullRepositoryAsync() =>
         RunRemoteOperationAsync(RepositorySyncOperation.Pull);
 
@@ -2743,6 +2750,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             switch (operation)
             {
+                case RepositorySyncOperation.FetchAll:
+                    await _gitRepositoryService.FetchAllAsync(RootPath, CancellationToken.None);
+                    break;
                 case RepositorySyncOperation.Pull:
                     await _gitRepositoryService.PullAsync(RootPath, RemoteName, CancellationToken.None);
                     break;
@@ -2778,6 +2788,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private string GetRemoteOperationStartedMessage(RepositorySyncOperation operation) =>
         operation switch
         {
+            RepositorySyncOperation.FetchAll => _localizer.Get(AvaGithubDesktopL.StatusFetchingAllRemotes),
             RepositorySyncOperation.Pull => _localizer.Format(AvaGithubDesktopL.StatusPullingFormat, RemoteName),
             RepositorySyncOperation.Publish => _localizer.Format(AvaGithubDesktopL.StatusPublishingBranchFormat, CurrentBranch, RemoteName),
             RepositorySyncOperation.Push => _localizer.Format(AvaGithubDesktopL.StatusPushingFormat, RemoteName),
@@ -2787,6 +2798,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private string GetRemoteOperationCompletedMessage(RepositorySyncOperation operation) =>
         operation switch
         {
+            RepositorySyncOperation.FetchAll => _localizer.Get(AvaGithubDesktopL.StatusFetchedAllRemotes),
             RepositorySyncOperation.Pull => _localizer.Format(AvaGithubDesktopL.StatusPulledFormat, RemoteName),
             RepositorySyncOperation.Publish => _localizer.Format(AvaGithubDesktopL.StatusPublishedBranchFormat, CurrentBranch, RemoteName),
             RepositorySyncOperation.Push => _localizer.Format(AvaGithubDesktopL.StatusPushedFormat, RemoteName),
@@ -2796,6 +2808,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private static string GetRemoteOperationFailedKey(RepositorySyncOperation operation) =>
         operation switch
         {
+            RepositorySyncOperation.FetchAll => AvaGithubDesktopL.StatusFetchAllRemotesFailedFormat,
             RepositorySyncOperation.Pull => AvaGithubDesktopL.StatusPullFailedFormat,
             RepositorySyncOperation.Publish => AvaGithubDesktopL.StatusPublishBranchFailedFormat,
             RepositorySyncOperation.Push => AvaGithubDesktopL.StatusPushFailedFormat,
@@ -4264,6 +4277,7 @@ public enum RepositorySyncOperation
 {
     None,
     Fetch,
+    FetchAll,
     Pull,
     Publish,
     Push

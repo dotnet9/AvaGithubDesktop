@@ -41,6 +41,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuPushTags = "AvaGithubDesktop.AvaGithubDesktopL.MenuPushTags";
     public static readonly string MenuPull = "AvaGithubDesktop.AvaGithubDesktopL.MenuPull";
     public static readonly string MenuFetch = "AvaGithubDesktop.AvaGithubDesktopL.MenuFetch";
+    public static readonly string MenuFetchAllRemotes = "AvaGithubDesktop.AvaGithubDesktopL.MenuFetchAllRemotes";
     public static readonly string MenuManageRemote = "AvaGithubDesktop.AvaGithubDesktopL.MenuManageRemote";
     public static readonly string MenuOpenInShell = "AvaGithubDesktop.AvaGithubDesktopL.MenuOpenInShell";
     public static readonly string MenuOpenInExternalEditor = "AvaGithubDesktop.AvaGithubDesktopL.MenuOpenInExternalEditor";
@@ -468,6 +469,7 @@ public static class AvaGithubDesktopL
     public static readonly string SyncPushTitleFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncPushTitleFormat";
     public static readonly string SyncPublishBranchTitle = "AvaGithubDesktop.AvaGithubDesktopL.SyncPublishBranchTitle";
     public static readonly string SyncFetchingTitleFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncFetchingTitleFormat";
+    public static readonly string SyncFetchingAllRemotesTitle = "AvaGithubDesktop.AvaGithubDesktopL.SyncFetchingAllRemotesTitle";
     public static readonly string SyncPullingTitleFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncPullingTitleFormat";
     public static readonly string SyncPushingTitleFormat = "AvaGithubDesktop.AvaGithubDesktopL.SyncPushingTitleFormat";
     public static readonly string SyncPublishingBranchTitle = "AvaGithubDesktop.AvaGithubDesktopL.SyncPublishingBranchTitle";
@@ -484,6 +486,9 @@ public static class AvaGithubDesktopL
     public static readonly string StatusFetchingFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusFetchingFormat";
     public static readonly string StatusFetchedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusFetchedFormat";
     public static readonly string StatusFetchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusFetchFailedFormat";
+    public static readonly string StatusFetchingAllRemotes = "AvaGithubDesktop.AvaGithubDesktopL.StatusFetchingAllRemotes";
+    public static readonly string StatusFetchedAllRemotes = "AvaGithubDesktop.AvaGithubDesktopL.StatusFetchedAllRemotes";
+    public static readonly string StatusFetchAllRemotesFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusFetchAllRemotesFailedFormat";
     public static readonly string StatusPullingFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPullingFormat";
     public static readonly string StatusPulledFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPulledFormat";
     public static readonly string StatusPullFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusPullFailedFormat";
