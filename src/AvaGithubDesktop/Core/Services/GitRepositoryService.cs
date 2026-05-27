@@ -467,6 +467,22 @@ public sealed class GitRepositoryService : IGitRepositoryService
         await RunRequiredGitAsync(root, cancellationToken, "rebase", "--abort");
     }
 
+    public async Task ContinueRevertAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken)
+    {
+        var root = await ResolveRootAsync(repositoryPath, cancellationToken);
+        await RunRequiredGitAsync(root, cancellationToken, "revert", "--continue");
+    }
+
+    public async Task AbortRevertAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken)
+    {
+        var root = await ResolveRootAsync(repositoryPath, cancellationToken);
+        await RunRequiredGitAsync(root, cancellationToken, "revert", "--abort");
+    }
+
     public async Task FetchAsync(
         string repositoryPath,
         string remoteName,
@@ -1094,8 +1110,13 @@ public sealed class GitRepositoryService : IGitRepositoryService
             return RepositoryOperationState.Rebase;
         }
 
-        return File.Exists(Path.Combine(fullGitDirectory, "MERGE_HEAD"))
-            ? RepositoryOperationState.Merge
+        if (File.Exists(Path.Combine(fullGitDirectory, "MERGE_HEAD")))
+        {
+            return RepositoryOperationState.Merge;
+        }
+
+        return File.Exists(Path.Combine(fullGitDirectory, "REVERT_HEAD"))
+            ? RepositoryOperationState.Revert
             : RepositoryOperationState.None;
     }
 

@@ -24,6 +24,8 @@ public static class AvaGithubDesktopL
     public static readonly string MenuContinueRebase = "AvaGithubDesktop.AvaGithubDesktopL.MenuContinueRebase";
     public static readonly string MenuSkipRebase = "AvaGithubDesktop.AvaGithubDesktopL.MenuSkipRebase";
     public static readonly string MenuAbortRebase = "AvaGithubDesktop.AvaGithubDesktopL.MenuAbortRebase";
+    public static readonly string MenuContinueRevert = "AvaGithubDesktop.AvaGithubDesktopL.MenuContinueRevert";
+    public static readonly string MenuAbortRevert = "AvaGithubDesktop.AvaGithubDesktopL.MenuAbortRevert";
     public static readonly string MenuView = "AvaGithubDesktop.AvaGithubDesktopL.MenuView";
     public static readonly string MenuHelp = "AvaGithubDesktop.AvaGithubDesktopL.MenuHelp";
     public static readonly string ShowOperationLog = "AvaGithubDesktop.AvaGithubDesktopL.ShowOperationLog";
@@ -393,6 +395,12 @@ public static class AvaGithubDesktopL
     public static readonly string StatusAbortingRebase = "AvaGithubDesktop.AvaGithubDesktopL.StatusAbortingRebase";
     public static readonly string StatusAbortedRebase = "AvaGithubDesktop.AvaGithubDesktopL.StatusAbortedRebase";
     public static readonly string StatusAbortRebaseFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusAbortRebaseFailedFormat";
+    public static readonly string StatusContinuingRevert = "AvaGithubDesktop.AvaGithubDesktopL.StatusContinuingRevert";
+    public static readonly string StatusContinuedRevert = "AvaGithubDesktop.AvaGithubDesktopL.StatusContinuedRevert";
+    public static readonly string StatusContinueRevertFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusContinueRevertFailedFormat";
+    public static readonly string StatusAbortingRevert = "AvaGithubDesktop.AvaGithubDesktopL.StatusAbortingRevert";
+    public static readonly string StatusAbortedRevert = "AvaGithubDesktop.AvaGithubDesktopL.StatusAbortedRevert";
+    public static readonly string StatusAbortRevertFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusAbortRevertFailedFormat";
     public static readonly string StatusRenamingBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRenamingBranchFormat";
     public static readonly string StatusRenamedBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRenamedBranchFormat";
     public static readonly string StatusRenameBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRenameBranchFailedFormat";

@@ -4,5 +4,6 @@ public enum RepositoryOperationState
 {
     None,
     Merge,
-    Rebase
+    Rebase,
+    Revert
 }

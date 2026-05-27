@@ -237,6 +237,12 @@ public sealed class MainWindowViewModel : ViewModelBase
         AbortRebaseCommand = ReactiveCommand.CreateFromTask(
             AbortRebaseAsync,
             this.WhenAnyValue(model => model.CanAbortRebase));
+        ContinueRevertCommand = ReactiveCommand.CreateFromTask(
+            ContinueRevertAsync,
+            this.WhenAnyValue(model => model.CanContinueRevert));
+        AbortRevertCommand = ReactiveCommand.CreateFromTask(
+            AbortRevertAsync,
+            this.WhenAnyValue(model => model.CanAbortRevert));
         CompareCurrentBranchOnGitHubCommand = ReactiveCommand.CreateFromTask(
             CompareCurrentBranchOnGitHubAsync,
             this.WhenAnyValue(
@@ -396,6 +402,10 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> SkipRebaseCommand { get; }
 
     public ReactiveCommand<Unit, Unit> AbortRebaseCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ContinueRevertCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> AbortRevertCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CompareCurrentBranchOnGitHubCommand { get; }
 
@@ -1003,11 +1013,13 @@ public sealed class MainWindowViewModel : ViewModelBase
     }
 
     public bool HasRepositoryOperationInProgress =>
-        OperationState is RepositoryOperationState.Merge or RepositoryOperationState.Rebase;
+        OperationState is RepositoryOperationState.Merge or RepositoryOperationState.Rebase or RepositoryOperationState.Revert;
 
     public bool HasMergeInProgress => OperationState == RepositoryOperationState.Merge;
 
     public bool HasRebaseInProgress => OperationState == RepositoryOperationState.Rebase;
+
+    public bool HasRevertInProgress => OperationState == RepositoryOperationState.Revert;
 
     public bool CanContinueMerge =>
         HasRepository &&
@@ -1024,6 +1036,13 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool CanSkipRebase => CanContinueRebase;
 
     public bool CanAbortRebase => CanContinueRebase;
+
+    public bool CanContinueRevert =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        HasRevertInProgress;
+
+    public bool CanAbortRevert => CanContinueRevert;
 
     public bool HasCurrentBranchStash => CurrentBranchStash is not null;
 
@@ -3214,11 +3233,14 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(HasRepositoryOperationInProgress));
         this.RaisePropertyChanged(nameof(HasMergeInProgress));
         this.RaisePropertyChanged(nameof(HasRebaseInProgress));
+        this.RaisePropertyChanged(nameof(HasRevertInProgress));
         this.RaisePropertyChanged(nameof(CanContinueMerge));
         this.RaisePropertyChanged(nameof(CanAbortMerge));
         this.RaisePropertyChanged(nameof(CanContinueRebase));
         this.RaisePropertyChanged(nameof(CanSkipRebase));
         this.RaisePropertyChanged(nameof(CanAbortRebase));
+        this.RaisePropertyChanged(nameof(CanContinueRevert));
+        this.RaisePropertyChanged(nameof(CanAbortRevert));
         RaiseBranchStateChanged();
         RaiseSyncStateChanged();
         RaiseStashStateChanged();
@@ -3556,6 +3578,56 @@ public sealed class MainWindowViewModel : ViewModelBase
             AvaGithubDesktopL.StatusAbortedRebase,
             AvaGithubDesktopL.StatusAbortRebaseFailedFormat,
             () => _gitRepositoryService.AbortRebaseAsync(RootPath, CancellationToken.None));
+
+    private Task ContinueRevertAsync() =>
+        RunRevertOperationStateCommandAsync(
+            CanContinueRevert,
+            AvaGithubDesktopL.StatusContinuingRevert,
+            AvaGithubDesktopL.StatusContinuedRevert,
+            AvaGithubDesktopL.StatusContinueRevertFailedFormat,
+            () => _gitRepositoryService.ContinueRevertAsync(RootPath, CancellationToken.None));
+
+    private Task AbortRevertAsync() =>
+        RunRevertOperationStateCommandAsync(
+            CanAbortRevert,
+            AvaGithubDesktopL.StatusAbortingRevert,
+            AvaGithubDesktopL.StatusAbortedRevert,
+            AvaGithubDesktopL.StatusAbortRevertFailedFormat,
+            () => _gitRepositoryService.AbortRevertAsync(RootPath, CancellationToken.None));
+
+    private async Task RunRevertOperationStateCommandAsync(
+        bool canRun,
+        string startedKey,
+        string completedKey,
+        string failedFormatKey,
+        Func<Task> operation)
+    {
+        if (!canRun)
+        {
+            return;
+        }
+
+        IsRevertingCommit = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(startedKey)));
+
+        try
+        {
+            await operation();
+            await ReloadRepositoryWorkspaceAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(completedKey)));
+        }
+        catch (Exception ex)
+        {
+            await TryReloadRepositoryWorkspaceAsync();
+            ErrorMessage = _localizer.Format(failedFormatKey, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsRevertingCommit = false;
+        }
+    }
 
     private async Task RunRepositoryOperationStateCommandAsync(
         bool canRun,

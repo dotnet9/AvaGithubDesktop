@@ -81,6 +81,8 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuContinueRebase}}" Command="{Binding ContinueRebaseCommand}" IsVisible="{Binding HasRebaseInProgress}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuSkipRebase}}" Command="{Binding SkipRebaseCommand}" IsVisible="{Binding HasRebaseInProgress}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAbortRebase}}" Command="{Binding AbortRebaseCommand}" IsVisible="{Binding HasRebaseInProgress}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuContinueRevert}}" Command="{Binding ContinueRevertCommand}" IsVisible="{Binding HasRevertInProgress}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAbortRevert}}" Command="{Binding AbortRevertCommand}" IsVisible="{Binding HasRevertInProgress}" />
                     <Separator IsVisible="{Binding HasRepositoryOperationInProgress}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCompareOnGitHub}}" Command="{Binding CompareCurrentBranchOnGitHubCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuViewBranchOnGitHub}}" Command="{Binding ViewCurrentBranchOnGitHubCommand}" />

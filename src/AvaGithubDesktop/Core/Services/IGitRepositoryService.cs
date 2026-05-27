@@ -97,6 +97,14 @@ public interface IGitRepositoryService
         string repositoryPath,
         CancellationToken cancellationToken);
 
+    Task ContinueRevertAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken);
+
+    Task AbortRevertAsync(
+        string repositoryPath,
+        CancellationToken cancellationToken);
+
     Task FetchAsync(
         string repositoryPath,
         string remoteName,
