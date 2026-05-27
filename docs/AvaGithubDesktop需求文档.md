@@ -89,3 +89,4 @@
 - Desktop 风格分支右键菜单支持打开 GitHub 分支页面
 - Desktop 风格未发布分支 Publish branch 同步入口
 - Desktop 风格 Branch 主菜单支持打开当前 GitHub 分支页面
+- Desktop 风格 Branch 主菜单支持 Compare on GitHub

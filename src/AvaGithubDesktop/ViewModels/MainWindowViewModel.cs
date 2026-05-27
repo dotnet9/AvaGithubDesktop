@@ -173,6 +173,15 @@ public sealed class MainWindowViewModel : ViewModelBase
         var canCheckoutBranch = this.WhenAnyValue(model => model.CanCheckoutBranch);
         CheckoutBranchCommand = ReactiveCommand.CreateFromTask(CheckoutSelectedBranchAsync, canCheckoutBranch);
         CreateBranchCommand = ReactiveCommand.CreateFromTask(CreateBranchAsync, this.WhenAnyValue(model => model.CanCreateBranch));
+        CompareCurrentBranchOnGitHubCommand = ReactiveCommand.CreateFromTask(
+            CompareCurrentBranchOnGitHubAsync,
+            this.WhenAnyValue(
+                model => model.HasRepository,
+                model => model.RemoteUrl,
+                model => model.Upstream,
+                model => model.CanRunRepositoryCommand,
+                (hasRepository, remoteUrl, upstream, canRunRepositoryCommand) =>
+                    hasRepository && canRunRepositoryCommand && RepositoryRemoteUrlHelper.TryGetGitHubCompareUrl(remoteUrl, upstream, out _)));
         ViewCurrentBranchOnGitHubCommand = ReactiveCommand.CreateFromTask(
             ViewCurrentBranchOnGitHubAsync,
             this.WhenAnyValue(
@@ -277,6 +286,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> CheckoutBranchCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CreateBranchCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> CompareCurrentBranchOnGitHubCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ViewCurrentBranchOnGitHubCommand { get; }
 
@@ -1402,6 +1413,11 @@ public sealed class MainWindowViewModel : ViewModelBase
         await ViewBranchOnGitHubAsync(RemoteUrl, Upstream);
     }
 
+    private async Task CompareCurrentBranchOnGitHubAsync()
+    {
+        await CompareBranchOnGitHubAsync(RemoteUrl, Upstream);
+    }
+
     private async Task ViewRepositoryItemOnGitHubAsync(RepositoryListItemViewModel repository)
     {
         await ViewRepositoryRemoteOnGitHubAsync(repository.Entry.RemoteUrl);
@@ -1661,6 +1677,27 @@ public sealed class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenBranchOnGitHubFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+    }
+
+    private async Task CompareBranchOnGitHubAsync(string? remoteUrl, string upstream)
+    {
+        if (!RepositoryRemoteUrlHelper.TryGetGitHubCompareUrl(remoteUrl, upstream, out var webUrl))
+        {
+            ErrorMessage = _localizer.Get(AvaGithubDesktopL.StatusRepositoryHasNoGitHubRemote);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+            return;
+        }
+
+        try
+        {
+            await _repositoryShellService.OpenUrlAsync(webUrl);
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedBranchCompareOnGitHub)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenBranchCompareOnGitHubFailedFormat, ex.Message);
             _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
         }
     }
