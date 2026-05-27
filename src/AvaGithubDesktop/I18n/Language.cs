@@ -322,6 +322,7 @@ public static class AvaGithubDesktopL
     public static readonly string CopyCommitSha = "AvaGithubDesktop.AvaGithubDesktopL.CopyCommitSha";
     public static readonly string ViewCommitOnGitHub = "AvaGithubDesktop.AvaGithubDesktopL.ViewCommitOnGitHub";
     public static readonly string CreateTag = "AvaGithubDesktop.AvaGithubDesktopL.CreateTag";
+    public static readonly string RevertCommit = "AvaGithubDesktop.AvaGithubDesktopL.RevertCommit";
     public static readonly string CreateTagTitle = "AvaGithubDesktop.AvaGithubDesktopL.CreateTagTitle";
     public static readonly string CreateTagNameLabel = "AvaGithubDesktop.AvaGithubDesktopL.CreateTagNameLabel";
     public static readonly string CreateTagNamePlaceholder = "AvaGithubDesktop.AvaGithubDesktopL.CreateTagNamePlaceholder";
@@ -410,6 +411,9 @@ public static class AvaGithubDesktopL
     public static readonly string StatusCreatingTagFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCreatingTagFormat";
     public static readonly string StatusCreatedTagFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCreatedTagFormat";
     public static readonly string StatusCreateTagFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCreateTagFailedFormat";
+    public static readonly string StatusRevertingCommitFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRevertingCommitFormat";
+    public static readonly string StatusRevertedCommitFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRevertedCommitFormat";
+    public static readonly string StatusRevertCommitFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusRevertCommitFailedFormat";
     public static readonly string StatusCheckingOutBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckingOutBranchFormat";
     public static readonly string StatusCheckedOutBranchFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckedOutBranchFormat";
     public static readonly string StatusCheckoutBranchFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusCheckoutBranchFailedFormat";

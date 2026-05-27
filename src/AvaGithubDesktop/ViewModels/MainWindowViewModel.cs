@@ -64,6 +64,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isManagingRemote;
     private bool _isAmendingLastCommit;
     private bool _isCreatingTag;
+    private bool _isRevertingCommit;
     private bool _isSigningIn;
     private bool _isOperationLogVisible;
     private bool _isInitialized;
@@ -186,6 +187,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         CreateTagCommand = ReactiveCommand.CreateFromTask(
             CreateTagAsync,
             this.WhenAnyValue(model => model.CanCreateTag));
+        RevertSelectedCommitCommand = ReactiveCommand.CreateFromTask(
+            RevertSelectedCommitAsync,
+            this.WhenAnyValue(model => model.CanRevertSelectedCommit));
         ToggleOperationLogCommand = ReactiveCommand.Create(ToggleOperationLog);
         SelectThemeCommand = ReactiveCommand.Create<string?>(SelectThemeByKey);
         SelectSimplifiedChineseCommand = ReactiveCommand.Create(() => SelectLanguageByCulture("zh-CN"));
@@ -353,6 +357,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ViewSelectedCommitOnGitHubCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CreateTagCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> RevertSelectedCommitCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ToggleOperationLogCommand { get; }
 
@@ -611,7 +617,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         !IsDiscardingStash &&
         !IsDiscardingChanges &&
         !IsManagingRemote &&
-        !IsCreatingTag;
+        !IsCreatingTag &&
+        !IsRevertingCommit;
 
     public bool IsLoading
     {
@@ -755,6 +762,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    public bool IsRevertingCommit
+    {
+        get => _isRevertingCommit;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isRevertingCommit, value);
+            RaiseOperationStateChanged();
+        }
+    }
+
     public int ChangedFilesCount
     {
         get => _changedFilesCount;
@@ -841,6 +858,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(CanCopySelectedCommitSha));
             this.RaisePropertyChanged(nameof(CanViewSelectedCommitOnGitHub));
             this.RaisePropertyChanged(nameof(CanCreateTag));
+            this.RaisePropertyChanged(nameof(CanRevertSelectedCommit));
             ApplySelectedCommitFiles(value, selectedFilePath);
         }
     }
@@ -859,6 +877,12 @@ public sealed class MainWindowViewModel : ViewModelBase
         RepositoryRemoteUrlHelper.TryGetGitHubCommitUrl(RemoteUrl, SelectedCommit.Sha, out _);
 
     public bool CanCreateTag =>
+        HasRepository &&
+        CanRunRepositoryCommand &&
+        !HasRepositoryOperationInProgress &&
+        SelectedCommit is not null;
+
+    public bool CanRevertSelectedCommit =>
         HasRepository &&
         CanRunRepositoryCommand &&
         !HasRepositoryOperationInProgress &&
@@ -1842,6 +1866,38 @@ public sealed class MainWindowViewModel : ViewModelBase
         finally
         {
             IsCreatingTag = false;
+        }
+    }
+
+    private async Task RevertSelectedCommitAsync()
+    {
+        if (!CanRevertSelectedCommit || SelectedCommit is null)
+        {
+            return;
+        }
+
+        var targetCommit = SelectedCommit;
+        IsRevertingCommit = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(
+            _localizer.Format(AvaGithubDesktopL.StatusRevertingCommitFormat, targetCommit.ShortSha)));
+
+        try
+        {
+            await _gitRepositoryService.RevertCommitAsync(RootPath, targetCommit.Sha, CancellationToken.None);
+            await ReloadRepositoryWorkspaceAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusRevertedCommitFormat, targetCommit.ShortSha)));
+        }
+        catch (Exception ex)
+        {
+            await TryReloadRepositoryWorkspaceAsync();
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusRevertCommitFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsRevertingCommit = false;
         }
     }
 
@@ -3016,6 +3072,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(CanCopySelectedCommitSha));
         this.RaisePropertyChanged(nameof(CanViewSelectedCommitOnGitHub));
         this.RaisePropertyChanged(nameof(CanCreateTag));
+        this.RaisePropertyChanged(nameof(CanRevertSelectedCommit));
         this.RaisePropertyChanged(nameof(CommitButtonText));
         this.RaisePropertyChanged(nameof(SelectedChangesStatusText));
     }

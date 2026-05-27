@@ -898,6 +898,20 @@ public sealed class GitRepositoryService : IGitRepositoryService
         await RunRequiredGitAsync(root, cancellationToken, "tag", "-a", normalizedTagName, targetSha.Trim(), "-m", message.Trim());
     }
 
+    public async Task RevertCommitAsync(
+        string repositoryPath,
+        string sha,
+        CancellationToken cancellationToken)
+    {
+        var root = await ResolveRootAsync(repositoryPath, cancellationToken);
+        if (string.IsNullOrWhiteSpace(sha))
+        {
+            throw new ArgumentException("A commit SHA is required.", nameof(sha));
+        }
+
+        await RunRequiredGitAsync(root, cancellationToken, "revert", "--no-edit", sha.Trim());
+    }
+
     private static async Task<string> ResolveBranchAsync(string root, CancellationToken cancellationToken)
     {
         var branch = await RunRequiredGitAsync(root, cancellationToken, "rev-parse", "--abbrev-ref", "HEAD");

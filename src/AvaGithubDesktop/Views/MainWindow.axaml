@@ -933,6 +933,11 @@
                                             Command="{Binding CreateTagCommand}"
                                             Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.CreateTag}}"
                                             IsEnabled="{Binding CanCreateTag}" />
+                                        <Button
+                                            Classes="inlineAction"
+                                            Command="{Binding RevertSelectedCommitCommand}"
+                                            Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.RevertCommit}}"
+                                            IsEnabled="{Binding CanRevertSelectedCommit}" />
                                     </StackPanel>
                                 </Grid>
                             </Grid>

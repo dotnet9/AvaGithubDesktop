@@ -169,4 +169,9 @@ public interface IGitRepositoryService
         string message,
         string targetSha,
         CancellationToken cancellationToken);
+
+    Task RevertCommitAsync(
+        string repositoryPath,
+        string sha,
+        CancellationToken cancellationToken);
 }
