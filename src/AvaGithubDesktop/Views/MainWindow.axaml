@@ -53,6 +53,8 @@
                     <MenuItem Header="{Binding AccountEndpointText}" IsEnabled="False" IsVisible="{Binding IsSignedIn}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.SignInToGitHub}}" Command="{Binding SignInCommand}" IsVisible="{Binding IsSignedOut}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.SignOut}}" Command="{Binding SignOutCommand}" IsVisible="{Binding IsSignedIn}" />
+                    <Separator />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuExit}}" Click="ExitMenuItem_Click" HotKey="Alt+F4" />
                 </MenuItem>
                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRepository}}">
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuPush}}" Command="{Binding PushRepositoryCommand}" HotKey="Ctrl+P" />

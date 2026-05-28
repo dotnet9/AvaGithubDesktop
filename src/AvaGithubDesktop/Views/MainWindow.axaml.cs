@@ -167,6 +167,11 @@ public partial class MainWindow : CodeWFWindow
         ToggleFullScreen();
     }
 
+    private void ExitMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+
     private static void ExecuteCommandIfPossible(ICommand command)
     {
         if (command.CanExecute(null))

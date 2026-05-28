@@ -44,6 +44,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuAddLocalRepository = "AvaGithubDesktop.AvaGithubDesktopL.MenuAddLocalRepository";
     public static readonly string MenuCloneRepository = "AvaGithubDesktop.AvaGithubDesktopL.MenuCloneRepository";
     public static readonly string MenuRefresh = "AvaGithubDesktop.AvaGithubDesktopL.MenuRefresh";
+    public static readonly string MenuExit = "AvaGithubDesktop.AvaGithubDesktopL.MenuExit";
     public static readonly string MenuPush = "AvaGithubDesktop.AvaGithubDesktopL.MenuPush";
     public static readonly string MenuPushTags = "AvaGithubDesktop.AvaGithubDesktopL.MenuPushTags";
     public static readonly string MenuPull = "AvaGithubDesktop.AvaGithubDesktopL.MenuPull";

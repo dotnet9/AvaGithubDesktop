@@ -39,6 +39,7 @@
       "MenuAddLocalRepository": "Add Local Repository...",
       "MenuCloneRepository": "Clone repository...",
       "MenuRefresh": "Refresh",
+      "MenuExit": "Exit",
       "MenuPush": "Push",
       "MenuPushTags": "Push tags",
       "MenuPull": "Pull",

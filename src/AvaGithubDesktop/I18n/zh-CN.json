@@ -39,6 +39,7 @@
       "MenuAddLocalRepository": "添加本地仓库...",
       "MenuCloneRepository": "克隆仓库...",
       "MenuRefresh": "刷新",
+      "MenuExit": "退出",
       "MenuPush": "推送",
       "MenuPushTags": "推送标签",
       "MenuPull": "拉取",
