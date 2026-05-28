@@ -2621,45 +2621,41 @@ public sealed class MainWindowViewModel : ViewModelBase
         var committedSummary = CommitSummary.Trim();
         var isAmending = IsAmendingLastCommit;
 
-        IsCommitting = true;
         ErrorMessage = string.Empty;
         var startedMessage = isAmending
             ? _localizer.Format(AvaGithubDesktopL.StatusAmendingCommitFormat, CurrentBranch)
             : _localizer.Format(AvaGithubDesktopL.StatusCommittingFormat, IncludedChangesCount, CurrentBranch);
-        _eventBus.Publish(new StatusMessageChangedCommand(startedMessage));
+        var completedFormat = isAmending
+            ? AvaGithubDesktopL.StatusAmendedCommitFormat
+            : AvaGithubDesktopL.StatusCommittedFormat;
+        var failedFormat = isAmending
+            ? AvaGithubDesktopL.StatusAmendCommitFailedFormat
+            : AvaGithubDesktopL.StatusCommitFailedFormat;
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            startedMessage,
+            _localizer.Format(completedFormat, committedSummary),
+            ex => _localizer.Format(failedFormat, ex.Message),
+            async () =>
+            {
+                await _gitRepositoryService.CommitAsync(
+                    RootPath,
+                    includedPaths,
+                    CommitSummary,
+                    CommitDescription,
+                    isAmending,
+                    CancellationToken.None);
 
-        try
+                CommitSummary = string.Empty;
+                CommitDescription = string.Empty;
+                IsAmendingLastCommit = false;
+            },
+            ReloadRepositoryWorkspaceAsync,
+            () => Task.CompletedTask,
+            value => IsCommitting = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            await _gitRepositoryService.CommitAsync(
-                RootPath,
-                includedPaths,
-                CommitSummary,
-                CommitDescription,
-                isAmending,
-                CancellationToken.None);
-
-            CommitSummary = string.Empty;
-            CommitDescription = string.Empty;
-            IsAmendingLastCommit = false;
-            var workspace = await _repositoryWorkspaceLoader.LoadAsync(RootPath, HistoryCommitLimit, CancellationToken.None);
-            ApplyWorkspace(workspace);
-            var completedFormat = isAmending
-                ? AvaGithubDesktopL.StatusAmendedCommitFormat
-                : AvaGithubDesktopL.StatusCommittedFormat;
-            _eventBus.Publish(new StatusMessageChangedCommand(
-                _localizer.Format(completedFormat, committedSummary)));
-        }
-        catch (Exception ex)
-        {
-            var failedFormat = isAmending
-                ? AvaGithubDesktopL.StatusAmendCommitFailedFormat
-                : AvaGithubDesktopL.StatusCommitFailedFormat;
-            ErrorMessage = _localizer.Format(failedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsCommitting = false;
+            ErrorMessage = errorMessage;
         }
     }
 
