@@ -8,8 +8,6 @@ namespace AvaGithubDesktop.Core.Services;
 
 public sealed class GitRepositoryService : IGitRepositoryService
 {
-    private const char CommitRecordSeparator = '\u001e';
-    private const char CommitFieldSeparator = '\u001f';
     private const string DesktopStashEntryMarker = "!!GitHub_Desktop";
     private static readonly HashSet<string> ImageFileExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -115,7 +113,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
             ? string.Empty
             : await RunOptionalGitAsync(root, cancellationToken, "remote", "get-url", remoteName);
         var lastCommit = await RunOptionalGitAsync(root, cancellationToken, "log", "-1", "--pretty=format:%h%x09%s%x09%cr");
-        var changes = ParseChanges(status);
+        var changes = GitRepositoryOutputParser.ParseChanges(status);
         var (ahead, behind) = GitRepositoryOutputParser.ParseAheadBehind(status);
         var lastFetchedAt = await ResolveLastFetchedAtAsync(root, cancellationToken);
         var operationState = await ResolveOperationStateAsync(root, cancellationToken);
@@ -225,7 +223,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
             $"--pretty=format:%x1e%H%x1f%h%x1f%an%x1f%ae%x1f%ad%x1f%ar%x1f%s",
             "--name-status");
 
-        return ParseHistory(history);
+        return GitRepositoryOutputParser.ParseHistory(history);
     }
 
     public async Task<IReadOnlySet<string>> LoadTagNamesAsync(
@@ -1009,7 +1007,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
         var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
         var status = await RunRequiredGitAsync(root, cancellationToken, "status", "--porcelain=v1");
         // Desktop 的提交面板允许只提交勾选文件。先把已跟踪文件全部退回，再只 add 勾选路径。
-        var trackedPaths = ParseChanges(status)
+        var trackedPaths = GitRepositoryOutputParser.ParseChanges(status)
             .Where(change => change.Kind != GitChangeKind.Untracked)
             .SelectMany(change => change.GitPaths)
             .Where(path => !string.IsNullOrWhiteSpace(path))
@@ -1281,204 +1279,6 @@ public sealed class GitRepositoryService : IGitRepositoryService
         return File.Exists(Path.Combine(fullGitDirectory, "CHERRY_PICK_HEAD"))
             ? RepositoryOperationState.CherryPick
             : RepositoryOperationState.None;
-    }
-
-    private static IReadOnlyList<GitChangeItem> ParseChanges(string status)
-    {
-        return status
-            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-            .Where(line => !line.StartsWith("## ", StringComparison.Ordinal))
-            .Select(ParseChange)
-            .Where(change => !string.IsNullOrWhiteSpace(change.Path))
-            .ToArray();
-    }
-
-    private static GitChangeItem ParseChange(string line)
-    {
-        var statusCode = line.Length >= 2 ? line[..2] : line.Trim();
-        var path = line.Length > 3 ? DecodeGitStatusPath(line[3..]) : string.Empty;
-        var kind = statusCode == "??"
-            ? GitChangeKind.Untracked
-            : statusCode[0] != ' '
-                ? GitChangeKind.Staged
-                : GitChangeKind.Unstaged;
-
-        return new GitChangeItem(statusCode.Trim(), path, kind);
-    }
-
-    private static string DecodeGitStatusPath(string rawPath)
-    {
-        if (string.IsNullOrWhiteSpace(rawPath))
-        {
-            return string.Empty;
-        }
-
-        var renameSeparatorIndex = rawPath.IndexOf(" -> ", StringComparison.Ordinal);
-        if (renameSeparatorIndex < 0)
-        {
-            return DecodeGitQuotedPath(rawPath);
-        }
-
-        var oldPath = DecodeGitQuotedPath(rawPath[..renameSeparatorIndex]);
-        var newPath = DecodeGitQuotedPath(rawPath[(renameSeparatorIndex + 4)..]);
-        return string.IsNullOrWhiteSpace(oldPath) || string.IsNullOrWhiteSpace(newPath)
-            ? DecodeGitQuotedPath(rawPath)
-            : $"{oldPath} -> {newPath}";
-    }
-
-    private static IReadOnlyList<GitCommitItem> ParseHistory(string history)
-    {
-        if (string.IsNullOrWhiteSpace(history))
-        {
-            return Array.Empty<GitCommitItem>();
-        }
-
-        return history
-            .Split(CommitRecordSeparator, StringSplitOptions.RemoveEmptyEntries)
-            .Select(ParseCommit)
-            .Where(commit => !string.IsNullOrWhiteSpace(commit.Sha))
-            .ToArray();
-    }
-
-    private static GitCommitItem ParseCommit(string record)
-    {
-        var lines = record
-            .Trim('\r', '\n')
-            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-
-        if (lines.Length == 0)
-        {
-            return EmptyCommit();
-        }
-
-        var fields = lines[0].Split(CommitFieldSeparator);
-        if (fields.Length < 7)
-        {
-            return EmptyCommit();
-        }
-
-        var files = lines
-            .Skip(1)
-            .Select(ParseCommitFile)
-            .Where(file => !string.IsNullOrWhiteSpace(file.Path))
-            .ToArray();
-
-        return new GitCommitItem(
-            Sha: fields[0],
-            ShortSha: fields[1],
-            AuthorName: fields[2],
-            AuthorEmail: fields[3],
-            Date: fields[4],
-            RelativeDate: fields[5],
-            Summary: string.IsNullOrWhiteSpace(fields[6]) ? "Empty commit message" : fields[6],
-            Files: files);
-    }
-
-    private static GitCommitFileItem ParseCommitFile(string line)
-    {
-        var parts = line.Split('\t', StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length < 2)
-        {
-            return new GitCommitFileItem(string.Empty, string.Empty);
-        }
-
-        var statusCode = parts[0];
-        var path = (statusCode.StartsWith('R') || statusCode.StartsWith('C')) && parts.Length >= 3
-            ? $"{DecodeGitQuotedPath(parts[1])} -> {DecodeGitQuotedPath(parts[2])}"
-            : DecodeGitQuotedPath(parts[^1]);
-        return new GitCommitFileItem(statusCode, path);
-    }
-
-    private static string DecodeGitQuotedPath(string value)
-    {
-        var path = value.Trim();
-        if (path.Length < 2 || path[0] != '"' || path[^1] != '"')
-        {
-            return path;
-        }
-
-        // Git 默认 core.quotePath=true，中文路径会以 C-style 八进制字节输出；
-        // 这里按 UTF-8 字节还原，避免提交时把转义文本当成真实 pathspec。
-        var content = path[1..^1];
-        var builder = new StringBuilder(content.Length);
-        var pendingBytes = new List<byte>();
-
-        for (var index = 0; index < content.Length; index++)
-        {
-            var current = content[index];
-            if (current != '\\')
-            {
-                FlushPendingBytes(builder, pendingBytes);
-                builder.Append(current);
-                continue;
-            }
-
-            if (index == content.Length - 1)
-            {
-                FlushPendingBytes(builder, pendingBytes);
-                builder.Append('\\');
-                break;
-            }
-
-            var escaped = content[++index];
-            if (escaped is >= '0' and <= '7')
-            {
-                var byteValue = escaped - '0';
-                var consumedDigits = 1;
-                while (consumedDigits < 3
-                       && index + 1 < content.Length
-                       && content[index + 1] is >= '0' and <= '7')
-                {
-                    byteValue = (byteValue * 8) + (content[++index] - '0');
-                    consumedDigits++;
-                }
-
-                pendingBytes.Add((byte)byteValue);
-                continue;
-            }
-
-            FlushPendingBytes(builder, pendingBytes);
-            builder.Append(escaped switch
-            {
-                'a' => '\a',
-                'b' => '\b',
-                'f' => '\f',
-                'n' => '\n',
-                'r' => '\r',
-                't' => '\t',
-                'v' => '\v',
-                '\\' => '\\',
-                '"' => '"',
-                _ => escaped
-            });
-        }
-
-        FlushPendingBytes(builder, pendingBytes);
-        return builder.ToString();
-    }
-
-    private static void FlushPendingBytes(StringBuilder builder, List<byte> pendingBytes)
-    {
-        if (pendingBytes.Count == 0)
-        {
-            return;
-        }
-
-        builder.Append(Encoding.UTF8.GetString(pendingBytes.ToArray()));
-        pendingBytes.Clear();
-    }
-
-    private static GitCommitItem EmptyCommit()
-    {
-        return new GitCommitItem(
-            Sha: string.Empty,
-            ShortSha: string.Empty,
-            Summary: string.Empty,
-            AuthorName: string.Empty,
-            AuthorEmail: string.Empty,
-            Date: string.Empty,
-            RelativeDate: string.Empty,
-            Files: Array.Empty<GitCommitFileItem>());
     }
 
     private static async Task<GitStashEntry?> LoadCurrentBranchStashAsync(
