@@ -580,9 +580,8 @@
                         <Button
                             Grid.Column="0"
                             Classes="repositoryTab"
-                            Background="{Binding ChangesTabBackground}"
+                            Classes.selected="{Binding IsChangesSelected}"
                             Command="{Binding ShowChangesCommand}"
-                            Foreground="{Binding ChangesTabForeground}"
                             HorizontalAlignment="Stretch">
                             <Grid RowDefinitions="*,3">
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal" Spacing="6">
@@ -605,9 +604,8 @@
                         <Button
                             Grid.Column="1"
                             Classes="repositoryTab"
-                            Background="{Binding HistoryTabBackground}"
+                            Classes.selected="{Binding IsHistorySelected}"
                             Command="{Binding ShowHistoryCommand}"
-                            Foreground="{Binding HistoryTabForeground}"
                             HorizontalAlignment="Stretch">
                             <Grid RowDefinitions="*,3">
                                 <TextBlock

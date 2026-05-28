@@ -976,14 +976,6 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public bool IsHistorySelected => SelectedSection == RepositorySection.History;
 
-    public string ChangesTabBackground => "#FFFFFF";
-
-    public string HistoryTabBackground => "#FFFFFF";
-
-    public string ChangesTabForeground => IsChangesSelected ? "#24292F" : "#57606A";
-
-    public string HistoryTabForeground => IsHistorySelected ? "#24292F" : "#57606A";
-
     public int HistoryCommitCount
     {
         get => _historyCommitCount;
@@ -3244,10 +3236,6 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         this.RaisePropertyChanged(nameof(IsChangesSelected));
         this.RaisePropertyChanged(nameof(IsHistorySelected));
-        this.RaisePropertyChanged(nameof(ChangesTabBackground));
-        this.RaisePropertyChanged(nameof(HistoryTabBackground));
-        this.RaisePropertyChanged(nameof(ChangesTabForeground));
-        this.RaisePropertyChanged(nameof(HistoryTabForeground));
         this.RaisePropertyChanged(nameof(ShowRepositoryOperationBanner));
     }
 
