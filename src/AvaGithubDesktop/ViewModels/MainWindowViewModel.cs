@@ -2815,28 +2815,26 @@ public sealed class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        IsStashing = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Format(AvaGithubDesktopL.StatusStashingChangesFormat, CurrentBranch)));
-
-        try
+        var stashed = false;
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            _localizer.Format(AvaGithubDesktopL.StatusStashingChangesFormat, CurrentBranch),
+            () => stashed
+                ? _localizer.Format(AvaGithubDesktopL.StatusStashedChangesFormat, CurrentBranch)
+                : _localizer.Get(AvaGithubDesktopL.StatusNoChangesToStash),
+            ex => _localizer.Format(AvaGithubDesktopL.StatusStashFailedFormat, ex.Message),
+            async () =>
+            {
+                // Stash all changes 是工作区级操作，不读取文件勾选状态，避免用户误以为只会 stash 已勾选文件。
+                stashed = await _gitRepositoryService.CreateStashAsync(RootPath, CurrentBranch, CancellationToken.None);
+            },
+            ReloadRepositoryWorkspaceAsync,
+            () => Task.CompletedTask,
+            value => IsStashing = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            // Stash all changes 是工作区级操作，不读取文件勾选状态，避免用户误以为只会 stash 已勾选文件。
-            var stashed = await _gitRepositoryService.CreateStashAsync(RootPath, CurrentBranch, CancellationToken.None);
-            await ReloadRepositoryWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(
-                stashed
-                    ? _localizer.Format(AvaGithubDesktopL.StatusStashedChangesFormat, CurrentBranch)
-                    : _localizer.Get(AvaGithubDesktopL.StatusNoChangesToStash)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusStashFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsStashing = false;
+            ErrorMessage = errorMessage;
         }
     }
 
