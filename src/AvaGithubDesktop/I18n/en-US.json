@@ -203,6 +203,7 @@
       "LogCopy": "Copy",
       "LogClear": "Clear",
       "LogOpenFolder": "Open log folder",
+      "LogFilterPlaceholder": "Filter logs",
       "English": "English",
       "SimplifiedChinese": "Simplified Chinese",
       "NoRepositoryTitle": "No repository loaded",

@@ -203,6 +203,7 @@
       "LogCopy": "复制",
       "LogClear": "清空",
       "LogOpenFolder": "查看日志",
+      "LogFilterPlaceholder": "过滤日志",
       "English": "English",
       "SimplifiedChinese": "简体中文",
       "NoRepositoryTitle": "未加载仓库",

@@ -64,6 +64,12 @@ public sealed class OperationLogView : TemplatedControl
     public static readonly StyledProperty<string> OpenLogFolderTextProperty =
         AvaloniaProperty.Register<OperationLogView, string>(nameof(OpenLogFolderText), "Open log folder");
 
+    public static readonly StyledProperty<string> FilterPlaceholderTextProperty =
+        AvaloniaProperty.Register<OperationLogView, string>(nameof(FilterPlaceholderText), "Filter logs");
+
+    public static readonly StyledProperty<string> FilterTextProperty =
+        AvaloniaProperty.Register<OperationLogView, string>(nameof(FilterText), string.Empty);
+
     public static readonly DirectProperty<OperationLogView, ICommand> CopyCommandProperty =
         AvaloniaProperty.RegisterDirect<OperationLogView, ICommand>(nameof(CopyCommand), view => view.CopyCommand);
 
@@ -164,6 +170,18 @@ public sealed class OperationLogView : TemplatedControl
         set => SetValue(OpenLogFolderTextProperty, value);
     }
 
+    public string FilterPlaceholderText
+    {
+        get => GetValue(FilterPlaceholderTextProperty);
+        set => SetValue(FilterPlaceholderTextProperty, value);
+    }
+
+    public string FilterText
+    {
+        get => GetValue(FilterTextProperty);
+        set => SetValue(FilterTextProperty, value);
+    }
+
     public ICommand CopyCommand => _copyCommand;
 
     public ICommand ClearCommand => _clearCommand;
@@ -196,7 +214,8 @@ public sealed class OperationLogView : TemplatedControl
             || change.Property == InfoLevelTextProperty
             || change.Property == WarnLevelTextProperty
             || change.Property == ErrorLevelTextProperty
-            || change.Property == FatalLevelTextProperty)
+            || change.Property == FatalLevelTextProperty
+            || change.Property == FilterTextProperty)
         {
             RenderAllLogs();
         }
@@ -260,7 +279,7 @@ public sealed class OperationLogView : TemplatedControl
         }
 
         _textView.Inlines.Clear();
-        foreach (var log in _logs)
+        foreach (var log in _logs.Where(MatchesFilter))
         {
             AddRuns(_textView.Inlines, log);
         }
@@ -272,6 +291,11 @@ public sealed class OperationLogView : TemplatedControl
     private void AppendLog(LogInfo log)
     {
         if (_textView?.Inlines is null)
+        {
+            return;
+        }
+
+        if (!MatchesFilter(log))
         {
             return;
         }
@@ -296,12 +320,27 @@ public sealed class OperationLogView : TemplatedControl
             Foreground = GetLevelForeground(log.Level),
             FontWeight = log.Level == LogType.Fatal ? FontWeight.Bold : FontWeight.Normal
         });
-        inlines.Add(new Run(string.IsNullOrWhiteSpace(log.FriendlyDescription) ? log.Description : log.FriendlyDescription)
+        inlines.Add(new Run(GetLogMessage(log))
         {
             Foreground = TextForeground
         });
         inlines.Add(new Run(Environment.NewLine));
     }
+
+    private bool MatchesFilter(LogInfo log)
+    {
+        var filter = FilterText.Trim();
+        if (filter.Length == 0)
+        {
+            return true;
+        }
+
+        return GetLevelText(log.Level).Contains(filter, StringComparison.OrdinalIgnoreCase)
+               || GetLogMessage(log).Contains(filter, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string GetLogMessage(LogInfo log) =>
+        string.IsNullOrWhiteSpace(log.FriendlyDescription) ? log.Description : log.FriendlyDescription;
 
     private string GetLevelText(LogType level)
     {

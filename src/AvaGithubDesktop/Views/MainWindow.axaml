@@ -1221,6 +1221,7 @@
                     DebugLevelText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogLevelDebug}}"
                     ErrorLevelText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogLevelError}}"
                     FatalLevelText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogLevelFatal}}"
+                    FilterPlaceholderText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogFilterPlaceholder}}"
                     InfoLevelText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogLevelInfo}}"
                     OpenLogFolderText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogOpenFolder}}"
                     WarnLevelText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogLevelWarn}}" />

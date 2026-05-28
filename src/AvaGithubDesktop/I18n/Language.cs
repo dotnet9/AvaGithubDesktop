@@ -208,6 +208,7 @@ public static class AvaGithubDesktopL
     public static readonly string LogCopy = "AvaGithubDesktop.AvaGithubDesktopL.LogCopy";
     public static readonly string LogClear = "AvaGithubDesktop.AvaGithubDesktopL.LogClear";
     public static readonly string LogOpenFolder = "AvaGithubDesktop.AvaGithubDesktopL.LogOpenFolder";
+    public static readonly string LogFilterPlaceholder = "AvaGithubDesktop.AvaGithubDesktopL.LogFilterPlaceholder";
     public static readonly string English = "AvaGithubDesktop.AvaGithubDesktopL.English";
     public static readonly string SimplifiedChinese = "AvaGithubDesktop.AvaGithubDesktopL.SimplifiedChinese";
     public static readonly string NoRepositoryTitle = "AvaGithubDesktop.AvaGithubDesktopL.NoRepositoryTitle";
