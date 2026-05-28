@@ -21,6 +21,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly IRepositoryRemoteDialogService _repositoryRemoteDialogService;
     private readonly IRepositoryHistoryService _repositoryHistoryService;
     private readonly IRepositoryInteractionService _repositoryInteractionService;
+    private readonly IRepositorySyncStatusService _repositorySyncStatusService;
     private readonly IGitHubAccountService _gitHubAccountService;
     private readonly IAccountDialogService _accountDialogService;
     private readonly IHelpService _helpService;
@@ -110,6 +111,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         IRepositoryRemoteDialogService repositoryRemoteDialogService,
         IRepositoryHistoryService repositoryHistoryService,
         IRepositoryInteractionService repositoryInteractionService,
+        IRepositorySyncStatusService repositorySyncStatusService,
         IGitHubAccountService gitHubAccountService,
         IAccountDialogService accountDialogService,
         IHelpService helpService,
@@ -130,6 +132,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _repositoryRemoteDialogService = repositoryRemoteDialogService;
         _repositoryHistoryService = repositoryHistoryService;
         _repositoryInteractionService = repositoryInteractionService;
+        _repositorySyncStatusService = repositorySyncStatusService;
         _gitHubAccountService = gitHubAccountService;
         _accountDialogService = accountDialogService;
         _helpService = helpService;
@@ -1337,102 +1340,38 @@ public sealed class MainWindowViewModel : ViewModelBase
         CurrentBranch != "-" &&
         !CurrentBranch.StartsWith("HEAD", StringComparison.OrdinalIgnoreCase);
 
-    public string SyncActionTitle
-    {
-        get
-        {
-            if (!HasRemote)
-            {
-                return _localizer.Get(AvaGithubDesktopL.SyncNoRemote);
-            }
+    public string SyncActionTitle => _repositorySyncStatusService.GetActionTitle(CurrentSyncStatus);
 
-            if (IsSyncing)
-            {
-                return _activeSyncOperation switch
-                {
-                    RepositorySyncOperation.FetchAll => _localizer.Get(AvaGithubDesktopL.SyncFetchingAllRemotesTitle),
-                    RepositorySyncOperation.FetchLfs => _localizer.Format(AvaGithubDesktopL.SyncFetchingLfsTitleFormat, RemoteName),
-                    RepositorySyncOperation.PullLfs => _localizer.Format(AvaGithubDesktopL.SyncPullingLfsTitleFormat, RemoteName),
-                    RepositorySyncOperation.UpdateSubmodules => _localizer.Get(AvaGithubDesktopL.SyncUpdatingSubmodulesTitle),
-                    RepositorySyncOperation.Pull => _localizer.Format(AvaGithubDesktopL.SyncPullingTitleFormat, RemoteName),
-                    RepositorySyncOperation.Publish => _localizer.Get(AvaGithubDesktopL.SyncPublishingBranchTitle),
-                    RepositorySyncOperation.Push => _localizer.Format(AvaGithubDesktopL.SyncPushingTitleFormat, RemoteName),
-                    _ => _localizer.Format(AvaGithubDesktopL.SyncFetchingTitleFormat, RemoteName)
-                };
-            }
-
-            if (CanPublishCurrentBranch)
-            {
-                return _localizer.Get(AvaGithubDesktopL.SyncPublishBranchTitle);
-            }
-
-            if (_behind > 0)
-            {
-                return _localizer.Format(AvaGithubDesktopL.SyncPullTitleFormat, RemoteName);
-            }
-
-            if (_ahead > 0)
-            {
-                return _localizer.Format(AvaGithubDesktopL.SyncPushTitleFormat, RemoteName);
-            }
-
-            return _localizer.Format(AvaGithubDesktopL.SyncFetchTitleFormat, RemoteName);
-        }
-    }
-
-    public string SyncActionDescription
-    {
-        get
-        {
-            if (!HasRemote)
-            {
-                return _localizer.Get(AvaGithubDesktopL.SyncNoRemoteDescription);
-            }
-
-            if (IsSyncing)
-            {
-                return _localizer.Get(AvaGithubDesktopL.SyncInProgressDescription);
-            }
-
-            if (CanPublishCurrentBranch)
-            {
-                var descriptionKey = RepositoryRemoteUrlHelper.TryGetGitHubWebUrl(RemoteUrl, out _)
-                    ? AvaGithubDesktopL.SyncPublishBranchToGitHubDescription
-                    : AvaGithubDesktopL.SyncPublishBranchToRemoteDescription;
-                return _localizer.Get(descriptionKey);
-            }
-
-            return FormatLastFetched(LastFetchedAt);
-        }
-    }
+    public string SyncActionDescription => _repositorySyncStatusService.GetActionDescription(CurrentSyncStatus);
 
     public bool IsSyncRefreshIconVisible =>
-        IsSyncing ||
-        (!CanPublishCurrentBranch && _behind <= 0 && _ahead <= 0);
+        _repositorySyncStatusService.IsRefreshIconVisible(CurrentSyncStatus);
 
     public bool IsSyncDownloadIconVisible =>
-        !IsSyncing &&
-        !CanPublishCurrentBranch &&
-        _behind > 0;
+        _repositorySyncStatusService.IsDownloadIconVisible(CurrentSyncStatus);
 
     public bool IsSyncUploadIconVisible =>
-        !IsSyncing &&
-        (CanPublishCurrentBranch || (!CanPublishCurrentBranch && _behind <= 0 && _ahead > 0));
+        _repositorySyncStatusService.IsUploadIconVisible(CurrentSyncStatus);
 
     public bool HasSyncAheadBehind =>
-        !IsSyncing &&
-        HasRemote &&
-        (_ahead > 0 || _behind > 0);
+        _repositorySyncStatusService.HasAheadBehind(CurrentSyncStatus);
 
     public bool HasSyncAhead =>
-        !IsSyncing &&
-        HasRemote &&
-        _ahead > 0;
+        _repositorySyncStatusService.HasAhead(CurrentSyncStatus);
 
     public bool HasSyncBehind =>
-        !IsSyncing &&
-        HasRemote &&
-        _behind > 0;
+        _repositorySyncStatusService.HasBehind(CurrentSyncStatus);
+
+    private RepositorySyncStatus CurrentSyncStatus => new(
+        HasRemote,
+        IsSyncing,
+        CanPublishCurrentBranch,
+        _ahead,
+        _behind,
+        LastFetchedAt,
+        RemoteName,
+        RemoteUrl,
+        _activeSyncOperation);
 
     public int AheadCount => _ahead;
 
@@ -2908,40 +2847,13 @@ public sealed class MainWindowViewModel : ViewModelBase
     }
 
     private string GetRemoteOperationStartedMessage(RepositorySyncOperation operation) =>
-        operation switch
-        {
-            RepositorySyncOperation.FetchAll => _localizer.Get(AvaGithubDesktopL.StatusFetchingAllRemotes),
-            RepositorySyncOperation.FetchLfs => _localizer.Format(AvaGithubDesktopL.StatusFetchingLfsFormat, RemoteName),
-            RepositorySyncOperation.PullLfs => _localizer.Format(AvaGithubDesktopL.StatusPullingLfsFormat, RemoteName),
-            RepositorySyncOperation.Pull => _localizer.Format(AvaGithubDesktopL.StatusPullingFormat, RemoteName),
-            RepositorySyncOperation.Publish => _localizer.Format(AvaGithubDesktopL.StatusPublishingBranchFormat, CurrentBranch, RemoteName),
-            RepositorySyncOperation.Push => _localizer.Format(AvaGithubDesktopL.StatusPushingFormat, RemoteName),
-            _ => _localizer.Format(AvaGithubDesktopL.StatusFetchingFormat, RemoteName)
-        };
+        _repositorySyncStatusService.GetStartedMessage(operation, RemoteName, CurrentBranch);
 
     private string GetRemoteOperationCompletedMessage(RepositorySyncOperation operation) =>
-        operation switch
-        {
-            RepositorySyncOperation.FetchAll => _localizer.Get(AvaGithubDesktopL.StatusFetchedAllRemotes),
-            RepositorySyncOperation.FetchLfs => _localizer.Format(AvaGithubDesktopL.StatusFetchedLfsFormat, RemoteName),
-            RepositorySyncOperation.PullLfs => _localizer.Format(AvaGithubDesktopL.StatusPulledLfsFormat, RemoteName),
-            RepositorySyncOperation.Pull => _localizer.Format(AvaGithubDesktopL.StatusPulledFormat, RemoteName),
-            RepositorySyncOperation.Publish => _localizer.Format(AvaGithubDesktopL.StatusPublishedBranchFormat, CurrentBranch, RemoteName),
-            RepositorySyncOperation.Push => _localizer.Format(AvaGithubDesktopL.StatusPushedFormat, RemoteName),
-            _ => _localizer.Format(AvaGithubDesktopL.StatusFetchedFormat, RemoteName)
-        };
+        _repositorySyncStatusService.GetCompletedMessage(operation, RemoteName, CurrentBranch);
 
-    private static string GetRemoteOperationFailedKey(RepositorySyncOperation operation) =>
-        operation switch
-        {
-            RepositorySyncOperation.FetchAll => AvaGithubDesktopL.StatusFetchAllRemotesFailedFormat,
-            RepositorySyncOperation.FetchLfs => AvaGithubDesktopL.StatusFetchLfsFailedFormat,
-            RepositorySyncOperation.PullLfs => AvaGithubDesktopL.StatusPullLfsFailedFormat,
-            RepositorySyncOperation.Pull => AvaGithubDesktopL.StatusPullFailedFormat,
-            RepositorySyncOperation.Publish => AvaGithubDesktopL.StatusPublishBranchFailedFormat,
-            RepositorySyncOperation.Push => AvaGithubDesktopL.StatusPushFailedFormat,
-            _ => AvaGithubDesktopL.StatusFetchFailedFormat
-        };
+    private string GetRemoteOperationFailedKey(RepositorySyncOperation operation) =>
+        _repositorySyncStatusService.GetFailedFormatKey(operation);
 
     private async Task StashAllChangesAsync()
     {
@@ -3325,32 +3237,6 @@ public sealed class MainWindowViewModel : ViewModelBase
             ? _localizer.Format(AvaGithubDesktopL.AheadBehindFormat, _ahead, _behind)
             : "-";
         RaiseSyncStateChanged();
-    }
-
-    private string FormatLastFetched(DateTimeOffset? lastFetchedAt)
-    {
-        if (lastFetchedAt is null)
-        {
-            return _localizer.Get(AvaGithubDesktopL.SyncNeverFetched);
-        }
-
-        var elapsed = DateTimeOffset.Now - lastFetchedAt.Value.ToLocalTime();
-        if (elapsed.TotalMinutes < 2)
-        {
-            return _localizer.Get(AvaGithubDesktopL.SyncLastFetchedJustNow);
-        }
-
-        if (elapsed.TotalHours < 1)
-        {
-            return _localizer.Format(AvaGithubDesktopL.SyncLastFetchedMinutesAgoFormat, Math.Max(1, (int)elapsed.TotalMinutes));
-        }
-
-        if (elapsed.TotalDays < 1)
-        {
-            return _localizer.Format(AvaGithubDesktopL.SyncLastFetchedHoursAgoFormat, Math.Max(1, (int)elapsed.TotalHours));
-        }
-
-        return _localizer.Format(AvaGithubDesktopL.SyncLastFetchedDaysAgoFormat, Math.Max(1, (int)elapsed.TotalDays));
     }
 
     private void SetAllChangesIncluded(bool include)
@@ -4396,17 +4282,4 @@ public enum RepositorySection
 {
     Changes,
     History
-}
-
-public enum RepositorySyncOperation
-{
-    None,
-    Fetch,
-    FetchAll,
-    FetchLfs,
-    PullLfs,
-    UpdateSubmodules,
-    Pull,
-    Publish,
-    Push
 }
