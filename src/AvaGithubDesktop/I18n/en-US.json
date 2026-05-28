@@ -28,6 +28,7 @@
       "MenuView": "View",
       "MenuShowRepositoryList": "Show repository list",
       "MenuShowBranchesList": "Show branches list",
+      "MenuFocusCommitSummary": "Go to Summary",
       "MenuFocusChangesFilter": "Focus changes filter",
       "MenuHelp": "Help",
       "ShowOperationLog": "Show operation log",

@@ -33,6 +33,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuView = "AvaGithubDesktop.AvaGithubDesktopL.MenuView";
     public static readonly string MenuShowRepositoryList = "AvaGithubDesktop.AvaGithubDesktopL.MenuShowRepositoryList";
     public static readonly string MenuShowBranchesList = "AvaGithubDesktop.AvaGithubDesktopL.MenuShowBranchesList";
+    public static readonly string MenuFocusCommitSummary = "AvaGithubDesktop.AvaGithubDesktopL.MenuFocusCommitSummary";
     public static readonly string MenuFocusChangesFilter = "AvaGithubDesktop.AvaGithubDesktopL.MenuFocusChangesFilter";
     public static readonly string MenuHelp = "AvaGithubDesktop.AvaGithubDesktopL.MenuHelp";
     public static readonly string ShowOperationLog = "AvaGithubDesktop.AvaGithubDesktopL.ShowOperationLog";

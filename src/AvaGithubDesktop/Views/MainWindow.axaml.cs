@@ -24,7 +24,7 @@ public partial class MainWindow : CodeWFWindow
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
-        if (!e.KeyModifiers.HasFlag(KeyModifiers.Control))
+        if (e.KeyModifiers != KeyModifiers.Control)
         {
             return;
         }
@@ -47,6 +47,10 @@ public partial class MainWindow : CodeWFWindow
                 break;
             case Key.B:
                 ShowBranchSelector();
+                e.Handled = true;
+                break;
+            case Key.G:
+                FocusCommitSummary();
                 e.Handled = true;
                 break;
             case Key.L:
@@ -112,6 +116,26 @@ public partial class MainWindow : CodeWFWindow
     private void FocusChangesFilterMenuItem_Click(object? sender, RoutedEventArgs e)
     {
         FocusChangesFilter();
+    }
+
+    private void FocusCommitSummary()
+    {
+        if (!CommitSummaryTextBox.IsEnabled)
+        {
+            return;
+        }
+
+        if (DataContext is MainWindowViewModel viewModel)
+        {
+            ExecuteCommandIfPossible(viewModel.ShowChangesCommand);
+        }
+
+        Dispatcher.UIThread.Post(() => CommitSummaryTextBox.Focus());
+    }
+
+    private void FocusCommitSummaryMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        FocusCommitSummary();
     }
 
     private static void ExecuteCommandIfPossible(ICommand command)

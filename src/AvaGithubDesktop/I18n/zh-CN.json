@@ -28,6 +28,7 @@
       "MenuView": "查看",
       "MenuShowRepositoryList": "显示仓库列表",
       "MenuShowBranchesList": "显示分支列表",
+      "MenuFocusCommitSummary": "跳转到提交摘要",
       "MenuFocusChangesFilter": "聚焦更改过滤",
       "MenuHelp": "帮助",
       "ShowOperationLog": "显示操作日志",

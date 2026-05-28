@@ -117,6 +117,7 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.History}}" Command="{Binding ShowHistoryCommand}" HotKey="Ctrl+2" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowRepositoryList}}" Click="ShowRepositorySelectorMenuItem_Click" HotKey="Ctrl+T" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowBranchesList}}" Click="ShowBranchSelectorMenuItem_Click" HotKey="Ctrl+B" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFocusCommitSummary}}" Click="FocusCommitSummaryMenuItem_Click" HotKey="Ctrl+G" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFocusChangesFilter}}" Click="FocusChangesFilterMenuItem_Click" HotKey="Ctrl+L" />
                     <Separator />
                     <MenuItem
@@ -839,6 +840,7 @@
                                         Data="{StaticResource OcticonGitCommit}" />
                                 </Border>
                                 <TextBox
+                                    x:Name="CommitSummaryTextBox"
                                     Grid.Column="1"
                                     Classes="commitSummary"
                                     IsEnabled="{Binding HasRepository}"
