@@ -73,6 +73,7 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowRepositoryList}}" Click="ShowRepositorySelectorMenuItem_Click" HotKey="Ctrl+T" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowBranchesList}}" Click="ShowBranchSelectorMenuItem_Click" HotKey="Ctrl+B" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFocusCommitSummary}}" Click="FocusCommitSummaryMenuItem_Click" HotKey="Ctrl+G" />
+                    <MenuItem Header="{Binding ToggleStashedChangesMenuText}" Command="{Binding ToggleStashedChangesVisibilityCommand}" HotKey="Ctrl+H" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFocusChangesFilter}}" Click="FocusChangesFilterMenuItem_Click" HotKey="Ctrl+L" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuToggleFullScreen}}" Click="ToggleFullScreenMenuItem_Click" HotKey="F11" />
                     <Separator />
@@ -814,7 +815,7 @@
                             Grid.Row="2"
                             Margin="12,8,12,12"
                             Classes="stashBanner"
-                            IsVisible="{Binding HasCurrentBranchStash}">
+                            IsVisible="{Binding IsCurrentBranchStashVisible}">
                             <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="3">
                                 <TextBlock
                                     FontWeight="SemiBold"

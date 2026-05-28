@@ -31,6 +31,8 @@
       "MenuShowBranchesList": "Show branches list",
       "MenuFocusCommitSummary": "Go to Summary",
       "MenuFocusChangesFilter": "Focus changes filter",
+      "MenuShowStashedChanges": "Show stashed changes",
+      "MenuHideStashedChanges": "Hide stashed changes",
       "MenuToggleFullScreen": "Toggle full screen",
       "MenuHelp": "Help",
       "MenuShowLogsInFileManager": "Show logs in file manager",

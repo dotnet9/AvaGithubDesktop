@@ -67,6 +67,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isStashing;
     private bool _isRestoringStash;
     private bool _isDiscardingStash;
+    private bool _isStashedChangesVisible = true;
     private bool _isDiscardingChanges;
     private bool _isResolvingConflicts;
     private bool _isManagingRemote;
@@ -215,6 +216,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         CreateIssueOnGitHubCommand = ReactiveCommand.CreateFromTask(CreateIssueOnGitHubAsync, canViewCurrentRepositoryOnGitHub);
         ShowChangesCommand = ReactiveCommand.Create(ShowChanges);
         ShowHistoryCommand = ReactiveCommand.Create(ShowHistory);
+        ToggleStashedChangesVisibilityCommand = ReactiveCommand.Create(ToggleStashedChangesVisibility);
         CopySelectedCommitShaCommand = ReactiveCommand.CreateFromTask(CopySelectedCommitShaAsync, this.WhenAnyValue(model => model.CanCopySelectedCommitSha));
         ViewSelectedCommitOnGitHubCommand = ReactiveCommand.CreateFromTask(
             ViewSelectedCommitOnGitHubAsync,
@@ -454,6 +456,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ShowChangesCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ShowHistoryCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ToggleStashedChangesVisibilityCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CopySelectedCommitShaCommand { get; }
 
@@ -1274,6 +1278,23 @@ public sealed class MainWindowViewModel : ViewModelBase
         };
 
     public bool HasCurrentBranchStash => CurrentBranchStash is not null;
+
+    public bool IsStashedChangesVisible
+    {
+        get => _isStashedChangesVisible;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _isStashedChangesVisible, value);
+            this.RaisePropertyChanged(nameof(IsCurrentBranchStashVisible));
+            this.RaisePropertyChanged(nameof(ToggleStashedChangesMenuText));
+        }
+    }
+
+    public bool IsCurrentBranchStashVisible => HasCurrentBranchStash && IsStashedChangesVisible;
+
+    public string ToggleStashedChangesMenuText => IsStashedChangesVisible
+        ? _localizer.Get(AvaGithubDesktopL.MenuHideStashedChanges)
+        : _localizer.Get(AvaGithubDesktopL.MenuShowStashedChanges);
 
     public bool CanStashChanges =>
         HasRepository &&
@@ -3242,6 +3263,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(RepositorySelectorDetail));
         this.RaisePropertyChanged(nameof(BinaryDiffMessage));
         this.RaisePropertyChanged(nameof(BinaryDiffOpenText));
+        this.RaisePropertyChanged(nameof(ToggleStashedChangesMenuText));
         RaiseAccountStateChanged();
     }
 
@@ -3285,6 +3307,11 @@ public sealed class MainWindowViewModel : ViewModelBase
         QueueDiffLoad();
     }
 
+    private void ToggleStashedChangesVisibility()
+    {
+        IsStashedChangesVisible = !IsStashedChangesVisible;
+    }
+
     private void RaiseSectionStateChanged()
     {
         this.RaisePropertyChanged(nameof(IsChangesSelected));
@@ -3315,6 +3342,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private void RaiseStashStateChanged()
     {
         this.RaisePropertyChanged(nameof(HasCurrentBranchStash));
+        this.RaisePropertyChanged(nameof(IsCurrentBranchStashVisible));
         this.RaisePropertyChanged(nameof(CanStashChanges));
         this.RaisePropertyChanged(nameof(CanRestoreStash));
         this.RaisePropertyChanged(nameof(CanDiscardStash));

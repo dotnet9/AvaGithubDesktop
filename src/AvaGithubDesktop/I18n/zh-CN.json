@@ -31,6 +31,8 @@
       "MenuShowBranchesList": "显示分支列表",
       "MenuFocusCommitSummary": "跳转到提交摘要",
       "MenuFocusChangesFilter": "聚焦更改过滤",
+      "MenuShowStashedChanges": "显示已贮藏的更改",
+      "MenuHideStashedChanges": "隐藏已贮藏的更改",
       "MenuToggleFullScreen": "切换全屏",
       "MenuHelp": "帮助",
       "MenuShowLogsInFileManager": "在文件管理器中显示日志",
