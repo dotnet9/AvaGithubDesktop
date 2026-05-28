@@ -20,7 +20,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly IRepositoryOpenDialogService _repositoryOpenDialogService;
     private readonly IRepositoryRemoteDialogService _repositoryRemoteDialogService;
     private readonly IRepositoryHistoryService _repositoryHistoryService;
-    private readonly IRepositoryShellService _repositoryShellService;
+    private readonly IRepositoryInteractionService _repositoryInteractionService;
     private readonly IGitHubAccountService _gitHubAccountService;
     private readonly IAccountDialogService _accountDialogService;
     private readonly IHelpService _helpService;
@@ -109,7 +109,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         IRepositoryOpenDialogService repositoryOpenDialogService,
         IRepositoryRemoteDialogService repositoryRemoteDialogService,
         IRepositoryHistoryService repositoryHistoryService,
-        IRepositoryShellService repositoryShellService,
+        IRepositoryInteractionService repositoryInteractionService,
         IGitHubAccountService gitHubAccountService,
         IAccountDialogService accountDialogService,
         IHelpService helpService,
@@ -129,7 +129,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _repositoryOpenDialogService = repositoryOpenDialogService;
         _repositoryRemoteDialogService = repositoryRemoteDialogService;
         _repositoryHistoryService = repositoryHistoryService;
-        _repositoryShellService = repositoryShellService;
+        _repositoryInteractionService = repositoryInteractionService;
         _gitHubAccountService = gitHubAccountService;
         _accountDialogService = accountDialogService;
         _helpService = helpService;
@@ -2372,30 +2372,14 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private async Task ShowCommitFileInFileManagerAsync(GitCommitFileItemViewModel file)
     {
-        try
-        {
-            await _repositoryShellService.ShowItemInFileManagerAsync(Path.Combine(RootPath, file.GitPath));
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusShowedChangeInFileManager)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusShowChangeInFileManagerFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
+        await ApplyInteractionErrorAsync(
+            _repositoryInteractionService.ShowChangeInFileManagerAsync(Path.Combine(RootPath, file.GitPath)));
     }
 
     private async Task OpenCommitFileInExternalEditorAsync(GitCommitFileItemViewModel file)
     {
-        try
-        {
-            await _repositoryShellService.OpenItemAsync(Path.Combine(RootPath, file.GitPath));
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedChangeInExternalEditor)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenChangeInExternalEditorFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
+        await ApplyInteractionErrorAsync(
+            _repositoryInteractionService.OpenChangeInExternalEditorAsync(Path.Combine(RootPath, file.GitPath)));
     }
 
     private async Task ShowChangeInFileManagerAsync(GitChangeItemViewModel change)
@@ -2403,16 +2387,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var relativePath = change.GitPaths.LastOrDefault() ?? change.Path;
         var fullPath = Path.Combine(RootPath, relativePath);
 
-        try
-        {
-            await _repositoryShellService.ShowItemInFileManagerAsync(fullPath);
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusShowedChangeInFileManager)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusShowChangeInFileManagerFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
+        await ApplyInteractionErrorAsync(_repositoryInteractionService.ShowChangeInFileManagerAsync(fullPath));
     }
 
     private async Task OpenChangeInExternalEditorAsync(GitChangeItemViewModel change)
@@ -2420,16 +2395,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var relativePath = change.GitPaths.LastOrDefault() ?? change.Path;
         var fullPath = Path.Combine(RootPath, relativePath);
 
-        try
-        {
-            await _repositoryShellService.OpenItemAsync(fullPath);
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedChangeInExternalEditor)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenChangeInExternalEditorFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
+        await ApplyInteractionErrorAsync(_repositoryInteractionService.OpenChangeInExternalEditorAsync(fullPath));
     }
 
     private async Task DiscardChangeAsync(GitChangeItemViewModel change)
@@ -2563,183 +2529,61 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private async Task CopyTextAsync(string text, string successKey, string failureFormatKey)
     {
-        try
-        {
-            await _repositoryShellService.CopyTextAsync(text);
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(successKey)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(failureFormatKey, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
+        await ApplyInteractionErrorAsync(_repositoryInteractionService.CopyTextAsync(text, successKey, failureFormatKey));
     }
 
     private async Task ViewRepositoryRemoteOnGitHubAsync(string? remoteUrl)
     {
-        if (!RepositoryRemoteUrlHelper.TryGetGitHubWebUrl(remoteUrl, out var webUrl))
-        {
-            ErrorMessage = _localizer.Get(AvaGithubDesktopL.StatusRepositoryHasNoGitHubRemote);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-            return;
-        }
-
-        try
-        {
-            await _repositoryShellService.OpenUrlAsync(webUrl);
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedRepositoryOnGitHub)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenRepositoryOnGitHubFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
+        await ApplyInteractionErrorAsync(_repositoryInteractionService.ViewRepositoryOnGitHubAsync(remoteUrl));
     }
 
     private async Task OpenIssueCreationOnGitHubAsync(string? remoteUrl)
     {
-        if (!RepositoryRemoteUrlHelper.TryGetGitHubIssueCreationUrl(remoteUrl, out var webUrl))
-        {
-            ErrorMessage = _localizer.Get(AvaGithubDesktopL.StatusRepositoryHasNoGitHubRemote);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-            return;
-        }
-
-        try
-        {
-            await _repositoryShellService.OpenUrlAsync(webUrl);
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedIssueCreationOnGitHub)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenIssueCreationOnGitHubFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
+        await ApplyInteractionErrorAsync(_repositoryInteractionService.OpenIssueCreationOnGitHubAsync(remoteUrl));
     }
 
     private async Task ViewCommitOnGitHubAsync(string? remoteUrl, string sha)
     {
-        if (!RepositoryRemoteUrlHelper.TryGetGitHubCommitUrl(remoteUrl, sha, out var webUrl))
-        {
-            ErrorMessage = _localizer.Get(AvaGithubDesktopL.StatusRepositoryHasNoGitHubRemote);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-            return;
-        }
-
-        try
-        {
-            await _repositoryShellService.OpenUrlAsync(webUrl);
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedCommitOnGitHub)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenCommitOnGitHubFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
+        await ApplyInteractionErrorAsync(_repositoryInteractionService.ViewCommitOnGitHubAsync(remoteUrl, sha));
     }
 
     private async Task ViewBranchOnGitHubAsync(string? remoteUrl, string upstream)
     {
-        if (!RepositoryRemoteUrlHelper.TryGetGitHubBranchUrl(remoteUrl, upstream, out var webUrl))
-        {
-            ErrorMessage = _localizer.Get(AvaGithubDesktopL.StatusRepositoryHasNoGitHubRemote);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-            return;
-        }
-
-        try
-        {
-            await _repositoryShellService.OpenUrlAsync(webUrl);
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedBranchOnGitHub)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenBranchOnGitHubFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
+        await ApplyInteractionErrorAsync(_repositoryInteractionService.ViewBranchOnGitHubAsync(remoteUrl, upstream));
     }
 
     private async Task CompareBranchOnGitHubAsync(string? remoteUrl, string upstream)
     {
-        if (!RepositoryRemoteUrlHelper.TryGetGitHubCompareUrl(remoteUrl, upstream, out var webUrl))
-        {
-            ErrorMessage = _localizer.Get(AvaGithubDesktopL.StatusRepositoryHasNoGitHubRemote);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-            return;
-        }
-
-        try
-        {
-            await _repositoryShellService.OpenUrlAsync(webUrl);
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedBranchCompareOnGitHub)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenBranchCompareOnGitHubFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
+        await ApplyInteractionErrorAsync(_repositoryInteractionService.CompareBranchOnGitHubAsync(remoteUrl, upstream));
     }
 
     private async Task OpenCreatePullRequestOnGitHubAsync(string? remoteUrl, string upstream, string currentBranch)
     {
-        if (!RepositoryRemoteUrlHelper.TryGetGitHubPullRequestUrl(remoteUrl, upstream, currentBranch, out var webUrl))
-        {
-            ErrorMessage = _localizer.Get(AvaGithubDesktopL.StatusRepositoryHasNoGitHubRemote);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-            return;
-        }
-
-        try
-        {
-            await _repositoryShellService.OpenUrlAsync(webUrl);
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedCreatePullRequestOnGitHub)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenCreatePullRequestOnGitHubFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
+        await ApplyInteractionErrorAsync(
+            _repositoryInteractionService.OpenCreatePullRequestOnGitHubAsync(remoteUrl, upstream, currentBranch));
     }
 
     private async Task OpenRepositoryPathInShellAsync(string repositoryPath)
     {
-        try
-        {
-            await _repositoryShellService.OpenInShellAsync(repositoryPath);
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedRepositoryShell)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenRepositoryShellFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
+        await ApplyInteractionErrorAsync(_repositoryInteractionService.OpenRepositoryInShellAsync(repositoryPath));
     }
 
     private async Task OpenRepositoryPathInExternalEditorAsync(string repositoryPath)
     {
-        try
-        {
-            await _repositoryShellService.OpenItemAsync(repositoryPath);
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedRepositoryInExternalEditor)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenRepositoryInExternalEditorFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
+        await ApplyInteractionErrorAsync(_repositoryInteractionService.OpenRepositoryInExternalEditorAsync(repositoryPath));
     }
 
     private async Task ShowRepositoryPathInFileManagerAsync(string repositoryPath)
     {
-        try
+        await ApplyInteractionErrorAsync(_repositoryInteractionService.ShowRepositoryInFileManagerAsync(repositoryPath));
+    }
+
+    private async Task ApplyInteractionErrorAsync(Task<string?> interactionTask)
+    {
+        var errorMessage = await interactionTask;
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            await _repositoryShellService.ShowInFileManagerAsync(repositoryPath);
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusShowedRepositoryInFileManager)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusShowRepositoryInFileManagerFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+            ErrorMessage = errorMessage;
         }
     }
 
@@ -4533,18 +4377,8 @@ public sealed class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        try
-        {
-            await _repositoryShellService.OpenItemAsync(DiffPreview.WorkingTreePath);
-            _eventBus.Publish(new StatusMessageChangedCommand(
-                _localizer.Get(AvaGithubDesktopL.StatusOpenedChangeInExternalEditor)));
-        }
-        catch (Exception ex)
-        {
-            var message = _localizer.Format(AvaGithubDesktopL.StatusOpenChangeInExternalEditorFailedFormat, ex.Message);
-            ErrorMessage = message;
-            _eventBus.Publish(new StatusMessageChangedCommand(message));
-        }
+        await ApplyInteractionErrorAsync(
+            _repositoryInteractionService.OpenChangeInExternalEditorAsync(DiffPreview.WorkingTreePath));
     }
 
     private static string ResolveDefaultRepositoryPath(string? lastRepositoryPath)
