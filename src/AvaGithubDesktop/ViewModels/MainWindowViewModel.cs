@@ -2075,30 +2075,24 @@ public sealed class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        IsCreatingTag = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(
-            _localizer.Format(AvaGithubDesktopL.StatusCreatingTagFormat, request.TagName, targetCommit.ShortSha)));
-
-        try
-        {
-            await _gitRepositoryService.CreateTagAsync(
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            _localizer.Format(AvaGithubDesktopL.StatusCreatingTagFormat, request.TagName, targetCommit.ShortSha),
+            () => _localizer.Format(AvaGithubDesktopL.StatusCreatedTagFormat, request.TagName),
+            ex => _localizer.Format(AvaGithubDesktopL.StatusCreateTagFailedFormat, ex.Message),
+            () => _gitRepositoryService.CreateTagAsync(
                 RootPath,
                 request.TagName,
                 request.Message,
                 request.TargetSha,
-                CancellationToken.None);
-            _eventBus.Publish(new StatusMessageChangedCommand(
-                _localizer.Format(AvaGithubDesktopL.StatusCreatedTagFormat, request.TagName)));
-        }
-        catch (Exception ex)
+                CancellationToken.None),
+            () => Task.CompletedTask,
+            () => Task.CompletedTask,
+            value => IsCreatingTag = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusCreateTagFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsCreatingTag = false;
+            ErrorMessage = errorMessage;
         }
     }
 
