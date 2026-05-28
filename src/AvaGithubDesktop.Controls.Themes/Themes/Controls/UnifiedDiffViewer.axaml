@@ -26,23 +26,64 @@
                     <ScrollViewer
                         HorizontalScrollBarVisibility="Auto"
                         VerticalScrollBarVisibility="Auto">
-                        <ItemsControl ItemsSource="{Binding Lines, RelativeSource={RelativeSource TemplatedParent}}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="controls:UnifiedDiffLine">
-                                    <controls:UnifiedDiffLinePresenter
-                                        Content="{Binding Content}"
-                                        Kind="{Binding Kind}"
-                                        NewLineNumber="{Binding NewLineNumber}"
-                                        OldLineNumber="{Binding OldLineNumber}"
-                                        Prefix="{Binding Prefix}" />
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <Grid>
+                            <ItemsControl
+                                IsVisible="{Binding IsUnified, RelativeSource={RelativeSource TemplatedParent}}"
+                                ItemsSource="{Binding Lines, RelativeSource={RelativeSource TemplatedParent}}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="controls:UnifiedDiffLine">
+                                        <controls:UnifiedDiffLinePresenter
+                                            Content="{Binding Content}"
+                                            Kind="{Binding Kind}"
+                                            NewLineNumber="{Binding NewLineNumber}"
+                                            OldLineNumber="{Binding OldLineNumber}"
+                                            Prefix="{Binding Prefix}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <ItemsControl
+                                IsVisible="{Binding IsSideBySide, RelativeSource={RelativeSource TemplatedParent}}"
+                                ItemsSource="{Binding SplitLines, RelativeSource={RelativeSource TemplatedParent}}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="controls:UnifiedDiffSplitLine">
+                                        <Grid MinWidth="1040">
+                                            <controls:UnifiedDiffLinePresenter
+                                                Content="{Binding Content}"
+                                                IsVisible="{Binding IsFullWidth}"
+                                                Kind="{Binding Kind}"
+                                                NewLineNumber=""
+                                                OldLineNumber=""
+                                                Prefix="{Binding Prefix}" />
+                                            <Grid
+                                                ColumnDefinitions="*,*"
+                                                IsVisible="{Binding IsSplitPair}">
+                                                <controls:UnifiedDiffSideLinePresenter
+                                                    Content="{Binding OldContent}"
+                                                    Kind="{Binding OldKind}"
+                                                    LineNumber="{Binding OldLineNumber}"
+                                                    Prefix="{Binding OldPrefix}" />
+                                                <controls:UnifiedDiffSideLinePresenter
+                                                    Grid.Column="1"
+                                                    Content="{Binding NewContent}"
+                                                    Kind="{Binding NewKind}"
+                                                    LineNumber="{Binding NewLineNumber}"
+                                                    Prefix="{Binding NewPrefix}" />
+                                            </Grid>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
                     </ScrollViewer>
                 </Border>
             </ControlTemplate>
@@ -102,6 +143,88 @@
                         Text="{TemplateBinding Prefix}" />
                     <TextBlock
                         Grid.Column="3"
+                        Margin="0,0,16,0"
+                        VerticalAlignment="Center"
+                        FontFamily="{TemplateBinding FontFamily}"
+                        FontSize="{TemplateBinding FontSize}"
+                        Foreground="{TemplateBinding ContentForeground}"
+                        Text="{TemplateBinding Content}"
+                        TextTrimming="None"
+                        TextWrapping="NoWrap" />
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^:message">
+            <Setter Property="Background" Value="{DynamicResource DiffViewerBackgroundBrush}" />
+            <Setter Property="GutterBackground" Value="{DynamicResource DiffViewerBackgroundBrush}" />
+            <Setter Property="ContentForeground" Value="{DynamicResource MutedTextBrush}" />
+        </Style>
+        <Style Selector="^:header">
+            <Setter Property="Background" Value="{DynamicResource DiffHeaderBackgroundBrush}" />
+            <Setter Property="GutterBackground" Value="{DynamicResource DiffHeaderBackgroundBrush}" />
+            <Setter Property="ContentForeground" Value="{DynamicResource DiffHeaderTextBrush}" />
+        </Style>
+        <Style Selector="^:hunk">
+            <Setter Property="Background" Value="{DynamicResource DiffHunkBackgroundBrush}" />
+            <Setter Property="GutterBackground" Value="{DynamicResource DiffHunkGutterBrush}" />
+            <Setter Property="GutterForeground" Value="{DynamicResource DiffHunkTextBrush}" />
+            <Setter Property="PrefixForeground" Value="{DynamicResource DiffHunkTextBrush}" />
+            <Setter Property="ContentForeground" Value="{DynamicResource DiffHunkTextBrush}" />
+        </Style>
+        <Style Selector="^:added">
+            <Setter Property="Background" Value="{DynamicResource DiffAddedBackgroundBrush}" />
+            <Setter Property="GutterBackground" Value="{DynamicResource DiffAddedGutterBrush}" />
+            <Setter Property="GutterForeground" Value="{DynamicResource DiffAddedTextBrush}" />
+            <Setter Property="PrefixForeground" Value="{DynamicResource DiffAddedTextBrush}" />
+            <Setter Property="ContentForeground" Value="{DynamicResource DiffContentTextBrush}" />
+        </Style>
+        <Style Selector="^:removed">
+            <Setter Property="Background" Value="{DynamicResource DiffRemovedBackgroundBrush}" />
+            <Setter Property="GutterBackground" Value="{DynamicResource DiffRemovedGutterBrush}" />
+            <Setter Property="GutterForeground" Value="{DynamicResource DiffRemovedTextBrush}" />
+            <Setter Property="PrefixForeground" Value="{DynamicResource DiffRemovedTextBrush}" />
+            <Setter Property="ContentForeground" Value="{DynamicResource DiffContentTextBrush}" />
+        </Style>
+    </ControlTheme>
+
+    <ControlTheme x:Key="{x:Type controls:UnifiedDiffSideLinePresenter}" TargetType="controls:UnifiedDiffSideLinePresenter">
+        <Setter Property="Height" Value="22" />
+        <Setter Property="Background" Value="{DynamicResource DiffLineBackgroundBrush}" />
+        <Setter Property="GutterBackground" Value="{DynamicResource DiffGutterBackgroundBrush}" />
+        <Setter Property="GutterForeground" Value="{DynamicResource DiffGutterTextBrush}" />
+        <Setter Property="PrefixForeground" Value="{DynamicResource DiffGutterTextBrush}" />
+        <Setter Property="ContentForeground" Value="{DynamicResource DiffContentTextBrush}" />
+        <Setter Property="FontFamily" Value="Cascadia Mono, JetBrains Mono, Consolas, Noto Sans Mono CJK SC, Microsoft YaHei UI, monospace" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Template">
+            <ControlTemplate TargetType="{x:Type controls:UnifiedDiffSideLinePresenter}">
+                <Grid
+                    Height="{TemplateBinding Height}"
+                    Background="{TemplateBinding Background}"
+                    ColumnDefinitions="54,26,*">
+                    <Border
+                        Background="{TemplateBinding GutterBackground}"
+                        BorderBrush="{DynamicResource DiffGutterBorderBrush}"
+                        BorderThickness="0,0,1,0">
+                        <TextBlock
+                            Margin="0,0,8,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            FontFamily="{TemplateBinding FontFamily}"
+                            FontSize="{TemplateBinding FontSize}"
+                            Foreground="{TemplateBinding GutterForeground}"
+                            Text="{TemplateBinding LineNumber}" />
+                    </Border>
+                    <TextBlock
+                        Grid.Column="1"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="{TemplateBinding FontFamily}"
+                        FontSize="{TemplateBinding FontSize}"
+                        Foreground="{TemplateBinding PrefixForeground}"
+                        Text="{TemplateBinding Prefix}" />
+                    <TextBlock
+                        Grid.Column="2"
                         Margin="0,0,16,0"
                         VerticalAlignment="Center"
                         FontFamily="{TemplateBinding FontFamily}"

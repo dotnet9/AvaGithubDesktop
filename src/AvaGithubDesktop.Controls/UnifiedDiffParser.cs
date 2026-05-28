@@ -67,6 +67,39 @@ internal static partial class UnifiedDiffParser
         return result;
     }
 
+    public static IReadOnlyList<UnifiedDiffSplitLine> ToSplitLines(IReadOnlyList<UnifiedDiffLine> lines)
+    {
+        if (lines.Count == 0)
+        {
+            return Array.Empty<UnifiedDiffSplitLine>();
+        }
+
+        var result = new List<UnifiedDiffSplitLine>(lines.Count);
+        var removed = new List<UnifiedDiffLine>();
+        var added = new List<UnifiedDiffLine>();
+
+        foreach (var line in lines)
+        {
+            if (line.Kind == UnifiedDiffLineKind.Removed)
+            {
+                removed.Add(line);
+                continue;
+            }
+
+            if (line.Kind == UnifiedDiffLineKind.Added)
+            {
+                added.Add(line);
+                continue;
+            }
+
+            FlushChangedLines(result, removed, added);
+            result.Add(ToFullWidthOrContextSplitLine(line));
+        }
+
+        FlushChangedLines(result, removed, added);
+        return result;
+    }
+
     private static UnifiedDiffLine ToMetadataLine(string line)
     {
         if (IsMetadataLine(line))
@@ -76,6 +109,74 @@ internal static partial class UnifiedDiffParser
 
         // 加载中、无差异、错误提示等非 diff 文本走消息样式，避免显示无意义行号。
         return new UnifiedDiffLine(UnifiedDiffLineKind.Message, string.Empty, string.Empty, string.Empty, line);
+    }
+
+    private static UnifiedDiffSplitLine ToFullWidthOrContextSplitLine(UnifiedDiffLine line)
+    {
+        if (line.Kind == UnifiedDiffLineKind.Context)
+        {
+            return new UnifiedDiffSplitLine(
+                false,
+                line.Kind,
+                line.Prefix,
+                line.Content,
+                line.Kind,
+                line.OldLineNumber,
+                line.Prefix,
+                line.Content,
+                line.Kind,
+                line.NewLineNumber,
+                line.Prefix,
+                line.Content);
+        }
+
+        return new UnifiedDiffSplitLine(
+            true,
+            line.Kind,
+            line.Prefix,
+            line.Content,
+            line.Kind,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            line.Kind,
+            string.Empty,
+            string.Empty,
+            string.Empty);
+    }
+
+    private static void FlushChangedLines(
+        ICollection<UnifiedDiffSplitLine> result,
+        IList<UnifiedDiffLine> removed,
+        IList<UnifiedDiffLine> added)
+    {
+        if (removed.Count == 0 && added.Count == 0)
+        {
+            return;
+        }
+
+        var count = Math.Max(removed.Count, added.Count);
+        for (var index = 0; index < count; index++)
+        {
+            var oldLine = index < removed.Count ? removed[index] : null;
+            var newLine = index < added.Count ? added[index] : null;
+            result.Add(new UnifiedDiffSplitLine(
+                false,
+                oldLine?.Kind ?? newLine?.Kind ?? UnifiedDiffLineKind.Context,
+                string.Empty,
+                string.Empty,
+                oldLine?.Kind ?? UnifiedDiffLineKind.Context,
+                oldLine?.OldLineNumber ?? string.Empty,
+                oldLine?.Prefix ?? string.Empty,
+                oldLine?.Content ?? string.Empty,
+                newLine?.Kind ?? UnifiedDiffLineKind.Context,
+                newLine?.NewLineNumber ?? string.Empty,
+                newLine?.Prefix ?? string.Empty,
+                newLine?.Content ?? string.Empty));
+        }
+
+        removed.Clear();
+        added.Clear();
     }
 
     private static bool IsMetadataLine(string line)

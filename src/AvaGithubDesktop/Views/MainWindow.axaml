@@ -81,6 +81,11 @@
                         Command="{Binding ToggleHideWhitespaceChangesCommand}"
                         IsChecked="{Binding HideWhitespaceChanges}"
                         ToggleType="CheckBox" />
+                    <MenuItem
+                        Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowSideBySideDiff}}"
+                        Command="{Binding ToggleSideBySideDiffCommand}"
+                        IsChecked="{Binding ShowSideBySideDiff}"
+                        ToggleType="CheckBox" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuToggleFullScreen}}" Click="ToggleFullScreenMenuItem_Click" HotKey="F11" />
                     <Separator />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuExpandActiveResizable}}" Click="ExpandActiveResizableMenuItem_Click" HotKey="Ctrl+9" />
@@ -999,6 +1004,7 @@
                             </Border>
                             <Grid Grid.Row="1">
                                 <controls:UnifiedDiffViewer
+                                    IsSideBySide="{Binding ShowSideBySideDiff}"
                                     IsVisible="{Binding IsTextDiffVisible}"
                                     Text="{Binding DiffText}" />
                                 <controls:ImageDiffViewer
@@ -1162,6 +1168,7 @@
                                     Grid.Row="1"
                                     IsVisible="{Binding HasHistory}">
                                     <controls:UnifiedDiffViewer
+                                        IsSideBySide="{Binding ShowSideBySideDiff}"
                                         IsVisible="{Binding IsTextDiffVisible}"
                                         Text="{Binding DiffText}" />
                                     <controls:ImageDiffViewer

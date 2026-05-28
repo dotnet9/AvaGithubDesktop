@@ -80,6 +80,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isSigningIn;
     private bool _isOperationLogVisible;
     private bool _hideWhitespaceChanges;
+    private bool _showSideBySideDiff;
     private bool _isInitialized;
     private bool _isBulkUpdatingIncludedChanges;
     private bool _isApplyingWorkspace;
@@ -169,6 +170,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         StatusBar = statusBar;
         _isOperationLogVisible = _settingsStore.Current.IsOperationLogVisible ?? true;
         _hideWhitespaceChanges = _settingsStore.Current.HideWhitespaceChanges ?? false;
+        _showSideBySideDiff = _settingsStore.Current.ShowSideBySideDiff ?? false;
         _repositoryPath = ResolveDefaultRepositoryPath(_settingsStore.Current.LastRepositoryPath);
 
         Languages = new ObservableCollection<LanguageOption>
@@ -237,6 +239,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             this.WhenAnyValue(model => model.CanCherryPickSelectedCommit));
         ToggleOperationLogCommand = ReactiveCommand.Create(ToggleOperationLog);
         ToggleHideWhitespaceChangesCommand = ReactiveCommand.Create(ToggleHideWhitespaceChanges);
+        ToggleSideBySideDiffCommand = ReactiveCommand.Create(ToggleSideBySideDiff);
         SelectThemeCommand = ReactiveCommand.Create<string?>(SelectThemeByKey);
         SelectSimplifiedChineseCommand = ReactiveCommand.Create(() => SelectLanguageByCulture("zh-CN"));
         SelectEnglishCommand = ReactiveCommand.Create(() => SelectLanguageByCulture("en-US"));
@@ -481,6 +484,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ToggleOperationLogCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ToggleHideWhitespaceChangesCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ToggleSideBySideDiffCommand { get; }
 
     public ReactiveCommand<string?, Unit> SelectThemeCommand { get; }
 
@@ -1721,6 +1726,21 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    public bool ShowSideBySideDiff
+    {
+        get => _showSideBySideDiff;
+        set
+        {
+            if (_showSideBySideDiff == value)
+            {
+                return;
+            }
+
+            this.RaiseAndSetIfChanged(ref _showSideBySideDiff, value);
+            _settingsStore.Update(settings => settings with { ShowSideBySideDiff = value });
+        }
+    }
+
     public ThemeOption? SelectedTheme
     {
         get => _selectedTheme;
@@ -2089,6 +2109,15 @@ public sealed class MainWindowViewModel : ViewModelBase
         var messageKey = HideWhitespaceChanges
             ? AvaGithubDesktopL.StatusWhitespaceChangesHidden
             : AvaGithubDesktopL.StatusWhitespaceChangesShown;
+        _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(messageKey)));
+    }
+
+    private void ToggleSideBySideDiff()
+    {
+        ShowSideBySideDiff = !ShowSideBySideDiff;
+        var messageKey = ShowSideBySideDiff
+            ? AvaGithubDesktopL.StatusSideBySideDiffShown
+            : AvaGithubDesktopL.StatusUnifiedDiffShown;
         _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(messageKey)));
     }
 

@@ -6,6 +6,8 @@ public sealed record AppSettings
 
     public bool? HideWhitespaceChanges { get; init; }
 
+    public bool? ShowSideBySideDiff { get; init; }
+
     public string? CultureName { get; init; }
 
     public string? ThemeKey { get; init; }
