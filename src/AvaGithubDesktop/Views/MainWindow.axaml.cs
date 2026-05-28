@@ -12,7 +12,7 @@ public partial class MainWindow : CodeWFWindow
     public MainWindow()
     {
         InitializeComponent();
-        KeyDown += OnKeyDown;
+        AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
     }
 
     public MainWindow(MainWindowViewModel viewModel)
@@ -24,13 +24,23 @@ public partial class MainWindow : CodeWFWindow
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.KeyModifiers != KeyModifiers.Control)
+        if (!e.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
             return;
         }
 
         switch (e.Key)
         {
+            case Key.D1:
+            case Key.NumPad1:
+                ShowChanges();
+                e.Handled = true;
+                break;
+            case Key.D2:
+            case Key.NumPad2:
+                ShowHistory();
+                e.Handled = true;
+                break;
             case Key.T:
                 ShowRepositorySelector();
                 e.Handled = true;
@@ -66,6 +76,22 @@ public partial class MainWindow : CodeWFWindow
 
         BranchSelectorButton.Flyout?.ShowAt(BranchSelectorButton);
         Dispatcher.UIThread.Post(() => BranchFilterTextBox.Focus());
+    }
+
+    private void ShowChanges()
+    {
+        if (DataContext is MainWindowViewModel viewModel)
+        {
+            ExecuteCommandIfPossible(viewModel.ShowChangesCommand);
+        }
+    }
+
+    private void ShowHistory()
+    {
+        if (DataContext is MainWindowViewModel viewModel)
+        {
+            ExecuteCommandIfPossible(viewModel.ShowHistoryCommand);
+        }
     }
 
     private void ShowBranchSelectorMenuItem_Click(object? sender, RoutedEventArgs e)
