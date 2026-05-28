@@ -352,6 +352,7 @@ public sealed class MainWindowViewModel : ViewModelBase
                     hasRepository && canRunRepositoryCommand && hasConflictFiles));
         ShowChangelogCommand = ReactiveCommand.CreateFromTask(ShowChangelogAsync);
         ShowKeyboardShortcutsCommand = ReactiveCommand.CreateFromTask(ShowKeyboardShortcutsAsync);
+        ShowLogFolderCommand = ReactiveCommand.CreateFromTask(ShowLogFolderAsync);
         ShowAboutCommand = ReactiveCommand.CreateFromTask(ShowAboutAsync);
         SignInCommand = ReactiveCommand.CreateFromTask(
             SignInAsync,
@@ -534,6 +535,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ShowChangelogCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ShowKeyboardShortcutsCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ShowLogFolderCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ShowAboutCommand { get; }
 
@@ -2521,6 +2524,20 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             await _helpService.ShowKeyboardShortcutsWindowAsync();
             _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedKeyboardShortcuts)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenHelpFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+    }
+
+    private async Task ShowLogFolderAsync()
+    {
+        try
+        {
+            await _helpService.ShowLogFolderAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedLogFolder)));
         }
         catch (Exception ex)
         {

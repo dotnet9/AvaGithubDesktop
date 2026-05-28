@@ -37,6 +37,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuFocusChangesFilter = "AvaGithubDesktop.AvaGithubDesktopL.MenuFocusChangesFilter";
     public static readonly string MenuToggleFullScreen = "AvaGithubDesktop.AvaGithubDesktopL.MenuToggleFullScreen";
     public static readonly string MenuHelp = "AvaGithubDesktop.AvaGithubDesktopL.MenuHelp";
+    public static readonly string MenuShowLogsInFileManager = "AvaGithubDesktop.AvaGithubDesktopL.MenuShowLogsInFileManager";
     public static readonly string ShowOperationLog = "AvaGithubDesktop.AvaGithubDesktopL.ShowOperationLog";
     public static readonly string ShowConflictsOnly = "AvaGithubDesktop.AvaGithubDesktopL.ShowConflictsOnly";
     public static readonly string MenuNewRepository = "AvaGithubDesktop.AvaGithubDesktopL.MenuNewRepository";
@@ -294,6 +295,7 @@ public static class AvaGithubDesktopL
     public static readonly string StatusDiscardStashFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusDiscardStashFailedFormat";
     public static readonly string StatusOpenedChangelog = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedChangelog";
     public static readonly string StatusOpenedKeyboardShortcuts = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedKeyboardShortcuts";
+    public static readonly string StatusOpenedLogFolder = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedLogFolder";
     public static readonly string StatusOpenedAbout = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenedAbout";
     public static readonly string StatusOpenHelpFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenHelpFailedFormat";
     public static readonly string StatusOperationLogShown = "AvaGithubDesktop.AvaGithubDesktopL.StatusOperationLogShown";

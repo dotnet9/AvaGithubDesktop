@@ -6,5 +6,7 @@ public interface IHelpService
 
     Task ShowKeyboardShortcutsWindowAsync();
 
+    Task ShowLogFolderAsync();
+
     Task ShowAboutWindowAsync();
 }

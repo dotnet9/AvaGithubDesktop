@@ -1,8 +1,10 @@
 using System.Reflection;
+using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using AvaGithubDesktop.Views;
+using CodeWF.Log.Core;
 
 namespace AvaGithubDesktop.Core.Services;
 
@@ -35,6 +37,21 @@ public sealed class HelpService : IHelpService
             _localizer.Get(AvaGithubDesktopL.KeyboardShortcuts),
             markdown,
             Path.GetDirectoryName(path)));
+        return Task.CompletedTask;
+    }
+
+    public Task ShowLogFolderAsync()
+    {
+        var directory = Logger.LogDir;
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        StartProcess(new ProcessStartInfo(directory)
+        {
+            UseShellExecute = true
+        });
         return Task.CompletedTask;
     }
 
@@ -102,5 +119,14 @@ public sealed class HelpService : IHelpService
         return Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: { } mainWindow }
             ? mainWindow
             : null;
+    }
+
+    private static void StartProcess(ProcessStartInfo startInfo)
+    {
+        using var process = Process.Start(startInfo);
+        if (process is null)
+        {
+            throw new InvalidOperationException($"Process '{startInfo.FileName}' could not be started.");
+        }
     }
 }

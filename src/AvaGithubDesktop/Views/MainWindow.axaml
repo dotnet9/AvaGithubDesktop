@@ -198,6 +198,7 @@
                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuHelp}}">
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Changelog}}" Command="{Binding ShowChangelogCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.KeyboardShortcuts}}" Command="{Binding ShowKeyboardShortcutsCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowLogsInFileManager}}" Command="{Binding ShowLogFolderCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAbout}}" Command="{Binding ShowAboutCommand}" />
                 </MenuItem>
             </Menu>
