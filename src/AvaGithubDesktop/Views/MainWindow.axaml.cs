@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
@@ -9,6 +10,8 @@ namespace AvaGithubDesktop.Views;
 
 public partial class MainWindow : CodeWFWindow
 {
+    private WindowState _windowStateBeforeFullScreen = WindowState.Normal;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -24,6 +27,13 @@ public partial class MainWindow : CodeWFWindow
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
+        if (e.Key == Key.F11 && e.KeyModifiers == KeyModifiers.None)
+        {
+            ToggleFullScreen();
+            e.Handled = true;
+            return;
+        }
+
         if (e.KeyModifiers != KeyModifiers.Control)
         {
             return;
@@ -136,6 +146,25 @@ public partial class MainWindow : CodeWFWindow
     private void FocusCommitSummaryMenuItem_Click(object? sender, RoutedEventArgs e)
     {
         FocusCommitSummary();
+    }
+
+    private void ToggleFullScreen()
+    {
+        if (WindowState == WindowState.FullScreen)
+        {
+            WindowState = _windowStateBeforeFullScreen == WindowState.FullScreen
+                ? WindowState.Normal
+                : _windowStateBeforeFullScreen;
+            return;
+        }
+
+        _windowStateBeforeFullScreen = WindowState;
+        WindowState = WindowState.FullScreen;
+    }
+
+    private void ToggleFullScreenMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        ToggleFullScreen();
     }
 
     private static void ExecuteCommandIfPossible(ICommand command)

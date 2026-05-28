@@ -30,6 +30,7 @@
       "MenuShowBranchesList": "Show branches list",
       "MenuFocusCommitSummary": "Go to Summary",
       "MenuFocusChangesFilter": "Focus changes filter",
+      "MenuToggleFullScreen": "Toggle full screen",
       "MenuHelp": "Help",
       "ShowOperationLog": "Show operation log",
       "ShowConflictsOnly": "Conflicts",

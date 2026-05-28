@@ -119,6 +119,7 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowBranchesList}}" Click="ShowBranchSelectorMenuItem_Click" HotKey="Ctrl+B" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFocusCommitSummary}}" Click="FocusCommitSummaryMenuItem_Click" HotKey="Ctrl+G" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFocusChangesFilter}}" Click="FocusChangesFilterMenuItem_Click" HotKey="Ctrl+L" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuToggleFullScreen}}" Click="ToggleFullScreenMenuItem_Click" HotKey="F11" />
                     <Separator />
                     <MenuItem
                         Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.ShowOperationLog}}"
