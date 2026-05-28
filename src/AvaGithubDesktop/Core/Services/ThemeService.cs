@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Styling;
+using AvaGithubDesktop.Controls.Themes;
 using AvaGithubDesktop.Core.Models;
-using Semi.Avalonia;
 
 namespace AvaGithubDesktop.Core.Services;
 
@@ -12,10 +12,10 @@ public sealed class ThemeService : IThemeService
         new("system", AvaGithubDesktopL.ThemeSystem, ThemeVariant.Default),
         new("light", AvaGithubDesktopL.ThemeLight, ThemeVariant.Light),
         new("dark", AvaGithubDesktopL.ThemeDark, ThemeVariant.Dark),
-        new("aquatic", AvaGithubDesktopL.ThemeAquatic, SemiTheme.Aquatic),
-        new("desert", AvaGithubDesktopL.ThemeDesert, SemiTheme.Desert),
-        new("dusk", AvaGithubDesktopL.ThemeDusk, SemiTheme.Dusk),
-        new("night-sky", AvaGithubDesktopL.ThemeNightSky, SemiTheme.NightSky)
+        new("aquatic", AvaGithubDesktopL.ThemeAquatic, AvaGithubDesktopThemeVariants.Aquatic),
+        new("desert", AvaGithubDesktopL.ThemeDesert, AvaGithubDesktopThemeVariants.Desert),
+        new("dusk", AvaGithubDesktopL.ThemeDusk, AvaGithubDesktopThemeVariants.Dusk),
+        new("night-sky", AvaGithubDesktopL.ThemeNightSky, AvaGithubDesktopThemeVariants.NightSky)
     ];
 
     public IReadOnlyList<ThemeOption> GetThemeOptions()

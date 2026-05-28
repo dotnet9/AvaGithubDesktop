@@ -47,8 +47,8 @@
 
     <Style Selector="Border.stashBanner">
         <Setter Property="Padding" Value="10" />
-        <Setter Property="Background" Value="#FFF8E5" />
-        <Setter Property="BorderBrush" Value="#E7C36A" />
+        <Setter Property="Background" Value="{DynamicResource AccentSubtleBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="6" />
     </Style>

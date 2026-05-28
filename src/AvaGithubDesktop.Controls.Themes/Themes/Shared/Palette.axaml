@@ -1,56 +1,336 @@
 <ResourceDictionary
     xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:themes="using:AvaGithubDesktop.Controls.Themes">
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
-            <SolidColorBrush x:Key="AppBackgroundBrush" Color="#FAFCFE" />
+            <LinearGradientBrush x:Key="ToolbarBackgroundBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+                <GradientStop Color="#0B5CAD" Offset="0" />
+                <GradientStop Color="#0D88D8" Offset="0.58" />
+                <GradientStop Color="#12B6D8" Offset="1" />
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="AppBackgroundBrush" Color="#EEF6FF" />
             <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#FFFFFF" />
-            <SolidColorBrush x:Key="PanelAltBackgroundBrush" Color="#F2F7FA" />
-            <SolidColorBrush x:Key="PanelBorderBrush" Color="#C9D6DF" />
-            <SolidColorBrush x:Key="PanelBorderContrastBrush" Color="#81909D" />
-            <SolidColorBrush x:Key="PrimaryTextBrush" Color="#1C252E" />
-            <SolidColorBrush x:Key="SecondaryTextBrush" Color="#53616D" />
-            <SolidColorBrush x:Key="MutedTextBrush" Color="#697887" />
-            <SolidColorBrush x:Key="AccentBrush" Color="#008FB3" />
-            <SolidColorBrush x:Key="AccentSubtleBrush" Color="#E2F7FB" />
-            <SolidColorBrush x:Key="AccentBorderBrush" Color="#9CDEE8" />
-            <SolidColorBrush x:Key="SelectionBackgroundBrush" Color="#E7F3F7" />
-            <SolidColorBrush x:Key="HoverBackgroundBrush" Color="#F0F7FA" />
-            <SolidColorBrush x:Key="DangerBrush" Color="#CF222E" />
-            <SolidColorBrush x:Key="DangerSubtleBrush" Color="#FFF5F5" />
-            <SolidColorBrush x:Key="DangerBorderBrush" Color="#FFD6D6" />
-            <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#FFFFFF" />
-            <SolidColorBrush x:Key="StatusBarBackgroundBrush" Color="#F2F7FA" />
-            <SolidColorBrush x:Key="StatusBarBorderBrush" Color="#C9D6DF" />
-            <SolidColorBrush x:Key="ToolbarBackgroundBrush" Color="#111B22" />
-            <SolidColorBrush x:Key="ToolbarBorderBrush" Color="#00A6C8" />
-            <SolidColorBrush x:Key="ToolbarHoverBackgroundBrush" Color="#1B2A33" />
-            <SolidColorBrush x:Key="ToolbarTextBrush" Color="#FFFFFF" />
-            <SolidColorBrush x:Key="ToolbarSecondaryTextBrush" Color="#B7CBD6" />
-            <SolidColorBrush x:Key="ToolbarBadgeBackgroundBrush" Color="#243846" />
-            <SolidColorBrush x:Key="ToolbarSplitBorderBrush" Color="#0A1116" />
+            <SolidColorBrush x:Key="PanelAltBackgroundBrush" Color="#F4F9FF" />
+            <SolidColorBrush x:Key="PanelBorderBrush" Color="#C5DDF4" />
+            <SolidColorBrush x:Key="PanelBorderContrastBrush" Color="#5C7898" />
+            <SolidColorBrush x:Key="PrimaryTextBrush" Color="#102033" />
+            <SolidColorBrush x:Key="SecondaryTextBrush" Color="#3E5873" />
+            <SolidColorBrush x:Key="MutedTextBrush" Color="#6C7F94" />
+            <SolidColorBrush x:Key="AccentBrush" Color="#0078FF" />
+            <SolidColorBrush x:Key="AccentSubtleBrush" Color="#E7F3FF" />
+            <SolidColorBrush x:Key="AccentBorderBrush" Color="#93C8FF" />
+            <SolidColorBrush x:Key="SelectionBackgroundBrush" Color="#DCEEFF" />
+            <SolidColorBrush x:Key="HoverBackgroundBrush" Color="#EDF6FF" />
+            <SolidColorBrush x:Key="DangerBrush" Color="#D92D4B" />
+            <SolidColorBrush x:Key="DangerSubtleBrush" Color="#FFF0F3" />
+            <SolidColorBrush x:Key="DangerBorderBrush" Color="#FFC2CC" />
+            <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#F8FBFF" />
+            <SolidColorBrush x:Key="StatusBarBackgroundBrush" Color="#E6F1FC" />
+            <SolidColorBrush x:Key="StatusBarBorderBrush" Color="#B9D3ED" />
+            <SolidColorBrush x:Key="ToolbarBorderBrush" Color="#63D8FF" />
+            <SolidColorBrush x:Key="ToolbarHoverBackgroundBrush" Color="#176EBA" />
+            <SolidColorBrush x:Key="ToolbarTextBrush" Color="#F8FCFF" />
+            <SolidColorBrush x:Key="ToolbarSecondaryTextBrush" Color="#D8EDFF" />
+            <SolidColorBrush x:Key="ToolbarBadgeBackgroundBrush" Color="#0A4B8C" />
+            <SolidColorBrush x:Key="ToolbarSplitBorderBrush" Color="#084B89" />
+            <SolidColorBrush x:Key="DiffViewerBackgroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="DiffLineBackgroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="DiffGutterBackgroundBrush" Color="#F2F7FD" />
+            <SolidColorBrush x:Key="DiffGutterBorderBrush" Color="#C9D7E6" />
+            <SolidColorBrush x:Key="DiffGutterTextBrush" Color="#7890A8" />
+            <SolidColorBrush x:Key="DiffContentTextBrush" Color="#1B2B3C" />
+            <SolidColorBrush x:Key="DiffHeaderBackgroundBrush" Color="#EAF4FF" />
+            <SolidColorBrush x:Key="DiffHeaderTextBrush" Color="#31516F" />
+            <SolidColorBrush x:Key="DiffHunkBackgroundBrush" Color="#DFF3FF" />
+            <SolidColorBrush x:Key="DiffHunkGutterBrush" Color="#BEE7FF" />
+            <SolidColorBrush x:Key="DiffHunkTextBrush" Color="#0067B3" />
+            <SolidColorBrush x:Key="DiffAddedBackgroundBrush" Color="#E8FFF2" />
+            <SolidColorBrush x:Key="DiffAddedGutterBrush" Color="#C9F7DB" />
+            <SolidColorBrush x:Key="DiffAddedTextBrush" Color="#0D6B36" />
+            <SolidColorBrush x:Key="DiffRemovedBackgroundBrush" Color="#FFF0F0" />
+            <SolidColorBrush x:Key="DiffRemovedGutterBrush" Color="#FFD2D2" />
+            <SolidColorBrush x:Key="DiffRemovedTextBrush" Color="#A71930" />
+            <SolidColorBrush x:Key="LogTimeBrush" Color="#668199" />
+            <SolidColorBrush x:Key="LogDebugBrush" Color="#0877D8" />
+            <SolidColorBrush x:Key="LogInfoBrush" Color="#138A4A" />
+            <SolidColorBrush x:Key="LogWarnBrush" Color="#9A6A00" />
+            <SolidColorBrush x:Key="LogErrorBrush" Color="#D92D4B" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="Dark">
+            <LinearGradientBrush x:Key="ToolbarBackgroundBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+                <GradientStop Color="#102A5A" Offset="0" />
+                <GradientStop Color="#075E9E" Offset="0.62" />
+                <GradientStop Color="#0788B8" Offset="1" />
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="AppBackgroundBrush" Color="#07111F" />
+            <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#0C182A" />
+            <SolidColorBrush x:Key="PanelAltBackgroundBrush" Color="#11243A" />
+            <SolidColorBrush x:Key="PanelBorderBrush" Color="#1C3954" />
+            <SolidColorBrush x:Key="PanelBorderContrastBrush" Color="#3C6B91" />
+            <SolidColorBrush x:Key="PrimaryTextBrush" Color="#E7F3FF" />
+            <SolidColorBrush x:Key="SecondaryTextBrush" Color="#AFC8E3" />
+            <SolidColorBrush x:Key="MutedTextBrush" Color="#7F9BB8" />
+            <SolidColorBrush x:Key="AccentBrush" Color="#38BDF8" />
+            <SolidColorBrush x:Key="AccentSubtleBrush" Color="#0C3048" />
+            <SolidColorBrush x:Key="AccentBorderBrush" Color="#176E9E" />
+            <SolidColorBrush x:Key="SelectionBackgroundBrush" Color="#12395D" />
+            <SolidColorBrush x:Key="HoverBackgroundBrush" Color="#142B43" />
+            <SolidColorBrush x:Key="DangerBrush" Color="#FB7185" />
+            <SolidColorBrush x:Key="DangerSubtleBrush" Color="#3B1420" />
+            <SolidColorBrush x:Key="DangerBorderBrush" Color="#7F1D2D" />
+            <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#0A1626" />
+            <SolidColorBrush x:Key="StatusBarBackgroundBrush" Color="#0E2134" />
+            <SolidColorBrush x:Key="StatusBarBorderBrush" Color="#1B3A58" />
+            <SolidColorBrush x:Key="ToolbarBorderBrush" Color="#25D9FF" />
+            <SolidColorBrush x:Key="ToolbarHoverBackgroundBrush" Color="#0D6FAE" />
+            <SolidColorBrush x:Key="ToolbarTextBrush" Color="#F5FBFF" />
+            <SolidColorBrush x:Key="ToolbarSecondaryTextBrush" Color="#B8D9F5" />
+            <SolidColorBrush x:Key="ToolbarBadgeBackgroundBrush" Color="#123B62" />
+            <SolidColorBrush x:Key="ToolbarSplitBorderBrush" Color="#082947" />
+            <SolidColorBrush x:Key="DiffViewerBackgroundBrush" Color="#091525" />
+            <SolidColorBrush x:Key="DiffLineBackgroundBrush" Color="#0B1726" />
+            <SolidColorBrush x:Key="DiffGutterBackgroundBrush" Color="#0D1C2E" />
+            <SolidColorBrush x:Key="DiffGutterBorderBrush" Color="#1F3A55" />
+            <SolidColorBrush x:Key="DiffGutterTextBrush" Color="#7793AF" />
+            <SolidColorBrush x:Key="DiffContentTextBrush" Color="#D8E8F7" />
+            <SolidColorBrush x:Key="DiffHeaderBackgroundBrush" Color="#10243A" />
+            <SolidColorBrush x:Key="DiffHeaderTextBrush" Color="#A6C3DE" />
+            <SolidColorBrush x:Key="DiffHunkBackgroundBrush" Color="#0D3552" />
+            <SolidColorBrush x:Key="DiffHunkGutterBrush" Color="#124667" />
+            <SolidColorBrush x:Key="DiffHunkTextBrush" Color="#7DD3FC" />
+            <SolidColorBrush x:Key="DiffAddedBackgroundBrush" Color="#0D2F21" />
+            <SolidColorBrush x:Key="DiffAddedGutterBrush" Color="#11442D" />
+            <SolidColorBrush x:Key="DiffAddedTextBrush" Color="#86EFAC" />
+            <SolidColorBrush x:Key="DiffRemovedBackgroundBrush" Color="#3A1420" />
+            <SolidColorBrush x:Key="DiffRemovedGutterBrush" Color="#541929" />
+            <SolidColorBrush x:Key="DiffRemovedTextBrush" Color="#FDA4AF" />
+            <SolidColorBrush x:Key="LogTimeBrush" Color="#8BA9C7" />
+            <SolidColorBrush x:Key="LogDebugBrush" Color="#38BDF8" />
+            <SolidColorBrush x:Key="LogInfoBrush" Color="#86EFAC" />
+            <SolidColorBrush x:Key="LogWarnBrush" Color="#FACC15" />
+            <SolidColorBrush x:Key="LogErrorBrush" Color="#FB7185" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="{x:Static themes:AvaGithubDesktopThemeVariants.Aquatic}">
+            <LinearGradientBrush x:Key="ToolbarBackgroundBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+                <GradientStop Color="#045B78" Offset="0" />
+                <GradientStop Color="#0284A8" Offset="0.6" />
+                <GradientStop Color="#0FB5B7" Offset="1" />
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="AppBackgroundBrush" Color="#ECFAFB" />
+            <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="PanelAltBackgroundBrush" Color="#F0FBFC" />
+            <SolidColorBrush x:Key="PanelBorderBrush" Color="#B8DDE6" />
+            <SolidColorBrush x:Key="PanelBorderContrastBrush" Color="#4D7C8A" />
+            <SolidColorBrush x:Key="PrimaryTextBrush" Color="#0B2631" />
+            <SolidColorBrush x:Key="SecondaryTextBrush" Color="#355F6D" />
+            <SolidColorBrush x:Key="MutedTextBrush" Color="#688794" />
+            <SolidColorBrush x:Key="AccentBrush" Color="#0096C7" />
+            <SolidColorBrush x:Key="AccentSubtleBrush" Color="#DDF7FA" />
+            <SolidColorBrush x:Key="AccentBorderBrush" Color="#8BDDEB" />
+            <SolidColorBrush x:Key="SelectionBackgroundBrush" Color="#D9F3F8" />
+            <SolidColorBrush x:Key="HoverBackgroundBrush" Color="#EAF8FA" />
+            <SolidColorBrush x:Key="DangerBrush" Color="#D93255" />
+            <SolidColorBrush x:Key="DangerSubtleBrush" Color="#FFF0F4" />
+            <SolidColorBrush x:Key="DangerBorderBrush" Color="#FFC6D1" />
+            <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#F8FCFD" />
+            <SolidColorBrush x:Key="StatusBarBackgroundBrush" Color="#DDF1F5" />
+            <SolidColorBrush x:Key="StatusBarBorderBrush" Color="#A9D5DE" />
+            <SolidColorBrush x:Key="ToolbarBorderBrush" Color="#48E8F0" />
+            <SolidColorBrush x:Key="ToolbarHoverBackgroundBrush" Color="#047A99" />
+            <SolidColorBrush x:Key="ToolbarTextBrush" Color="#F7FEFF" />
+            <SolidColorBrush x:Key="ToolbarSecondaryTextBrush" Color="#D5F5F8" />
+            <SolidColorBrush x:Key="ToolbarBadgeBackgroundBrush" Color="#07506B" />
+            <SolidColorBrush x:Key="ToolbarSplitBorderBrush" Color="#06415A" />
+            <SolidColorBrush x:Key="DiffViewerBackgroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="DiffLineBackgroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="DiffGutterBackgroundBrush" Color="#F3FAFB" />
+            <SolidColorBrush x:Key="DiffGutterBorderBrush" Color="#C7DDE3" />
+            <SolidColorBrush x:Key="DiffGutterTextBrush" Color="#78919A" />
+            <SolidColorBrush x:Key="DiffContentTextBrush" Color="#18323C" />
+            <SolidColorBrush x:Key="DiffHeaderBackgroundBrush" Color="#E7F7FA" />
+            <SolidColorBrush x:Key="DiffHeaderTextBrush" Color="#355F6D" />
+            <SolidColorBrush x:Key="DiffHunkBackgroundBrush" Color="#DCF5FA" />
+            <SolidColorBrush x:Key="DiffHunkGutterBrush" Color="#B7E8F1" />
+            <SolidColorBrush x:Key="DiffHunkTextBrush" Color="#007F9F" />
+            <SolidColorBrush x:Key="DiffAddedBackgroundBrush" Color="#E8FFF2" />
+            <SolidColorBrush x:Key="DiffAddedGutterBrush" Color="#C9F7DB" />
+            <SolidColorBrush x:Key="DiffAddedTextBrush" Color="#0D6B36" />
+            <SolidColorBrush x:Key="DiffRemovedBackgroundBrush" Color="#FFF0F3" />
+            <SolidColorBrush x:Key="DiffRemovedGutterBrush" Color="#FFD2DA" />
+            <SolidColorBrush x:Key="DiffRemovedTextBrush" Color="#A7193A" />
+            <SolidColorBrush x:Key="LogTimeBrush" Color="#668A96" />
+            <SolidColorBrush x:Key="LogDebugBrush" Color="#0284A8" />
+            <SolidColorBrush x:Key="LogInfoBrush" Color="#138A4A" />
+            <SolidColorBrush x:Key="LogWarnBrush" Color="#9A6A00" />
+            <SolidColorBrush x:Key="LogErrorBrush" Color="#D93255" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="{x:Static themes:AvaGithubDesktopThemeVariants.Desert}">
+            <LinearGradientBrush x:Key="ToolbarBackgroundBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+                <GradientStop Color="#16437A" Offset="0" />
+                <GradientStop Color="#0E75B8" Offset="0.58" />
+                <GradientStop Color="#C78321" Offset="1" />
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="AppBackgroundBrush" Color="#F4F7FA" />
+            <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="PanelAltBackgroundBrush" Color="#F7F9FC" />
+            <SolidColorBrush x:Key="PanelBorderBrush" Color="#D5DDE7" />
+            <SolidColorBrush x:Key="PanelBorderContrastBrush" Color="#7A8795" />
+            <SolidColorBrush x:Key="PrimaryTextBrush" Color="#1D2733" />
+            <SolidColorBrush x:Key="SecondaryTextBrush" Color="#596575" />
+            <SolidColorBrush x:Key="MutedTextBrush" Color="#7B8794" />
+            <SolidColorBrush x:Key="AccentBrush" Color="#0D75D9" />
+            <SolidColorBrush x:Key="AccentSubtleBrush" Color="#E8F3FF" />
+            <SolidColorBrush x:Key="AccentBorderBrush" Color="#9CCAFF" />
+            <SolidColorBrush x:Key="SelectionBackgroundBrush" Color="#E5F0FB" />
+            <SolidColorBrush x:Key="HoverBackgroundBrush" Color="#F1F6FB" />
+            <SolidColorBrush x:Key="DangerBrush" Color="#C83542" />
+            <SolidColorBrush x:Key="DangerSubtleBrush" Color="#FFF2F2" />
+            <SolidColorBrush x:Key="DangerBorderBrush" Color="#FFC9C9" />
+            <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#FAFBFD" />
+            <SolidColorBrush x:Key="StatusBarBackgroundBrush" Color="#EBF1F7" />
+            <SolidColorBrush x:Key="StatusBarBorderBrush" Color="#CBD7E3" />
+            <SolidColorBrush x:Key="ToolbarBorderBrush" Color="#F4B24A" />
+            <SolidColorBrush x:Key="ToolbarHoverBackgroundBrush" Color="#155F9E" />
+            <SolidColorBrush x:Key="ToolbarTextBrush" Color="#FFFDF8" />
+            <SolidColorBrush x:Key="ToolbarSecondaryTextBrush" Color="#F5E5C8" />
+            <SolidColorBrush x:Key="ToolbarBadgeBackgroundBrush" Color="#1B4F83" />
+            <SolidColorBrush x:Key="ToolbarSplitBorderBrush" Color="#113B66" />
             <SolidColorBrush x:Key="DiffViewerBackgroundBrush" Color="#FFFFFF" />
             <SolidColorBrush x:Key="DiffLineBackgroundBrush" Color="#FFFFFF" />
             <SolidColorBrush x:Key="DiffGutterBackgroundBrush" Color="#F6F8FA" />
             <SolidColorBrush x:Key="DiffGutterBorderBrush" Color="#D8DEE4" />
             <SolidColorBrush x:Key="DiffGutterTextBrush" Color="#8C959F" />
             <SolidColorBrush x:Key="DiffContentTextBrush" Color="#24292F" />
-            <SolidColorBrush x:Key="DiffHeaderBackgroundBrush" Color="#F2F7FA" />
-            <SolidColorBrush x:Key="DiffHeaderTextBrush" Color="#53616D" />
-            <SolidColorBrush x:Key="DiffHunkBackgroundBrush" Color="#E2F7FB" />
-            <SolidColorBrush x:Key="DiffHunkGutterBrush" Color="#B8E7EF" />
-            <SolidColorBrush x:Key="DiffHunkTextBrush" Color="#007A99" />
-            <SolidColorBrush x:Key="DiffAddedBackgroundBrush" Color="#E6FFEC" />
-            <SolidColorBrush x:Key="DiffAddedGutterBrush" Color="#CCFFD8" />
-            <SolidColorBrush x:Key="DiffAddedTextBrush" Color="#116329" />
-            <SolidColorBrush x:Key="DiffRemovedBackgroundBrush" Color="#FFEBE9" />
-            <SolidColorBrush x:Key="DiffRemovedGutterBrush" Color="#FFD7D5" />
-            <SolidColorBrush x:Key="DiffRemovedTextBrush" Color="#82071E" />
-            <SolidColorBrush x:Key="LogTimeBrush" Color="#6E7781" />
-            <SolidColorBrush x:Key="LogDebugBrush" Color="#008FB3" />
-            <SolidColorBrush x:Key="LogInfoBrush" Color="#1A7F37" />
-            <SolidColorBrush x:Key="LogWarnBrush" Color="#9A6700" />
-            <SolidColorBrush x:Key="LogErrorBrush" Color="#CF222E" />
+            <SolidColorBrush x:Key="DiffHeaderBackgroundBrush" Color="#EEF4FA" />
+            <SolidColorBrush x:Key="DiffHeaderTextBrush" Color="#596575" />
+            <SolidColorBrush x:Key="DiffHunkBackgroundBrush" Color="#E5F2FF" />
+            <SolidColorBrush x:Key="DiffHunkGutterBrush" Color="#C1E0FF" />
+            <SolidColorBrush x:Key="DiffHunkTextBrush" Color="#0B63B6" />
+            <SolidColorBrush x:Key="DiffAddedBackgroundBrush" Color="#E9FFF2" />
+            <SolidColorBrush x:Key="DiffAddedGutterBrush" Color="#CDF7DD" />
+            <SolidColorBrush x:Key="DiffAddedTextBrush" Color="#116B36" />
+            <SolidColorBrush x:Key="DiffRemovedBackgroundBrush" Color="#FFF0EC" />
+            <SolidColorBrush x:Key="DiffRemovedGutterBrush" Color="#FFD3C9" />
+            <SolidColorBrush x:Key="DiffRemovedTextBrush" Color="#9D2A1F" />
+            <SolidColorBrush x:Key="LogTimeBrush" Color="#6C7782" />
+            <SolidColorBrush x:Key="LogDebugBrush" Color="#0D75D9" />
+            <SolidColorBrush x:Key="LogInfoBrush" Color="#178A4A" />
+            <SolidColorBrush x:Key="LogWarnBrush" Color="#B56D00" />
+            <SolidColorBrush x:Key="LogErrorBrush" Color="#C83542" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="{x:Static themes:AvaGithubDesktopThemeVariants.Dusk}">
+            <LinearGradientBrush x:Key="ToolbarBackgroundBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+                <GradientStop Color="#18346D" Offset="0" />
+                <GradientStop Color="#2563B8" Offset="0.64" />
+                <GradientStop Color="#2DD4BF" Offset="1" />
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="AppBackgroundBrush" Color="#101B2D" />
+            <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#162337" />
+            <SolidColorBrush x:Key="PanelAltBackgroundBrush" Color="#1C2E47" />
+            <SolidColorBrush x:Key="PanelBorderBrush" Color="#29455F" />
+            <SolidColorBrush x:Key="PanelBorderContrastBrush" Color="#527C9B" />
+            <SolidColorBrush x:Key="PrimaryTextBrush" Color="#ECF5FF" />
+            <SolidColorBrush x:Key="SecondaryTextBrush" Color="#B9CDE2" />
+            <SolidColorBrush x:Key="MutedTextBrush" Color="#8CA5BF" />
+            <SolidColorBrush x:Key="AccentBrush" Color="#5BC9FF" />
+            <SolidColorBrush x:Key="AccentSubtleBrush" Color="#17334A" />
+            <SolidColorBrush x:Key="AccentBorderBrush" Color="#236F98" />
+            <SolidColorBrush x:Key="SelectionBackgroundBrush" Color="#1F4666" />
+            <SolidColorBrush x:Key="HoverBackgroundBrush" Color="#20364F" />
+            <SolidColorBrush x:Key="DangerBrush" Color="#FF7A90" />
+            <SolidColorBrush x:Key="DangerSubtleBrush" Color="#421B29" />
+            <SolidColorBrush x:Key="DangerBorderBrush" Color="#873043" />
+            <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#122033" />
+            <SolidColorBrush x:Key="StatusBarBackgroundBrush" Color="#182A40" />
+            <SolidColorBrush x:Key="StatusBarBorderBrush" Color="#29455F" />
+            <SolidColorBrush x:Key="ToolbarBorderBrush" Color="#42E8D8" />
+            <SolidColorBrush x:Key="ToolbarHoverBackgroundBrush" Color="#1C5EA2" />
+            <SolidColorBrush x:Key="ToolbarTextBrush" Color="#F8FDFF" />
+            <SolidColorBrush x:Key="ToolbarSecondaryTextBrush" Color="#CCE7F7" />
+            <SolidColorBrush x:Key="ToolbarBadgeBackgroundBrush" Color="#183E6A" />
+            <SolidColorBrush x:Key="ToolbarSplitBorderBrush" Color="#10294B" />
+            <SolidColorBrush x:Key="DiffViewerBackgroundBrush" Color="#101B2D" />
+            <SolidColorBrush x:Key="DiffLineBackgroundBrush" Color="#132034" />
+            <SolidColorBrush x:Key="DiffGutterBackgroundBrush" Color="#16263B" />
+            <SolidColorBrush x:Key="DiffGutterBorderBrush" Color="#2B455F" />
+            <SolidColorBrush x:Key="DiffGutterTextBrush" Color="#84A1BD" />
+            <SolidColorBrush x:Key="DiffContentTextBrush" Color="#DCEBFA" />
+            <SolidColorBrush x:Key="DiffHeaderBackgroundBrush" Color="#1B2E47" />
+            <SolidColorBrush x:Key="DiffHeaderTextBrush" Color="#B9CDE2" />
+            <SolidColorBrush x:Key="DiffHunkBackgroundBrush" Color="#173D58" />
+            <SolidColorBrush x:Key="DiffHunkGutterBrush" Color="#1D5877" />
+            <SolidColorBrush x:Key="DiffHunkTextBrush" Color="#86E8FF" />
+            <SolidColorBrush x:Key="DiffAddedBackgroundBrush" Color="#123523" />
+            <SolidColorBrush x:Key="DiffAddedGutterBrush" Color="#174B31" />
+            <SolidColorBrush x:Key="DiffAddedTextBrush" Color="#9EF5B7" />
+            <SolidColorBrush x:Key="DiffRemovedBackgroundBrush" Color="#3F1926" />
+            <SolidColorBrush x:Key="DiffRemovedGutterBrush" Color="#5D2235" />
+            <SolidColorBrush x:Key="DiffRemovedTextBrush" Color="#FFB0BF" />
+            <SolidColorBrush x:Key="LogTimeBrush" Color="#8FAAC4" />
+            <SolidColorBrush x:Key="LogDebugBrush" Color="#5BC9FF" />
+            <SolidColorBrush x:Key="LogInfoBrush" Color="#9EF5B7" />
+            <SolidColorBrush x:Key="LogWarnBrush" Color="#FFD166" />
+            <SolidColorBrush x:Key="LogErrorBrush" Color="#FF7A90" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="{x:Static themes:AvaGithubDesktopThemeVariants.NightSky}">
+            <LinearGradientBrush x:Key="ToolbarBackgroundBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+                <GradientStop Color="#0B1B3A" Offset="0" />
+                <GradientStop Color="#123E7C" Offset="0.62" />
+                <GradientStop Color="#0EA5E9" Offset="1" />
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="AppBackgroundBrush" Color="#060D1A" />
+            <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#0A1424" />
+            <SolidColorBrush x:Key="PanelAltBackgroundBrush" Color="#101D30" />
+            <SolidColorBrush x:Key="PanelBorderBrush" Color="#1A3150" />
+            <SolidColorBrush x:Key="PanelBorderContrastBrush" Color="#456A92" />
+            <SolidColorBrush x:Key="PrimaryTextBrush" Color="#EAF6FF" />
+            <SolidColorBrush x:Key="SecondaryTextBrush" Color="#B6CEE8" />
+            <SolidColorBrush x:Key="MutedTextBrush" Color="#849EBC" />
+            <SolidColorBrush x:Key="AccentBrush" Color="#60D8FF" />
+            <SolidColorBrush x:Key="AccentSubtleBrush" Color="#0A2B44" />
+            <SolidColorBrush x:Key="AccentBorderBrush" Color="#155D86" />
+            <SolidColorBrush x:Key="SelectionBackgroundBrush" Color="#12385A" />
+            <SolidColorBrush x:Key="HoverBackgroundBrush" Color="#12233A" />
+            <SolidColorBrush x:Key="DangerBrush" Color="#FB7185" />
+            <SolidColorBrush x:Key="DangerSubtleBrush" Color="#381522" />
+            <SolidColorBrush x:Key="DangerBorderBrush" Color="#752036" />
+            <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#08111F" />
+            <SolidColorBrush x:Key="StatusBarBackgroundBrush" Color="#0D1A2C" />
+            <SolidColorBrush x:Key="StatusBarBorderBrush" Color="#1B3150" />
+            <SolidColorBrush x:Key="ToolbarBorderBrush" Color="#36D6FF" />
+            <SolidColorBrush x:Key="ToolbarHoverBackgroundBrush" Color="#174D8E" />
+            <SolidColorBrush x:Key="ToolbarTextBrush" Color="#F6FCFF" />
+            <SolidColorBrush x:Key="ToolbarSecondaryTextBrush" Color="#BADAF4" />
+            <SolidColorBrush x:Key="ToolbarBadgeBackgroundBrush" Color="#102F55" />
+            <SolidColorBrush x:Key="ToolbarSplitBorderBrush" Color="#071F3A" />
+            <SolidColorBrush x:Key="DiffViewerBackgroundBrush" Color="#070F1D" />
+            <SolidColorBrush x:Key="DiffLineBackgroundBrush" Color="#091321" />
+            <SolidColorBrush x:Key="DiffGutterBackgroundBrush" Color="#0D1B2D" />
+            <SolidColorBrush x:Key="DiffGutterBorderBrush" Color="#1A3150" />
+            <SolidColorBrush x:Key="DiffGutterTextBrush" Color="#7791AF" />
+            <SolidColorBrush x:Key="DiffContentTextBrush" Color="#D8E9FA" />
+            <SolidColorBrush x:Key="DiffHeaderBackgroundBrush" Color="#112138" />
+            <SolidColorBrush x:Key="DiffHeaderTextBrush" Color="#B6CEE8" />
+            <SolidColorBrush x:Key="DiffHunkBackgroundBrush" Color="#0B334F" />
+            <SolidColorBrush x:Key="DiffHunkGutterBrush" Color="#104461" />
+            <SolidColorBrush x:Key="DiffHunkTextBrush" Color="#83E5FF" />
+            <SolidColorBrush x:Key="DiffAddedBackgroundBrush" Color="#0D2F21" />
+            <SolidColorBrush x:Key="DiffAddedGutterBrush" Color="#11442D" />
+            <SolidColorBrush x:Key="DiffAddedTextBrush" Color="#86EFAC" />
+            <SolidColorBrush x:Key="DiffRemovedBackgroundBrush" Color="#351421" />
+            <SolidColorBrush x:Key="DiffRemovedGutterBrush" Color="#4D1B2D" />
+            <SolidColorBrush x:Key="DiffRemovedTextBrush" Color="#FDA4AF" />
+            <SolidColorBrush x:Key="LogTimeBrush" Color="#89A6C5" />
+            <SolidColorBrush x:Key="LogDebugBrush" Color="#60D8FF" />
+            <SolidColorBrush x:Key="LogInfoBrush" Color="#86EFAC" />
+            <SolidColorBrush x:Key="LogWarnBrush" Color="#FACC15" />
+            <SolidColorBrush x:Key="LogErrorBrush" Color="#FB7185" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 

@@ -15,9 +15,9 @@
     CanResize="False"
     Icon="/Assets/app-logo.ico"
     ShowInTaskbar="False"
-    TitleBarBackground="#24292F"
-    TitleBarBorderBrush="#11161C"
-    TitleBarForeground="#F3F4F6"
+    TitleBarBackground="{DynamicResource ToolbarBackgroundBrush}"
+    TitleBarBorderBrush="{DynamicResource ToolbarBorderBrush}"
+    TitleBarForeground="{DynamicResource ToolbarTextBrush}"
     TitleBarHeight="34"
     WindowStartupLocation="CenterOwner">
 
@@ -27,7 +27,7 @@
             VerticalAlignment="Center"
             FontSize="13"
             FontWeight="SemiBold"
-            Foreground="#F3F4F6"
+            Foreground="{DynamicResource ToolbarTextBrush}"
             Text="{Binding Title}" />
     </codewf:CodeWFWindow.LeftContent>
 
