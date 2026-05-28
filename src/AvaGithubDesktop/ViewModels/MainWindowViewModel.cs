@@ -3909,34 +3909,28 @@ public sealed class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        IsCreatingBranch = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(
-            _localizer.Format(AvaGithubDesktopL.StatusCreatingBranchFormat, request.BranchName, CurrentBranch)));
-
-        try
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            _localizer.Format(AvaGithubDesktopL.StatusCreatingBranchFormat, request.BranchName, CurrentBranch),
+            _localizer.Format(AvaGithubDesktopL.StatusCreatedBranchFormat, request.BranchName),
+            ex => _localizer.Format(AvaGithubDesktopL.StatusCreateBranchFailedFormat, ex.Message),
+            async () =>
+            {
+                await _gitRepositoryService.CreateBranchAsync(
+                    RootPath,
+                    request.BranchName,
+                    request.StartPoint,
+                    request.CheckoutBranch,
+                    CancellationToken.None);
+                BranchFilterText = string.Empty;
+            },
+            ReloadRepositoryWorkspaceAsync,
+            () => Task.CompletedTask,
+            value => IsCreatingBranch = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            await _gitRepositoryService.CreateBranchAsync(
-                RootPath,
-                request.BranchName,
-                request.StartPoint,
-                request.CheckoutBranch,
-                CancellationToken.None);
-
-            BranchFilterText = string.Empty;
-            var workspace = await _repositoryWorkspaceLoader.LoadAsync(RootPath, HistoryCommitLimit, CancellationToken.None);
-            ApplyWorkspace(workspace);
-            _eventBus.Publish(new StatusMessageChangedCommand(
-                _localizer.Format(AvaGithubDesktopL.StatusCreatedBranchFormat, request.BranchName)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusCreateBranchFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsCreatingBranch = false;
+            ErrorMessage = errorMessage;
         }
     }
 
@@ -3948,27 +3942,19 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
 
         var targetBranch = SelectedBranch.Name;
-        IsCheckingOutBranch = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(
-            _localizer.Format(AvaGithubDesktopL.StatusCheckingOutBranchFormat, targetBranch)));
-
-        try
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            _localizer.Format(AvaGithubDesktopL.StatusCheckingOutBranchFormat, targetBranch),
+            _localizer.Format(AvaGithubDesktopL.StatusCheckedOutBranchFormat, targetBranch),
+            ex => _localizer.Format(AvaGithubDesktopL.StatusCheckoutBranchFailedFormat, ex.Message),
+            () => _gitRepositoryService.CheckoutBranchAsync(RootPath, targetBranch, CancellationToken.None),
+            ReloadRepositoryWorkspaceAsync,
+            () => Task.CompletedTask,
+            value => IsCheckingOutBranch = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            await _gitRepositoryService.CheckoutBranchAsync(RootPath, targetBranch, CancellationToken.None);
-            var workspace = await _repositoryWorkspaceLoader.LoadAsync(RootPath, HistoryCommitLimit, CancellationToken.None);
-            ApplyWorkspace(workspace);
-            _eventBus.Publish(new StatusMessageChangedCommand(
-                _localizer.Format(AvaGithubDesktopL.StatusCheckedOutBranchFormat, targetBranch)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusCheckoutBranchFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsCheckingOutBranch = false;
+            ErrorMessage = errorMessage;
         }
     }
 
