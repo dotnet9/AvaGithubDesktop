@@ -2714,28 +2714,19 @@ public sealed class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        _activeSyncOperation = RepositorySyncOperation.Push;
-        IsSyncing = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(
-            _localizer.Format(AvaGithubDesktopL.StatusPushingTagsFormat, RemoteName)));
-
-        try
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            _localizer.Format(AvaGithubDesktopL.StatusPushingTagsFormat, RemoteName),
+            _localizer.Format(AvaGithubDesktopL.StatusPushedTagsFormat, RemoteName),
+            ex => _localizer.Format(AvaGithubDesktopL.StatusPushTagsFailedFormat, ex.Message),
+            () => _gitRepositoryService.PushTagsAsync(RootPath, RemoteName, CancellationToken.None),
+            ReloadRepositoryWorkspaceAsync,
+            () => Task.CompletedTask,
+            value => SetSyncOperationBusy(RepositorySyncOperation.Push, value)));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            await _gitRepositoryService.PushTagsAsync(RootPath, RemoteName, CancellationToken.None);
-            await ReloadRepositoryWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(
-                _localizer.Format(AvaGithubDesktopL.StatusPushedTagsFormat, RemoteName)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusPushTagsFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            _activeSyncOperation = RepositorySyncOperation.None;
-            IsSyncing = false;
+            ErrorMessage = errorMessage;
         }
     }
 
@@ -2746,26 +2737,19 @@ public sealed class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        _activeSyncOperation = RepositorySyncOperation.UpdateSubmodules;
-        IsSyncing = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusUpdatingSubmodules)));
-
-        try
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            _localizer.Get(AvaGithubDesktopL.StatusUpdatingSubmodules),
+            _localizer.Get(AvaGithubDesktopL.StatusUpdatedSubmodules),
+            ex => _localizer.Format(AvaGithubDesktopL.StatusUpdateSubmodulesFailedFormat, ex.Message),
+            () => _gitRepositoryService.UpdateSubmodulesAsync(RootPath, CancellationToken.None),
+            ReloadRepositoryWorkspaceAsync,
+            () => Task.CompletedTask,
+            value => SetSyncOperationBusy(RepositorySyncOperation.UpdateSubmodules, value)));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            await _gitRepositoryService.UpdateSubmodulesAsync(RootPath, CancellationToken.None);
-            await ReloadRepositoryWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusUpdatedSubmodules)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusUpdateSubmodulesFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            _activeSyncOperation = RepositorySyncOperation.None;
-            IsSyncing = false;
+            ErrorMessage = errorMessage;
         }
     }
 
@@ -2841,6 +2825,12 @@ public sealed class MainWindowViewModel : ViewModelBase
     private string GetRemoteOperationFailedKey(RepositorySyncOperation operation) =>
         _repositorySyncStatusService.GetFailedFormatKey(operation);
 
+    private void SetSyncOperationBusy(RepositorySyncOperation operation, bool isBusy)
+    {
+        _activeSyncOperation = isBusy ? operation : RepositorySyncOperation.None;
+        IsSyncing = isBusy;
+    }
+
     private async Task StashAllChangesAsync()
     {
         if (!CanStashChanges)
@@ -2881,24 +2871,19 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
 
         var stashName = CurrentBranchStash.Name;
-        IsRestoringStash = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusRestoringStash)));
-
-        try
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            _localizer.Get(AvaGithubDesktopL.StatusRestoringStash),
+            _localizer.Get(AvaGithubDesktopL.StatusRestoredStash),
+            ex => _localizer.Format(AvaGithubDesktopL.StatusRestoreStashFailedFormat, ex.Message),
+            () => _gitRepositoryService.RestoreStashAsync(RootPath, stashName, CancellationToken.None),
+            ReloadRepositoryWorkspaceAsync,
+            () => Task.CompletedTask,
+            value => IsRestoringStash = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            await _gitRepositoryService.RestoreStashAsync(RootPath, stashName, CancellationToken.None);
-            await ReloadRepositoryWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusRestoredStash)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusRestoreStashFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsRestoringStash = false;
+            ErrorMessage = errorMessage;
         }
     }
 
@@ -2910,24 +2895,19 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
 
         var stashName = CurrentBranchStash.Name;
-        IsDiscardingStash = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusDiscardingStash)));
-
-        try
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            _localizer.Get(AvaGithubDesktopL.StatusDiscardingStash),
+            _localizer.Get(AvaGithubDesktopL.StatusDiscardedStash),
+            ex => _localizer.Format(AvaGithubDesktopL.StatusDiscardStashFailedFormat, ex.Message),
+            () => _gitRepositoryService.DiscardStashAsync(RootPath, stashName, CancellationToken.None),
+            ReloadRepositoryWorkspaceAsync,
+            () => Task.CompletedTask,
+            value => IsDiscardingStash = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            await _gitRepositoryService.DiscardStashAsync(RootPath, stashName, CancellationToken.None);
-            await ReloadRepositoryWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusDiscardedStash)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusDiscardStashFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsDiscardingStash = false;
+            ErrorMessage = errorMessage;
         }
     }
 
