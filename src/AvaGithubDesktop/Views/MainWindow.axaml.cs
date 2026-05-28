@@ -17,6 +17,8 @@ public partial class MainWindow : CodeWFWindow
     private const double WorkspaceSidebarMaxWidth = 560;
     private const double HistoryFileListMinWidth = 220;
     private const double HistoryFileListMaxWidth = 480;
+    private const double MinPersistedWindowWidth = 960;
+    private const double MinPersistedWindowHeight = 620;
     private WindowState _windowStateBeforeFullScreen = WindowState.Normal;
     private TextBox? _lastFocusedTextBox;
     private GridLength _lastVisibleOperationLogHeight = new(DefaultOperationLogHeight);
@@ -33,6 +35,7 @@ public partial class MainWindow : CodeWFWindow
         DataContextChanged += (_, _) => SubscribeToViewModel();
         Closed += (_, _) =>
         {
+            SaveWindowSize();
             SaveWorkspaceLayout();
             UnsubscribeFromViewModel();
         };
@@ -53,6 +56,7 @@ public partial class MainWindow : CodeWFWindow
         {
             _subscribedViewModel = viewModel;
             _subscribedViewModel.PropertyChanged += OnViewModelPropertyChanged;
+            ApplyWindowSize(viewModel);
             ApplyWorkspaceLayout(viewModel);
             SyncOperationLogRow(viewModel.IsOperationLogVisible);
         }
@@ -153,6 +157,31 @@ public partial class MainWindow : CodeWFWindow
 
         clamped = Math.Clamp(actual, min, max);
         return true;
+    }
+
+    private void ApplyWindowSize(MainWindowViewModel viewModel)
+    {
+        if (TryClamp(viewModel.WindowWidth, MinPersistedWindowWidth, double.PositiveInfinity, out var width))
+        {
+            Width = width;
+        }
+
+        if (TryClamp(viewModel.WindowHeight, MinPersistedWindowHeight, double.PositiveInfinity, out var height))
+        {
+            Height = height;
+        }
+    }
+
+    private void SaveWindowSize()
+    {
+        if (DataContext is not MainWindowViewModel viewModel || WindowState != WindowState.Normal)
+        {
+            return;
+        }
+
+        viewModel.SaveWindowSize(
+            Math.Max(MinPersistedWindowWidth, Bounds.Width),
+            Math.Max(MinPersistedWindowHeight, Bounds.Height));
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)

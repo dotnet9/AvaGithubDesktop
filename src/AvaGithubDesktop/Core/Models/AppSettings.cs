@@ -15,4 +15,8 @@ public sealed record AppSettings
     public double? HistoryFileListWidth { get; init; }
 
     public double? OperationLogHeight { get; init; }
+
+    public double? WindowWidth { get; init; }
+
+    public double? WindowHeight { get; init; }
 }

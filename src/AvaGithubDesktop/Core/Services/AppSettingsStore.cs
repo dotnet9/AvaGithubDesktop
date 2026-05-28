@@ -12,6 +12,8 @@ public sealed class AppSettingsStore : IAppSettingsStore
     private const string WorkspaceSidebarWidthKey = nameof(AppSettings.WorkspaceSidebarWidth);
     private const string HistoryFileListWidthKey = nameof(AppSettings.HistoryFileListWidth);
     private const string OperationLogHeightKey = nameof(AppSettings.OperationLogHeight);
+    private const string WindowWidthKey = nameof(AppSettings.WindowWidth);
+    private const string WindowHeightKey = nameof(AppSettings.WindowHeight);
     private readonly object _syncRoot = new();
     private AppSettings? _settings;
 
@@ -48,7 +50,9 @@ public sealed class AppSettingsStore : IAppSettingsStore
             LastRepositoryPath = Get<string>(configPath, LastRepositoryPathKey),
             WorkspaceSidebarWidth = Get<double?>(configPath, WorkspaceSidebarWidthKey),
             HistoryFileListWidth = Get<double?>(configPath, HistoryFileListWidthKey),
-            OperationLogHeight = Get<double?>(configPath, OperationLogHeightKey)
+            OperationLogHeight = Get<double?>(configPath, OperationLogHeightKey),
+            WindowWidth = Get<double?>(configPath, WindowWidthKey),
+            WindowHeight = Get<double?>(configPath, WindowHeightKey)
         };
     }
 
@@ -64,6 +68,8 @@ public sealed class AppSettingsStore : IAppSettingsStore
             AppConfigHelper.Set(configPath, WorkspaceSidebarWidthKey, settings.WorkspaceSidebarWidth);
             AppConfigHelper.Set(configPath, HistoryFileListWidthKey, settings.HistoryFileListWidth);
             AppConfigHelper.Set(configPath, OperationLogHeightKey, settings.OperationLogHeight);
+            AppConfigHelper.Set(configPath, WindowWidthKey, settings.WindowWidth);
+            AppConfigHelper.Set(configPath, WindowHeightKey, settings.WindowHeight);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Xml.XmlException)
         {

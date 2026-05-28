@@ -568,6 +568,10 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public double? OperationLogHeight => _settingsStore.Current.OperationLogHeight;
 
+    public double? WindowWidth => _settingsStore.Current.WindowWidth;
+
+    public double? WindowHeight => _settingsStore.Current.WindowHeight;
+
     public void SaveWorkspaceLayout(double workspaceSidebarWidth, double historyFileListWidth, double operationLogHeight)
     {
         _settingsStore.Update(settings => settings with
@@ -575,6 +579,15 @@ public sealed class MainWindowViewModel : ViewModelBase
             WorkspaceSidebarWidth = workspaceSidebarWidth,
             HistoryFileListWidth = historyFileListWidth,
             OperationLogHeight = operationLogHeight
+        });
+    }
+
+    public void SaveWindowSize(double width, double height)
+    {
+        _settingsStore.Update(settings => settings with
+        {
+            WindowWidth = width,
+            WindowHeight = height
         });
     }
 
