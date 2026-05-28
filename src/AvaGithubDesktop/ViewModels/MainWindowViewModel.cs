@@ -32,6 +32,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly IThemeService _themeService;
     private readonly IAppLocalizer _localizer;
     private readonly IEventBus _eventBus;
+    private readonly BranchesViewStateBuilder _branchesViewStateBuilder;
     private readonly ChangedFilesViewStateBuilder _changedFilesViewStateBuilder;
     private readonly RepositoryListGroupBuilder _repositoryListGroupBuilder;
     private string _repositoryPath;
@@ -124,6 +125,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         IThemeService themeService,
         IAppLocalizer localizer,
         IEventBus eventBus,
+        BranchesViewStateBuilder branchesViewStateBuilder,
         ChangedFilesViewStateBuilder changedFilesViewStateBuilder,
         RepositoryListGroupBuilder repositoryListGroupBuilder,
         ShellStatusViewModel statusBar)
@@ -147,6 +149,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _themeService = themeService;
         _localizer = localizer;
         _eventBus = eventBus;
+        _branchesViewStateBuilder = branchesViewStateBuilder;
         _changedFilesViewStateBuilder = changedFilesViewStateBuilder;
         _repositoryListGroupBuilder = repositoryListGroupBuilder;
         StatusBar = statusBar;
@@ -3139,36 +3142,21 @@ public sealed class MainWindowViewModel : ViewModelBase
     private void ApplyBranchFilter(string? preferredSelectedName = null, bool preferCurrentBranch = false)
     {
         // Desktop 的分支弹出层允许输入关键字缩小范围；过滤只影响弹出层列表，不改动真实分支集合。
-        var filterText = BranchFilterText.Trim();
         var selectedName = preferredSelectedName ?? SelectedBranch?.Name;
-        FilteredBranches.Clear();
+        var result = _branchesViewStateBuilder.BuildFilterResult(
+            Branches,
+            BranchFilterText,
+            selectedName,
+            preferCurrentBranch);
 
-        foreach (var branch in Branches.Where(branch => MatchesBranchFilter(branch, filterText)))
+        FilteredBranches.Clear();
+        foreach (var branch in result.Branches)
         {
             FilteredBranches.Add(branch);
         }
 
-        var currentBranch = preferCurrentBranch
-            ? FilteredBranches.FirstOrDefault(branch => branch.IsCurrent)
-            : null;
-        var selectedBranch = !string.IsNullOrWhiteSpace(selectedName)
-            ? FilteredBranches.FirstOrDefault(branch => branch.Name == selectedName)
-            : null;
-        SelectedBranch = currentBranch ?? selectedBranch ?? FilteredBranches.FirstOrDefault();
-
+        SelectedBranch = result.SelectedBranch;
         RaiseBranchStateChanged();
-    }
-
-    private static bool MatchesBranchFilter(GitBranchItemViewModel branch, string filterText)
-    {
-        if (string.IsNullOrWhiteSpace(filterText))
-        {
-            return true;
-        }
-
-        return branch.Name.Contains(filterText, StringComparison.OrdinalIgnoreCase)
-            || branch.Upstream.Contains(filterText, StringComparison.OrdinalIgnoreCase)
-            || branch.RelativeDate.Contains(filterText, StringComparison.OrdinalIgnoreCase);
     }
 
     private void UpdateAheadBehindText()
