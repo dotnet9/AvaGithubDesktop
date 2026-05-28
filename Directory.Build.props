@@ -5,7 +5,7 @@
       第一位：架构级调整；第二位：功能新增或行为修改；第三/四位：日常开发迭代与修复。
       当前版本必须和 docs/更新日志.md 的最新版本号保持一致，方便后续更新日志窗口直接关联展示。
     -->
-    <AvaGithubDesktopVersion>0.109.0.0</AvaGithubDesktopVersion>
+    <AvaGithubDesktopVersion>0.110.0.0</AvaGithubDesktopVersion>
     <Version>$(AvaGithubDesktopVersion)</Version>
     <AssemblyVersion>$(AvaGithubDesktopVersion)</AssemblyVersion>
     <FileVersion>$(AvaGithubDesktopVersion)</FileVersion>

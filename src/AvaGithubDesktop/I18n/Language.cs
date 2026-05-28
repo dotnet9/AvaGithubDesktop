@@ -39,6 +39,8 @@ public static class AvaGithubDesktopL
     public static readonly string MenuShowStashedChanges = "AvaGithubDesktop.AvaGithubDesktopL.MenuShowStashedChanges";
     public static readonly string MenuHideStashedChanges = "AvaGithubDesktop.AvaGithubDesktopL.MenuHideStashedChanges";
     public static readonly string MenuToggleFullScreen = "AvaGithubDesktop.AvaGithubDesktopL.MenuToggleFullScreen";
+    public static readonly string MenuExpandActiveResizable = "AvaGithubDesktop.AvaGithubDesktopL.MenuExpandActiveResizable";
+    public static readonly string MenuContractActiveResizable = "AvaGithubDesktop.AvaGithubDesktopL.MenuContractActiveResizable";
     public static readonly string MenuHelp = "AvaGithubDesktop.AvaGithubDesktopL.MenuHelp";
     public static readonly string MenuReportIssue = "AvaGithubDesktop.AvaGithubDesktopL.MenuReportIssue";
     public static readonly string MenuContactSupport = "AvaGithubDesktop.AvaGithubDesktopL.MenuContactSupport";

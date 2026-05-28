@@ -19,6 +19,7 @@ public partial class MainWindow : CodeWFWindow
     private const double HistoryFileListMaxWidth = 480;
     private const double MinPersistedWindowWidth = 960;
     private const double MinPersistedWindowHeight = 620;
+    private const double ResizableStep = 40;
     private WindowState _windowStateBeforeFullScreen = WindowState.Normal;
     private TextBox? _lastFocusedTextBox;
     private GridLength _lastVisibleOperationLogHeight = new(DefaultOperationLogHeight);
@@ -230,6 +231,16 @@ public partial class MainWindow : CodeWFWindow
                 FocusChangesFilter();
                 e.Handled = true;
                 break;
+            case Key.D9:
+            case Key.NumPad9:
+                ExpandActiveResizable();
+                e.Handled = true;
+                break;
+            case Key.D8:
+            case Key.NumPad8:
+                ContractActiveResizable();
+                e.Handled = true;
+                break;
         }
     }
 
@@ -336,6 +347,46 @@ public partial class MainWindow : CodeWFWindow
     private void ToggleFullScreenMenuItem_Click(object? sender, RoutedEventArgs e)
     {
         ToggleFullScreen();
+    }
+
+    private void ExpandActiveResizableMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        ExpandActiveResizable();
+    }
+
+    private void ContractActiveResizableMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        ContractActiveResizable();
+    }
+
+    private void ExpandActiveResizable()
+    {
+        AdjustActiveResizable(ResizableStep);
+    }
+
+    private void ContractActiveResizable()
+    {
+        AdjustActiveResizable(-ResizableStep);
+    }
+
+    private void AdjustActiveResizable(double delta)
+    {
+        if (DataContext is MainWindowViewModel { IsHistorySelected: true })
+        {
+            AdjustColumnWidth(HistoryFileListColumn, delta, HistoryFileListMinWidth, HistoryFileListMaxWidth);
+        }
+        else
+        {
+            AdjustColumnWidth(WorkspaceSidebarColumn, delta, WorkspaceSidebarMinWidth, WorkspaceSidebarMaxWidth);
+        }
+
+        SaveWorkspaceLayout();
+    }
+
+    private static void AdjustColumnWidth(ColumnDefinition column, double delta, double min, double max)
+    {
+        var currentWidth = column.Width.Value > 0 ? column.Width.Value : min;
+        column.Width = new GridLength(Math.Clamp(currentWidth + delta, min, max));
     }
 
     private void ExitMenuItem_Click(object? sender, RoutedEventArgs e)

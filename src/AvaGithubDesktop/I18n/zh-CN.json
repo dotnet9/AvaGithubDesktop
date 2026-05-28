@@ -34,6 +34,8 @@
       "MenuShowStashedChanges": "显示已贮藏的更改",
       "MenuHideStashedChanges": "隐藏已贮藏的更改",
       "MenuToggleFullScreen": "切换全屏",
+      "MenuExpandActiveResizable": "展开当前可调区域",
+      "MenuContractActiveResizable": "收缩当前可调区域",
       "MenuHelp": "帮助",
       "MenuShowLogsInFileManager": "在文件管理器中显示日志",
       "ShowOperationLog": "显示操作日志",

@@ -34,6 +34,8 @@
       "MenuShowStashedChanges": "Show stashed changes",
       "MenuHideStashedChanges": "Hide stashed changes",
       "MenuToggleFullScreen": "Toggle full screen",
+      "MenuExpandActiveResizable": "Expand active resizable",
+      "MenuContractActiveResizable": "Contract active resizable",
       "MenuHelp": "Help",
       "MenuShowLogsInFileManager": "Show logs in file manager",
       "ShowOperationLog": "Show operation log",
