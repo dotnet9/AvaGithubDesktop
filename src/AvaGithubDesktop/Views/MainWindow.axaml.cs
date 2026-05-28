@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Windows.Input;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -10,14 +11,21 @@ namespace AvaGithubDesktop.Views;
 
 public partial class MainWindow : CodeWFWindow
 {
+    private const double DefaultOperationLogHeight = 180;
+    private const double OperationLogMinHeight = 80;
     private WindowState _windowStateBeforeFullScreen = WindowState.Normal;
     private TextBox? _lastFocusedTextBox;
+    private GridLength _lastVisibleOperationLogHeight = new(DefaultOperationLogHeight);
+    private INotifyPropertyChanged? _subscribedViewModel;
+    private RowDefinition OperationLogRow => MainLayoutGrid.RowDefinitions[3];
 
     public MainWindow()
     {
         InitializeComponent();
         AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
         AddHandler(GotFocusEvent, OnGotFocus, RoutingStrategies.Tunnel);
+        DataContextChanged += (_, _) => SubscribeToViewModel();
+        Closed += (_, _) => UnsubscribeFromViewModel();
     }
 
     public MainWindow(MainWindowViewModel viewModel)
@@ -25,6 +33,56 @@ public partial class MainWindow : CodeWFWindow
     {
         DataContext = viewModel;
         Opened += async (_, _) => await viewModel.InitializeAsync();
+    }
+
+    private void SubscribeToViewModel()
+    {
+        UnsubscribeFromViewModel();
+
+        if (DataContext is MainWindowViewModel viewModel)
+        {
+            _subscribedViewModel = viewModel;
+            _subscribedViewModel.PropertyChanged += OnViewModelPropertyChanged;
+            SyncOperationLogRow(viewModel.IsOperationLogVisible);
+        }
+    }
+
+    private void UnsubscribeFromViewModel()
+    {
+        if (_subscribedViewModel is not null)
+        {
+            _subscribedViewModel.PropertyChanged -= OnViewModelPropertyChanged;
+            _subscribedViewModel = null;
+        }
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(MainWindowViewModel.IsOperationLogVisible)
+            && sender is MainWindowViewModel viewModel)
+        {
+            SyncOperationLogRow(viewModel.IsOperationLogVisible);
+        }
+    }
+
+    private void SyncOperationLogRow(bool isVisible)
+    {
+        if (isVisible)
+        {
+            OperationLogRow.MinHeight = OperationLogMinHeight;
+            OperationLogRow.Height = _lastVisibleOperationLogHeight.Value > 0
+                ? _lastVisibleOperationLogHeight
+                : new GridLength(DefaultOperationLogHeight);
+            return;
+        }
+
+        if (OperationLogRow.Height.Value > 0)
+        {
+            _lastVisibleOperationLogHeight = OperationLogRow.Height;
+        }
+
+        OperationLogRow.MinHeight = 0;
+        OperationLogRow.Height = new GridLength(0);
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)

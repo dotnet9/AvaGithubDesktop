@@ -182,7 +182,6 @@
     </Style>
 
     <Style Selector="Border.operationLog">
-        <Setter Property="Height" Value="180" />
         <Setter Property="Background" Value="{DynamicResource PanelBackgroundBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
         <Setter Property="BorderThickness" Value="0,1,0,0" />
@@ -194,5 +193,27 @@
         <Setter Property="Background" Value="{DynamicResource PanelAltBackgroundBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
         <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <Style Selector="GridSplitter.workspaceSplitter">
+        <Setter Property="Background" Value="{DynamicResource PanelBorderBrush}" />
+        <Setter Property="Opacity" Value="0.72" />
+    </Style>
+
+    <Style Selector="GridSplitter.workspaceSplitter:pointerover">
+        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+
+    <Style Selector="GridSplitter.workspaceSplitter.vertical">
+        <Setter Property="Width" Value="6" />
+        <Setter Property="MinWidth" Value="6" />
+        <Setter Property="Cursor" Value="SizeWestEast" />
+    </Style>
+
+    <Style Selector="GridSplitter.workspaceSplitter.horizontal">
+        <Setter Property="Height" Value="6" />
+        <Setter Property="MinHeight" Value="6" />
+        <Setter Property="Cursor" Value="SizeNorthSouth" />
     </Style>
 </Styles>
