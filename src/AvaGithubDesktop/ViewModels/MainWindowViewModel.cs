@@ -3360,30 +3360,23 @@ public sealed class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        IsUpdatingBranch = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(
-            _localizer.Format(AvaGithubDesktopL.StatusRenamingBranchFormat, request.OldBranchName, request.NewBranchName)));
-
-        try
-        {
-            await _gitRepositoryService.RenameBranchAsync(
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            _localizer.Format(AvaGithubDesktopL.StatusRenamingBranchFormat, request.OldBranchName, request.NewBranchName),
+            _localizer.Format(AvaGithubDesktopL.StatusRenamedBranchFormat, request.OldBranchName, request.NewBranchName),
+            ex => _localizer.Format(AvaGithubDesktopL.StatusRenameBranchFailedFormat, ex.Message),
+            () => _gitRepositoryService.RenameBranchAsync(
                 RootPath,
                 request.OldBranchName,
                 request.NewBranchName,
-                CancellationToken.None);
-            await ReloadRepositoryWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(
-                _localizer.Format(AvaGithubDesktopL.StatusRenamedBranchFormat, request.OldBranchName, request.NewBranchName)));
-        }
-        catch (Exception ex)
+                CancellationToken.None),
+            ReloadRepositoryWorkspaceAsync,
+            () => Task.CompletedTask,
+            value => IsUpdatingBranch = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusRenameBranchFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsUpdatingBranch = false;
+            ErrorMessage = errorMessage;
         }
     }
 
@@ -3429,30 +3422,23 @@ public sealed class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        IsUpdatingBranch = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(
-            _localizer.Format(AvaGithubDesktopL.StatusSettingUpstreamFormat, branchName, request.UpstreamBranchName)));
-
-        try
-        {
-            await _gitRepositoryService.SetUpstreamAsync(
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            _localizer.Format(AvaGithubDesktopL.StatusSettingUpstreamFormat, branchName, request.UpstreamBranchName),
+            _localizer.Format(AvaGithubDesktopL.StatusSetUpstreamFormat, branchName, request.UpstreamBranchName),
+            ex => _localizer.Format(AvaGithubDesktopL.StatusSetUpstreamFailedFormat, ex.Message),
+            () => _gitRepositoryService.SetUpstreamAsync(
                 RootPath,
                 branchName,
                 request.UpstreamBranchName,
-                CancellationToken.None);
-            await ReloadRepositoryWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(
-                _localizer.Format(AvaGithubDesktopL.StatusSetUpstreamFormat, branchName, request.UpstreamBranchName)));
-        }
-        catch (Exception ex)
+                CancellationToken.None),
+            ReloadRepositoryWorkspaceAsync,
+            () => Task.CompletedTask,
+            value => IsUpdatingBranch = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusSetUpstreamFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsUpdatingBranch = false;
+            ErrorMessage = errorMessage;
         }
     }
 
@@ -3465,26 +3451,19 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         var branchName = CurrentBranch;
         var upstream = Upstream;
-        IsUpdatingBranch = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(
-            _localizer.Format(AvaGithubDesktopL.StatusUnsettingUpstreamFormat, branchName, upstream)));
-
-        try
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            _localizer.Format(AvaGithubDesktopL.StatusUnsettingUpstreamFormat, branchName, upstream),
+            _localizer.Format(AvaGithubDesktopL.StatusUnsetUpstreamFormat, branchName),
+            ex => _localizer.Format(AvaGithubDesktopL.StatusUnsetUpstreamFailedFormat, ex.Message),
+            () => _gitRepositoryService.UnsetUpstreamAsync(RootPath, branchName, CancellationToken.None),
+            ReloadRepositoryWorkspaceAsync,
+            () => Task.CompletedTask,
+            value => IsUpdatingBranch = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            await _gitRepositoryService.UnsetUpstreamAsync(RootPath, branchName, CancellationToken.None);
-            await ReloadRepositoryWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(
-                _localizer.Format(AvaGithubDesktopL.StatusUnsetUpstreamFormat, branchName)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusUnsetUpstreamFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsUpdatingBranch = false;
+            ErrorMessage = errorMessage;
         }
     }
 
@@ -3502,26 +3481,19 @@ public sealed class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        IsUpdatingBranch = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(
-            _localizer.Format(AvaGithubDesktopL.StatusDeletingBranchFormat, branch.Name)));
-
-        try
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            _localizer.Format(AvaGithubDesktopL.StatusDeletingBranchFormat, branch.Name),
+            _localizer.Format(AvaGithubDesktopL.StatusDeletedBranchFormat, branch.Name),
+            ex => _localizer.Format(AvaGithubDesktopL.StatusDeleteBranchFailedFormat, ex.Message),
+            () => _gitRepositoryService.DeleteBranchAsync(RootPath, branch.Name, CancellationToken.None),
+            ReloadRepositoryWorkspaceAsync,
+            () => Task.CompletedTask,
+            value => IsUpdatingBranch = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            await _gitRepositoryService.DeleteBranchAsync(RootPath, branch.Name, CancellationToken.None);
-            await ReloadRepositoryWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(
-                _localizer.Format(AvaGithubDesktopL.StatusDeletedBranchFormat, branch.Name)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusDeleteBranchFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsUpdatingBranch = false;
+            ErrorMessage = errorMessage;
         }
     }
 
@@ -3534,30 +3506,23 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         var branchName = CurrentBranch;
         var remoteName = RemoteName;
-        IsUpdatingBranch = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(
-            _localizer.Format(AvaGithubDesktopL.StatusSettingDefaultBranchFormat, branchName, remoteName)));
-
-        try
-        {
-            await _gitRepositoryService.SetDefaultBranchAsync(
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            _localizer.Format(AvaGithubDesktopL.StatusSettingDefaultBranchFormat, branchName, remoteName),
+            _localizer.Format(AvaGithubDesktopL.StatusSetDefaultBranchFormat, branchName),
+            ex => _localizer.Format(AvaGithubDesktopL.StatusSetDefaultBranchFailedFormat, ex.Message),
+            () => _gitRepositoryService.SetDefaultBranchAsync(
                 RootPath,
                 remoteName,
                 branchName,
-                CancellationToken.None);
-            await ReloadRepositoryWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(
-                _localizer.Format(AvaGithubDesktopL.StatusSetDefaultBranchFormat, branchName)));
-        }
-        catch (Exception ex)
+                CancellationToken.None),
+            ReloadRepositoryWorkspaceAsync,
+            () => Task.CompletedTask,
+            value => IsUpdatingBranch = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusSetDefaultBranchFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsUpdatingBranch = false;
+            ErrorMessage = errorMessage;
         }
     }
 
