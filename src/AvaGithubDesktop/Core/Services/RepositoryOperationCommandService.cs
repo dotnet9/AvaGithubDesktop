@@ -6,12 +6,10 @@ namespace AvaGithubDesktop.Core.Services;
 
 public sealed class RepositoryOperationCommandService : IRepositoryOperationCommandService
 {
-    private readonly IAppLocalizer _localizer;
     private readonly IEventBus _eventBus;
 
-    public RepositoryOperationCommandService(IAppLocalizer localizer, IEventBus eventBus)
+    public RepositoryOperationCommandService(IEventBus eventBus)
     {
-        _localizer = localizer;
         _eventBus = eventBus;
     }
 
@@ -23,19 +21,19 @@ public sealed class RepositoryOperationCommandService : IRepositoryOperationComm
         }
 
         request.SetBusy(true);
-        _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(request.StartedKey)));
+        _eventBus.Publish(new StatusMessageChangedCommand(request.StartedMessage));
 
         try
         {
             await request.Operation();
             await request.ReloadWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(request.CompletedKey)));
+            _eventBus.Publish(new StatusMessageChangedCommand(request.CompletedMessage));
             return null;
         }
         catch (Exception ex)
         {
             await request.TryReloadWorkspaceAsync();
-            var errorMessage = _localizer.Format(request.FailedFormatKey, ex.Message);
+            var errorMessage = request.CreateFailedMessage(ex);
             _eventBus.Publish(new StatusMessageChangedCommand(errorMessage));
             return errorMessage;
         }

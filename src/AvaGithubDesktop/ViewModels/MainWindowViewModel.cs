@@ -2107,27 +2107,19 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
 
         var targetCommit = SelectedCommit;
-        IsRevertingCommit = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(
-            _localizer.Format(AvaGithubDesktopL.StatusRevertingCommitFormat, targetCommit.ShortSha)));
-
-        try
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            _localizer.Format(AvaGithubDesktopL.StatusRevertingCommitFormat, targetCommit.ShortSha),
+            _localizer.Format(AvaGithubDesktopL.StatusRevertedCommitFormat, targetCommit.ShortSha),
+            ex => _localizer.Format(AvaGithubDesktopL.StatusRevertCommitFailedFormat, ex.Message),
+            () => _gitRepositoryService.RevertCommitAsync(RootPath, targetCommit.Sha, CancellationToken.None),
+            ReloadRepositoryWorkspaceAsync,
+            TryReloadRepositoryWorkspaceAsync,
+            value => IsRevertingCommit = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            await _gitRepositoryService.RevertCommitAsync(RootPath, targetCommit.Sha, CancellationToken.None);
-            await ReloadRepositoryWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(
-                _localizer.Format(AvaGithubDesktopL.StatusRevertedCommitFormat, targetCommit.ShortSha)));
-        }
-        catch (Exception ex)
-        {
-            await TryReloadRepositoryWorkspaceAsync();
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusRevertCommitFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsRevertingCommit = false;
+            ErrorMessage = errorMessage;
         }
     }
 
@@ -2139,27 +2131,19 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
 
         var targetCommit = SelectedCommit;
-        IsCherryPickingCommit = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(
-            _localizer.Format(AvaGithubDesktopL.StatusCherryPickingCommitFormat, targetCommit.ShortSha)));
-
-        try
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            _localizer.Format(AvaGithubDesktopL.StatusCherryPickingCommitFormat, targetCommit.ShortSha),
+            _localizer.Format(AvaGithubDesktopL.StatusCherryPickedCommitFormat, targetCommit.ShortSha),
+            ex => _localizer.Format(AvaGithubDesktopL.StatusCherryPickCommitFailedFormat, ex.Message),
+            () => _gitRepositoryService.CherryPickCommitAsync(RootPath, targetCommit.Sha, CancellationToken.None),
+            ReloadRepositoryWorkspaceAsync,
+            TryReloadRepositoryWorkspaceAsync,
+            value => IsCherryPickingCommit = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            await _gitRepositoryService.CherryPickCommitAsync(RootPath, targetCommit.Sha, CancellationToken.None);
-            await ReloadRepositoryWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(
-                _localizer.Format(AvaGithubDesktopL.StatusCherryPickedCommitFormat, targetCommit.ShortSha)));
-        }
-        catch (Exception ex)
-        {
-            await TryReloadRepositoryWorkspaceAsync();
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusCherryPickCommitFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsCherryPickingCommit = false;
+            ErrorMessage = errorMessage;
         }
     }
 
@@ -3931,9 +3915,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         ErrorMessage = string.Empty;
         var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
             canRun,
-            startedKey,
-            completedKey,
-            failedFormatKey,
+            _localizer.Get(startedKey),
+            _localizer.Get(completedKey),
+            ex => _localizer.Format(failedFormatKey, ex.Message),
             operation,
             ReloadRepositoryWorkspaceAsync,
             TryReloadRepositoryWorkspaceAsync,
