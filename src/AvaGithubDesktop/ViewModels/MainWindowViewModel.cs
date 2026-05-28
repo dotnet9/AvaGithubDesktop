@@ -32,6 +32,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly IThemeService _themeService;
     private readonly IAppLocalizer _localizer;
     private readonly IEventBus _eventBus;
+    private readonly RepositoryListGroupBuilder _repositoryListGroupBuilder;
     private string _repositoryPath;
     private string _repositoryName = "-";
     private string _rootPath = "-";
@@ -122,6 +123,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         IThemeService themeService,
         IAppLocalizer localizer,
         IEventBus eventBus,
+        RepositoryListGroupBuilder repositoryListGroupBuilder,
         ShellStatusViewModel statusBar)
     {
         _gitRepositoryService = gitRepositoryService;
@@ -143,6 +145,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _themeService = themeService;
         _localizer = localizer;
         _eventBus = eventBus;
+        _repositoryListGroupBuilder = repositoryListGroupBuilder;
         StatusBar = statusBar;
         _isOperationLogVisible = _settingsStore.Current.IsOperationLogVisible ?? true;
         _repositoryPath = ResolveDefaultRepositoryPath(_settingsStore.Current.LastRepositoryPath);
@@ -1799,10 +1802,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             ErrorMessage = string.Empty;
             await _repositoryHistoryService.RemoveAsync(repository.Path, CancellationToken.None);
             _knownRepositories = _knownRepositories
-                .Where(item => !string.Equals(
-                    NormalizePathForComparison(item.Path),
-                    NormalizePathForComparison(repository.Path),
-                    StringComparison.OrdinalIgnoreCase))
+                .Where(item => !_repositoryListGroupBuilder.PathsEqual(item.Path, repository.Path))
                 .ToArray();
             RebuildRepositoryGroups();
 
@@ -2989,81 +2989,18 @@ public sealed class MainWindowViewModel : ViewModelBase
     private void RebuildRepositoryGroups()
     {
         RepositoryGroups.Clear();
-
-        var filteredRepositories = _knownRepositories
-            .Where(MatchesRepositoryFilter)
-            .ToArray();
-
-        if (filteredRepositories.Length > 1)
+        foreach (var group in _repositoryListGroupBuilder.Build(_knownRepositories, RepositoryFilterText))
         {
-            // GitHub Desktop 的当前仓库只在所属分组中高亮；Recent 只作为快速入口，避免重复蓝点造成视觉噪声。
-            AddRepositoryGroup(
-                _localizer.Get(AvaGithubDesktopL.RecentRepositories),
-                filteredRepositories
-                    .Where(repository => !repository.IsCurrent)
-                    .OrderByDescending(repository => repository.LastOpenedAt)
-                    .ThenBy(repository => repository.Name, StringComparer.OrdinalIgnoreCase)
-                    .Take(5));
-        }
-
-        foreach (var group in filteredRepositories
-                     .GroupBy(repository => repository.GroupName)
-                     .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase))
-        {
-            AddRepositoryGroup(
-                group.Key,
-                group.OrderBy(repository => repository.Name, StringComparer.OrdinalIgnoreCase));
+            RepositoryGroups.Add(group);
         }
 
         this.RaisePropertyChanged(nameof(HasNoRepositoryMatches));
     }
 
-    private void AddRepositoryGroup(string header, IEnumerable<RepositoryListItemViewModel> repositories)
-    {
-        var items = repositories.ToArray();
-        if (items.Length == 0)
-        {
-            return;
-        }
-
-        RepositoryGroups.Add(new RepositoryListGroupViewModel(header, items));
-    }
-
-    private bool MatchesRepositoryFilter(RepositoryListItemViewModel repository)
-    {
-        var filter = RepositoryFilterText.Trim();
-        if (string.IsNullOrWhiteSpace(filter))
-        {
-            return true;
-        }
-
-        return repository.Name.Contains(filter, StringComparison.OrdinalIgnoreCase)
-               || repository.Path.Contains(filter, StringComparison.OrdinalIgnoreCase)
-               || repository.GroupName.Contains(filter, StringComparison.OrdinalIgnoreCase);
-    }
-
     private void UpdateCurrentRepositoryIndicators()
     {
         var currentPath = HasRepository ? RootPath : RepositoryPath;
-        var normalizedCurrentPath = NormalizePathForComparison(currentPath);
-        foreach (var repository in _knownRepositories)
-        {
-            repository.IsCurrent = string.Equals(
-                NormalizePathForComparison(repository.Path),
-                normalizedCurrentPath,
-                StringComparison.OrdinalIgnoreCase);
-        }
-    }
-
-    private static string NormalizePathForComparison(string path)
-    {
-        if (string.IsNullOrWhiteSpace(path))
-        {
-            return string.Empty;
-        }
-
-        return Path.GetFullPath(path.Trim())
-            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        _repositoryListGroupBuilder.UpdateCurrentIndicators(_knownRepositories, currentPath);
     }
 
     private void ApplySnapshot(GitRepositorySnapshot snapshot)
