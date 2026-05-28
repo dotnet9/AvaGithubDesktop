@@ -21,6 +21,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly IRepositoryRemoteDialogService _repositoryRemoteDialogService;
     private readonly IRepositoryHistoryService _repositoryHistoryService;
     private readonly IRepositoryInteractionService _repositoryInteractionService;
+    private readonly IRepositoryOperationCommandService _repositoryOperationCommandService;
     private readonly IRepositorySyncStatusService _repositorySyncStatusService;
     private readonly IGitHubAccountService _gitHubAccountService;
     private readonly IAccountDialogService _accountDialogService;
@@ -115,6 +116,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         IRepositoryRemoteDialogService repositoryRemoteDialogService,
         IRepositoryHistoryService repositoryHistoryService,
         IRepositoryInteractionService repositoryInteractionService,
+        IRepositoryOperationCommandService repositoryOperationCommandService,
         IRepositorySyncStatusService repositorySyncStatusService,
         IGitHubAccountService gitHubAccountService,
         IAccountDialogService accountDialogService,
@@ -140,6 +142,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _repositoryRemoteDialogService = repositoryRemoteDialogService;
         _repositoryHistoryService = repositoryHistoryService;
         _repositoryInteractionService = repositoryInteractionService;
+        _repositoryOperationCommandService = repositoryOperationCommandService;
         _repositorySyncStatusService = repositorySyncStatusService;
         _gitHubAccountService = gitHubAccountService;
         _accountDialogService = accountDialogService;
@@ -3867,121 +3870,77 @@ public sealed class MainWindowViewModel : ViewModelBase
             AvaGithubDesktopL.StatusAbortCherryPickFailedFormat,
             () => _gitRepositoryService.AbortCherryPickAsync(RootPath, CancellationToken.None));
 
-    private async Task RunRevertOperationStateCommandAsync(
+    private Task RunRevertOperationStateCommandAsync(
         bool canRun,
         string startedKey,
         string completedKey,
         string failedFormatKey,
-        Func<Task> operation)
-    {
-        if (!canRun)
-        {
-            return;
-        }
+        Func<Task> operation) =>
+        RunOperationStateCommandAsync(
+            canRun,
+            startedKey,
+            completedKey,
+            failedFormatKey,
+            operation,
+            value => IsRevertingCommit = value);
 
-        IsRevertingCommit = true;
-        ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(startedKey)));
-
-        try
-        {
-            await operation();
-            await ReloadRepositoryWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(completedKey)));
-        }
-        catch (Exception ex)
-        {
-            await TryReloadRepositoryWorkspaceAsync();
-            ErrorMessage = _localizer.Format(failedFormatKey, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsRevertingCommit = false;
-        }
-    }
-
-    private async Task RunCherryPickOperationStateCommandAsync(
+    private Task RunCherryPickOperationStateCommandAsync(
         bool canRun,
         string startedKey,
         string completedKey,
         string failedFormatKey,
-        Func<Task> operation)
-    {
-        if (!canRun)
-        {
-            return;
-        }
+        Func<Task> operation) =>
+        RunOperationStateCommandAsync(
+            canRun,
+            startedKey,
+            completedKey,
+            failedFormatKey,
+            operation,
+            value => IsCherryPickingCommit = value);
 
-        IsCherryPickingCommit = true;
-        ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(startedKey)));
-
-        try
-        {
-            await operation();
-            await ReloadRepositoryWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(completedKey)));
-        }
-        catch (Exception ex)
-        {
-            await TryReloadRepositoryWorkspaceAsync();
-            ErrorMessage = _localizer.Format(failedFormatKey, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsCherryPickingCommit = false;
-        }
-    }
-
-    private async Task RunRepositoryOperationStateCommandAsync(
+    private Task RunRepositoryOperationStateCommandAsync(
         bool canRun,
         bool isRebaseOperation,
         string startedKey,
         string completedKey,
         string failedFormatKey,
-        Func<Task> operation)
+        Func<Task> operation) =>
+        RunOperationStateCommandAsync(
+            canRun,
+            startedKey,
+            completedKey,
+            failedFormatKey,
+            operation,
+            isRebaseOperation
+                ? value => IsRebasingBranch = value
+                : value => IsMergingBranch = value);
+
+    private async Task RunOperationStateCommandAsync(
+        bool canRun,
+        string startedKey,
+        string completedKey,
+        string failedFormatKey,
+        Func<Task> operation,
+        Action<bool> setBusy)
     {
         if (!canRun)
         {
             return;
         }
 
-        if (isRebaseOperation)
-        {
-            IsRebasingBranch = true;
-        }
-        else
-        {
-            IsMergingBranch = true;
-        }
-
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(startedKey)));
-
-        try
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            canRun,
+            startedKey,
+            completedKey,
+            failedFormatKey,
+            operation,
+            ReloadRepositoryWorkspaceAsync,
+            TryReloadRepositoryWorkspaceAsync,
+            setBusy));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            await operation();
-            await ReloadRepositoryWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(completedKey)));
-        }
-        catch (Exception ex)
-        {
-            await TryReloadRepositoryWorkspaceAsync();
-            ErrorMessage = _localizer.Format(failedFormatKey, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            if (isRebaseOperation)
-            {
-                IsRebasingBranch = false;
-            }
-            else
-            {
-                IsMergingBranch = false;
-            }
+            ErrorMessage = errorMessage;
         }
     }
 
