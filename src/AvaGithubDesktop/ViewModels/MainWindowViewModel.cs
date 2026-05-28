@@ -2356,27 +2356,22 @@ public sealed class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        IsResolvingConflicts = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(GetMarkResolvedStartedMessage(conflicts)));
-
-        try
-        {
-            await _gitRepositoryService.MarkConflictsResolvedAsync(
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            GetMarkResolvedStartedMessage(conflicts),
+            GetMarkResolvedCompletedMessage(conflicts),
+            ex => _localizer.Format(AvaGithubDesktopL.StatusMarkResolvedFailedFormat, ex.Message),
+            () => _gitRepositoryService.MarkConflictsResolvedAsync(
                 RootPath,
                 conflicts.Select(change => change.Change).ToArray(),
-                CancellationToken.None);
-            await ReloadRepositoryWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(GetMarkResolvedCompletedMessage(conflicts)));
-        }
-        catch (Exception ex)
+                CancellationToken.None),
+            ReloadRepositoryWorkspaceAsync,
+            () => Task.CompletedTask,
+            value => IsResolvingConflicts = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusMarkResolvedFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsResolvingConflicts = false;
+            ErrorMessage = errorMessage;
         }
     }
 
@@ -2424,27 +2419,22 @@ public sealed class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        IsDiscardingChanges = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(GetDiscardChangesStartedMessage(changes)));
-
-        try
-        {
-            await _gitRepositoryService.DiscardChangesAsync(
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            GetDiscardChangesStartedMessage(changes),
+            GetDiscardChangesCompletedMessage(changes),
+            ex => _localizer.Format(AvaGithubDesktopL.StatusDiscardChangesFailedFormat, ex.Message),
+            () => _gitRepositoryService.DiscardChangesAsync(
                 RootPath,
                 changes.Select(change => change.Change).ToArray(),
-                CancellationToken.None);
-            await ReloadRepositoryWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(GetDiscardChangesCompletedMessage(changes)));
-        }
-        catch (Exception ex)
+                CancellationToken.None),
+            ReloadRepositoryWorkspaceAsync,
+            () => Task.CompletedTask,
+            value => IsDiscardingChanges = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusDiscardChangesFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsDiscardingChanges = false;
+            ErrorMessage = errorMessage;
         }
     }
 
