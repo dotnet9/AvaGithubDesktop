@@ -2758,50 +2758,39 @@ public sealed class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        _activeSyncOperation = operation;
-        IsSyncing = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(GetRemoteOperationStartedMessage(operation)));
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            GetRemoteOperationStartedMessage(operation),
+            () => GetRemoteOperationCompletedMessage(operation),
+            ex => _localizer.Format(GetRemoteOperationFailedKey(operation), ex.Message),
+            () => RunRemoteGitOperationAsync(operation),
+            ReloadRepositoryWorkspaceAsync,
+            () => Task.CompletedTask,
+            value => SetSyncOperationBusy(operation, value)));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            ErrorMessage = errorMessage;
+        }
+    }
 
-        try
+    private Task RunRemoteGitOperationAsync(RepositorySyncOperation operation)
+    {
+        return operation switch
         {
-            switch (operation)
-            {
-                case RepositorySyncOperation.FetchAll:
-                    await _gitRepositoryService.FetchAllAsync(RootPath, CancellationToken.None);
-                    break;
-                case RepositorySyncOperation.FetchLfs:
-                    await _gitRepositoryService.FetchLfsAsync(RootPath, RemoteName, CancellationToken.None);
-                    break;
-                case RepositorySyncOperation.PullLfs:
-                    await _gitRepositoryService.PullLfsAsync(RootPath, RemoteName, CancellationToken.None);
-                    break;
-                case RepositorySyncOperation.Pull:
-                    await _gitRepositoryService.PullAsync(RootPath, RemoteName, CancellationToken.None);
-                    break;
-                case RepositorySyncOperation.Push:
-                case RepositorySyncOperation.Publish:
-                    await _gitRepositoryService.PushAsync(RootPath, RemoteName, CurrentBranch, CancellationToken.None);
-                    break;
-                default:
-                    await _gitRepositoryService.FetchAsync(RootPath, RemoteName, CancellationToken.None);
-                    break;
-            }
-
-            var workspace = await _repositoryWorkspaceLoader.LoadAsync(RootPath, HistoryCommitLimit, CancellationToken.None);
-            ApplyWorkspace(workspace);
-            _eventBus.Publish(new StatusMessageChangedCommand(GetRemoteOperationCompletedMessage(operation)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(GetRemoteOperationFailedKey(operation), ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            _activeSyncOperation = RepositorySyncOperation.None;
-            IsSyncing = false;
-        }
+            RepositorySyncOperation.FetchAll =>
+                _gitRepositoryService.FetchAllAsync(RootPath, CancellationToken.None),
+            RepositorySyncOperation.FetchLfs =>
+                _gitRepositoryService.FetchLfsAsync(RootPath, RemoteName, CancellationToken.None),
+            RepositorySyncOperation.PullLfs =>
+                _gitRepositoryService.PullLfsAsync(RootPath, RemoteName, CancellationToken.None),
+            RepositorySyncOperation.Pull =>
+                _gitRepositoryService.PullAsync(RootPath, RemoteName, CancellationToken.None),
+            RepositorySyncOperation.Push or RepositorySyncOperation.Publish =>
+                _gitRepositoryService.PushAsync(RootPath, RemoteName, CurrentBranch, CancellationToken.None),
+            _ =>
+                _gitRepositoryService.FetchAsync(RootPath, RemoteName, CancellationToken.None)
+        };
     }
 
     private string GetRemoteOperationStartedMessage(RepositorySyncOperation operation) =>
