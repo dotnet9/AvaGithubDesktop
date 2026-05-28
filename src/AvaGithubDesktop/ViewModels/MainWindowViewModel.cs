@@ -20,6 +20,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly IRepositoryOpenDialogService _repositoryOpenDialogService;
     private readonly IRepositoryRemoteDialogService _repositoryRemoteDialogService;
     private readonly IRepositoryHistoryService _repositoryHistoryService;
+    private readonly IRepositoryWorkspaceLoader _repositoryWorkspaceLoader;
     private readonly IRepositoryInteractionService _repositoryInteractionService;
     private readonly IRepositoryOperationCommandService _repositoryOperationCommandService;
     private readonly IRepositorySyncStatusService _repositorySyncStatusService;
@@ -115,6 +116,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         IRepositoryOpenDialogService repositoryOpenDialogService,
         IRepositoryRemoteDialogService repositoryRemoteDialogService,
         IRepositoryHistoryService repositoryHistoryService,
+        IRepositoryWorkspaceLoader repositoryWorkspaceLoader,
         IRepositoryInteractionService repositoryInteractionService,
         IRepositoryOperationCommandService repositoryOperationCommandService,
         IRepositorySyncStatusService repositorySyncStatusService,
@@ -141,6 +143,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _repositoryOpenDialogService = repositoryOpenDialogService;
         _repositoryRemoteDialogService = repositoryRemoteDialogService;
         _repositoryHistoryService = repositoryHistoryService;
+        _repositoryWorkspaceLoader = repositoryWorkspaceLoader;
         _repositoryInteractionService = repositoryInteractionService;
         _repositoryOperationCommandService = repositoryOperationCommandService;
         _repositorySyncStatusService = repositorySyncStatusService;
@@ -2570,12 +2573,9 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         try
         {
-            var snapshot = await _gitRepositoryService.LoadRepositoryAsync(path, CancellationToken.None);
-            ApplySnapshot(snapshot);
-            var branches = await _gitRepositoryService.LoadBranchesAsync(snapshot.RootPath, CancellationToken.None);
-            ApplyBranches(branches);
-            var history = await _gitRepositoryService.LoadHistoryAsync(snapshot.RootPath, HistoryCommitLimit, CancellationToken.None);
-            ApplyHistory(history);
+            var workspace = await _repositoryWorkspaceLoader.LoadAsync(path, HistoryCommitLimit, CancellationToken.None);
+            ApplyWorkspace(workspace);
+            var snapshot = workspace.Snapshot;
             await _repositoryHistoryService.AddOrUpdateAsync(snapshot.RootPath, CancellationToken.None);
             _settingsStore.Update(settings => settings with { LastRepositoryPath = snapshot.RootPath });
             await LoadRepositoryHistoryAsync();
@@ -2641,12 +2641,8 @@ public sealed class MainWindowViewModel : ViewModelBase
             CommitSummary = string.Empty;
             CommitDescription = string.Empty;
             IsAmendingLastCommit = false;
-            var snapshot = await _gitRepositoryService.LoadRepositoryAsync(RootPath, CancellationToken.None);
-            ApplySnapshot(snapshot);
-            var branches = await _gitRepositoryService.LoadBranchesAsync(snapshot.RootPath, CancellationToken.None);
-            ApplyBranches(branches);
-            var history = await _gitRepositoryService.LoadHistoryAsync(snapshot.RootPath, HistoryCommitLimit, CancellationToken.None);
-            ApplyHistory(history);
+            var workspace = await _repositoryWorkspaceLoader.LoadAsync(RootPath, HistoryCommitLimit, CancellationToken.None);
+            ApplyWorkspace(workspace);
             var completedFormat = isAmending
                 ? AvaGithubDesktopL.StatusAmendedCommitFormat
                 : AvaGithubDesktopL.StatusCommittedFormat;
@@ -2796,12 +2792,8 @@ public sealed class MainWindowViewModel : ViewModelBase
                     break;
             }
 
-            var snapshot = await _gitRepositoryService.LoadRepositoryAsync(RootPath, CancellationToken.None);
-            ApplySnapshot(snapshot);
-            var branches = await _gitRepositoryService.LoadBranchesAsync(snapshot.RootPath, CancellationToken.None);
-            ApplyBranches(branches);
-            var history = await _gitRepositoryService.LoadHistoryAsync(snapshot.RootPath, HistoryCommitLimit, CancellationToken.None);
-            ApplyHistory(history);
+            var workspace = await _repositoryWorkspaceLoader.LoadAsync(RootPath, HistoryCommitLimit, CancellationToken.None);
+            ApplyWorkspace(workspace);
             _eventBus.Publish(new StatusMessageChangedCommand(GetRemoteOperationCompletedMessage(operation)));
         }
         catch (Exception ex)
@@ -2913,12 +2905,8 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private async Task ReloadRepositoryWorkspaceAsync()
     {
-        var snapshot = await _gitRepositoryService.LoadRepositoryAsync(RootPath, CancellationToken.None);
-        ApplySnapshot(snapshot);
-        var branches = await _gitRepositoryService.LoadBranchesAsync(snapshot.RootPath, CancellationToken.None);
-        ApplyBranches(branches);
-        var history = await _gitRepositoryService.LoadHistoryAsync(snapshot.RootPath, HistoryCommitLimit, CancellationToken.None);
-        ApplyHistory(history);
+        var workspace = await _repositoryWorkspaceLoader.LoadAsync(RootPath, HistoryCommitLimit, CancellationToken.None);
+        ApplyWorkspace(workspace);
     }
 
     private async Task TryReloadRepositoryWorkspaceAsync()
@@ -2967,6 +2955,13 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         var currentPath = HasRepository ? RootPath : RepositoryPath;
         _repositoryListGroupBuilder.UpdateCurrentIndicators(_knownRepositories, currentPath);
+    }
+
+    private void ApplyWorkspace(RepositoryWorkspaceState workspace)
+    {
+        ApplySnapshot(workspace.Snapshot);
+        ApplyBranches(workspace.Branches);
+        ApplyHistory(workspace.History);
     }
 
     private void ApplySnapshot(GitRepositorySnapshot snapshot)
@@ -3929,12 +3924,8 @@ public sealed class MainWindowViewModel : ViewModelBase
                 CancellationToken.None);
 
             BranchFilterText = string.Empty;
-            var snapshot = await _gitRepositoryService.LoadRepositoryAsync(RootPath, CancellationToken.None);
-            ApplySnapshot(snapshot);
-            var branches = await _gitRepositoryService.LoadBranchesAsync(snapshot.RootPath, CancellationToken.None);
-            ApplyBranches(branches);
-            var history = await _gitRepositoryService.LoadHistoryAsync(snapshot.RootPath, HistoryCommitLimit, CancellationToken.None);
-            ApplyHistory(history);
+            var workspace = await _repositoryWorkspaceLoader.LoadAsync(RootPath, HistoryCommitLimit, CancellationToken.None);
+            ApplyWorkspace(workspace);
             _eventBus.Publish(new StatusMessageChangedCommand(
                 _localizer.Format(AvaGithubDesktopL.StatusCreatedBranchFormat, request.BranchName)));
         }
@@ -3965,12 +3956,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         try
         {
             await _gitRepositoryService.CheckoutBranchAsync(RootPath, targetBranch, CancellationToken.None);
-            var snapshot = await _gitRepositoryService.LoadRepositoryAsync(RootPath, CancellationToken.None);
-            ApplySnapshot(snapshot);
-            var branches = await _gitRepositoryService.LoadBranchesAsync(snapshot.RootPath, CancellationToken.None);
-            ApplyBranches(branches);
-            var history = await _gitRepositoryService.LoadHistoryAsync(snapshot.RootPath, HistoryCommitLimit, CancellationToken.None);
-            ApplyHistory(history);
+            var workspace = await _repositoryWorkspaceLoader.LoadAsync(RootPath, HistoryCommitLimit, CancellationToken.None);
+            ApplyWorkspace(workspace);
             _eventBus.Publish(new StatusMessageChangedCommand(
                 _localizer.Format(AvaGithubDesktopL.StatusCheckedOutBranchFormat, targetBranch)));
         }

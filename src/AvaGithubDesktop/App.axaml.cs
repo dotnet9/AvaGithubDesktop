@@ -51,6 +51,7 @@ public partial class App : PrismApplication
         containerRegistry.RegisterSingleton<IRepositoryOpenDialogService, RepositoryOpenDialogService>();
         containerRegistry.RegisterSingleton<IRepositoryRemoteDialogService, RepositoryRemoteDialogService>();
         containerRegistry.RegisterSingleton<IRepositoryHistoryService, RepositoryHistoryService>();
+        containerRegistry.RegisterSingleton<IRepositoryWorkspaceLoader, RepositoryWorkspaceLoader>();
         containerRegistry.RegisterSingleton<IRepositoryShellService, RepositoryShellService>();
         containerRegistry.RegisterSingleton<IRepositoryInteractionService, RepositoryInteractionService>();
         containerRegistry.RegisterSingleton<IRepositoryOperationCommandService, RepositoryOperationCommandService>();
