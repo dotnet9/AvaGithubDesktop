@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <PublishProtocol>FileSystem</PublishProtocol>
+    <PublishProvider>FileSystem</PublishProvider>
+    <WebPublishMethod>FileSystem</WebPublishMethod>
+    <LaunchSiteAfterPublish>false</LaunchSiteAfterPublish>
+    <DeleteExistingFiles>true</DeleteExistingFiles>
+    <LastUsedBuildConfiguration>Release</LastUsedBuildConfiguration>
+    <Configuration>Release</Configuration>
+    <LastUsedPlatform>Any CPU</LastUsedPlatform>
+    <Platform>Any CPU</Platform>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+    <PublishTrimmed>false</PublishTrimmed>
+    <PublishUrl>$(MSBuildProjectDirectory)\..\..\publish\$(RuntimeIdentifier)\</PublishUrl>
+    <PublishDir>$(MSBuildProjectDirectory)\..\..\publish\$(RuntimeIdentifier)\</PublishDir>
+    <_TargetId>Folder</_TargetId>
+  </PropertyGroup>
+</Project>
