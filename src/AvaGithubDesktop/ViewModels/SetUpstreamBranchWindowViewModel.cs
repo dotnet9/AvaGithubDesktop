@@ -84,31 +84,24 @@ public sealed class SetUpstreamBranchWindowViewModel : ViewModelBase
 
     private void ApplyFilter(bool selectPreferred)
     {
-        var selectedName = SelectedBranch?.Name;
-        var filter = BranchFilterText.Trim();
-        var filtered = _availableBranches
-            .Where(branch => MatchesFilter(branch, filter))
-            .ToArray();
+        var result = BranchDialogFilter.Build(
+            _availableBranches,
+            BranchFilterText,
+            SelectedBranch?.Name,
+            branches => selectPreferred
+                ? branches.FirstOrDefault(branch => IsPreferredUpstream(branch.Name, CurrentBranch))
+                  ?? branches.FirstOrDefault()
+                : branches.FirstOrDefault(),
+            matchUpstream: false);
 
         FilteredBranches.Clear();
-        foreach (var branch in filtered)
+        foreach (var branch in result.Branches)
         {
             FilteredBranches.Add(branch);
         }
 
-        SelectedBranch = selectPreferred
-            ? FilteredBranches.FirstOrDefault(branch => IsPreferredUpstream(branch.Name, CurrentBranch))
-              ?? FilteredBranches.FirstOrDefault()
-            : FilteredBranches.FirstOrDefault(branch => branch.Name == selectedName)
-              ?? FilteredBranches.FirstOrDefault();
+        SelectedBranch = result.SelectedBranch;
         this.RaisePropertyChanged(nameof(HasNoFilteredBranches));
-    }
-
-    private static bool MatchesFilter(GitBranchItem branch, string filter)
-    {
-        return string.IsNullOrWhiteSpace(filter)
-               || branch.Name.Contains(filter, StringComparison.OrdinalIgnoreCase)
-               || branch.RelativeDate.Contains(filter, StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsPreferredUpstream(string branchName, string currentBranch)

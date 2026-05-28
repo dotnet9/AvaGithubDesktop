@@ -93,30 +93,23 @@ public sealed class MergeBranchWindowViewModel : ViewModelBase
 
     private void ApplyFilter(bool selectFirst)
     {
-        var selectedName = SelectedBranch?.Name;
-        var filter = BranchFilterText.Trim();
-        var filtered = _availableBranches
-            .Where(branch => MatchesFilter(branch, filter))
-            .ToArray();
+        var result = BranchDialogFilter.Build(
+            _availableBranches,
+            BranchFilterText,
+            SelectedBranch?.Name,
+            branches => branches.FirstOrDefault(),
+            matchUpstream: true);
 
         FilteredBranches.Clear();
-        foreach (var branch in filtered)
+        foreach (var branch in result.Branches)
         {
             FilteredBranches.Add(branch);
         }
 
         SelectedBranch = selectFirst
             ? FilteredBranches.FirstOrDefault()
-            : FilteredBranches.FirstOrDefault(branch => branch.Name == selectedName) ?? FilteredBranches.FirstOrDefault();
+            : result.SelectedBranch;
         this.RaisePropertyChanged(nameof(HasNoFilteredBranches));
-    }
-
-    private static bool MatchesFilter(GitBranchItem branch, string filter)
-    {
-        return string.IsNullOrWhiteSpace(filter)
-               || branch.Name.Contains(filter, StringComparison.OrdinalIgnoreCase)
-               || branch.Upstream.Contains(filter, StringComparison.OrdinalIgnoreCase)
-               || branch.RelativeDate.Contains(filter, StringComparison.OrdinalIgnoreCase);
     }
 
     private void RequestClose(BranchMergeRequest? request)
