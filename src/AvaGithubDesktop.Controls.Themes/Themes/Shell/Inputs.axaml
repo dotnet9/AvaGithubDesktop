@@ -250,6 +250,27 @@
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
     </Style>
 
+    <Style Selector="Border.repositoryTabCountBadge">
+        <Setter Property="MinWidth" Value="18" />
+        <Setter Property="Padding" Value="5,1" />
+        <Setter Property="Background" Value="{DynamicResource AccentSubtleBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+
+    <Style Selector="Border.repositoryTabCountBadge TextBlock">
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Border.repositoryTabIndicator">
+        <Setter Property="Height" Value="3" />
+        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+    </Style>
+
     <Style Selector="ComboBox.toolbarLanguage">
         <Setter Property="MinHeight" Value="50" />
         <Setter Property="CornerRadius" Value="0" />

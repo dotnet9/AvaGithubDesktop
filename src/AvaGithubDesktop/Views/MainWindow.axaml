@@ -587,18 +587,12 @@
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal" Spacing="6">
                                     <TextBlock Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.Changes}}" />
                                     <Border
-                                        MinWidth="18"
-                                        Padding="5,1"
-                                        Background="{DynamicResource PanelAltBackgroundBrush}"
-                                        CornerRadius="8"
+                                        Classes="repositoryTabCountBadge"
                                         IsVisible="{Binding HasChanges}">
-                                        <TextBlock
-                                            FontSize="10"
-                                            FontWeight="SemiBold"
-                                            Text="{Binding ChangedFilesCount}" />
+                                        <TextBlock Text="{Binding ChangedFilesCount}" />
                                     </Border>
                                 </StackPanel>
-                                <Border Grid.Row="1" Background="{DynamicResource AccentBrush}" IsVisible="{Binding IsChangesSelected}" />
+                                <Border Grid.Row="1" Classes="repositoryTabIndicator" IsVisible="{Binding IsChangesSelected}" />
                             </Grid>
                         </Button>
                         <Button
@@ -612,7 +606,7 @@
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
                                     Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.History}}" />
-                                <Border Grid.Row="1" Background="{DynamicResource AccentBrush}" IsVisible="{Binding IsHistorySelected}" />
+                                <Border Grid.Row="1" Classes="repositoryTabIndicator" IsVisible="{Binding IsHistorySelected}" />
                             </Grid>
                         </Button>
                     </Grid>
