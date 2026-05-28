@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Controls.Primitives;
+using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -203,7 +204,17 @@ public sealed class OperationLogView : TemplatedControl
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
+        if (_filterTextBox is not null)
+        {
+            _filterTextBox.KeyDown -= OnFilterTextBoxKeyDown;
+        }
+
         _filterTextBox = e.NameScope.Find<TextBox>("PART_FilterTextBox");
+        if (_filterTextBox is not null)
+        {
+            _filterTextBox.KeyDown += OnFilterTextBoxKeyDown;
+        }
+
         _scrollViewer = e.NameScope.Find<ScrollViewer>("PART_ScrollViewer");
         _textView = e.NameScope.Find<SelectableTextBlock>("PART_TextView");
         RenderAllLogs();
@@ -212,6 +223,11 @@ public sealed class OperationLogView : TemplatedControl
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
+        if (_filterTextBox is not null)
+        {
+            _filterTextBox.KeyDown -= OnFilterTextBoxKeyDown;
+        }
+
         _readCancellationTokenSource?.Cancel();
         _readCancellationTokenSource?.Dispose();
         _readCancellationTokenSource = null;
@@ -232,6 +248,17 @@ public sealed class OperationLogView : TemplatedControl
         {
             RenderAllLogs();
         }
+    }
+
+    private void OnFilterTextBoxKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Escape || string.IsNullOrEmpty(FilterText))
+        {
+            return;
+        }
+
+        FilterText = string.Empty;
+        e.Handled = true;
     }
 
     private void StartReadingLogs()
