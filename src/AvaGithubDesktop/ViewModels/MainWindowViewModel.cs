@@ -32,6 +32,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly IThemeService _themeService;
     private readonly IAppLocalizer _localizer;
     private readonly IEventBus _eventBus;
+    private readonly ChangedFilesViewStateBuilder _changedFilesViewStateBuilder;
     private readonly RepositoryListGroupBuilder _repositoryListGroupBuilder;
     private string _repositoryPath;
     private string _repositoryName = "-";
@@ -123,6 +124,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         IThemeService themeService,
         IAppLocalizer localizer,
         IEventBus eventBus,
+        ChangedFilesViewStateBuilder changedFilesViewStateBuilder,
         RepositoryListGroupBuilder repositoryListGroupBuilder,
         ShellStatusViewModel statusBar)
     {
@@ -145,6 +147,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _themeService = themeService;
         _localizer = localizer;
         _eventBus = eventBus;
+        _changedFilesViewStateBuilder = changedFilesViewStateBuilder;
         _repositoryListGroupBuilder = repositoryListGroupBuilder;
         StatusBar = statusBar;
         _isOperationLogVisible = _settingsStore.Current.IsOperationLogVisible ?? true;
@@ -3201,14 +3204,15 @@ public sealed class MainWindowViewModel : ViewModelBase
     private void ApplyChangesFilter(string? preferredSelectedPath = null)
     {
         // 过滤集合单独维护，提交仍读取全量 ChangedFiles，避免隐藏文件被意外移出提交选择。
-        var filterText = ChangesFilterText.Trim();
-        var showConflictsOnly = ShowConflictsOnly;
         var selectedPath = preferredSelectedPath ?? SelectedChange?.Path;
-        FilteredChangedFiles.Clear();
+        var result = _changedFilesViewStateBuilder.BuildFilterResult(
+            ChangedFiles,
+            ChangesFilterText,
+            ShowConflictsOnly,
+            selectedPath);
 
-        foreach (var change in ChangedFiles.Where(change =>
-                     (!showConflictsOnly || change.IsConflict) &&
-                     MatchesChangesFilter(change, filterText)))
+        FilteredChangedFiles.Clear();
+        foreach (var change in result.Changes)
         {
             FilteredChangedFiles.Add(change);
         }
@@ -3219,40 +3223,19 @@ public sealed class MainWindowViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(HasActiveChangesFilter));
         this.RaisePropertyChanged(nameof(ChangedFilesHeaderText));
 
-        SelectedChange = !string.IsNullOrWhiteSpace(selectedPath)
-            ? FilteredChangedFiles.FirstOrDefault(change => change.Path == selectedPath) ?? FilteredChangedFiles.FirstOrDefault()
-            : FilteredChangedFiles.FirstOrDefault();
+        SelectedChange = result.SelectedChange;
         UpdateIncludedState();
-    }
-
-    private static bool MatchesChangesFilter(GitChangeItemViewModel change, string filterText)
-    {
-        if (string.IsNullOrWhiteSpace(filterText))
-        {
-            return true;
-        }
-
-        return change.Path.Contains(filterText, StringComparison.OrdinalIgnoreCase)
-            || change.DisplayStatus.Contains(filterText, StringComparison.OrdinalIgnoreCase)
-            || change.StatusCode.Contains(filterText, StringComparison.OrdinalIgnoreCase);
     }
 
     private void UpdateIncludedState()
     {
-        IncludedChangesCount = ChangedFiles.Count(change => change.IsIncluded);
         // 全选框反映当前筛选范围；提交按钮数量反映全量已勾选文件，两者职责不同。
         var scopedChanges = HasActiveChangesFilter
             ? FilteredChangedFiles
             : ChangedFiles;
-        var scopedIncludedChangesCount = scopedChanges.Count(change => change.IsIncluded);
-        var allIncluded = scopedChanges.Count == 0
-            ? false
-            : scopedIncludedChangesCount == scopedChanges.Count
-                ? true
-                : scopedIncludedChangesCount == 0
-                    ? false
-                    : (bool?)null;
-        this.RaiseAndSetIfChanged(ref _areAllChangesIncluded, allIncluded, nameof(AreAllChangesIncluded));
+        var state = _changedFilesViewStateBuilder.BuildIncludedState(ChangedFiles, scopedChanges);
+        IncludedChangesCount = state.IncludedCount;
+        this.RaiseAndSetIfChanged(ref _areAllChangesIncluded, state.AreAllIncluded, nameof(AreAllChangesIncluded));
         this.RaisePropertyChanged(nameof(ChangedFilesHeaderText));
     }
 
