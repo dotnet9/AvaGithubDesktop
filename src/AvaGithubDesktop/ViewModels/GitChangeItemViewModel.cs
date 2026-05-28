@@ -53,9 +53,11 @@ public sealed class GitChangeItemViewModel : ReactiveObject
 
     public string DisplayStatus => Change.DisplayStatus;
 
-    public string StatusBackground => Change.StatusBackground;
+    public bool IsStatusAddedTone => !IsConflict && Kind == GitChangeKind.Staged;
 
-    public string StatusForeground => Change.StatusForeground;
+    public bool IsStatusWarningTone => !IsConflict && Kind == GitChangeKind.Untracked;
+
+    public bool IsStatusDangerTone => IsConflict;
 
     public bool CanOpenInExternalEditor => !string.Equals(StatusCode, "D", StringComparison.Ordinal);
 

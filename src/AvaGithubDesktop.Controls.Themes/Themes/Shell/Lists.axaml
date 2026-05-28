@@ -147,4 +147,40 @@
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
+
+    <Style Selector="Border.fileStatusBadge">
+        <Setter Property="Padding" Value="7,2" />
+        <Setter Property="Background" Value="{DynamicResource AccentSubtleBrush}" />
+        <Setter Property="CornerRadius" Value="4" />
+    </Style>
+
+    <Style Selector="Border.fileStatusBadge TextBlock">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+    </Style>
+
+    <Style Selector="Border.fileStatusBadge.added">
+        <Setter Property="Background" Value="{DynamicResource DiffAddedBackgroundBrush}" />
+    </Style>
+
+    <Style Selector="Border.fileStatusBadge.added TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource DiffAddedTextBrush}" />
+    </Style>
+
+    <Style Selector="Border.fileStatusBadge.warning">
+        <Setter Property="Background" Value="{DynamicResource PanelAltBackgroundBrush}" />
+    </Style>
+
+    <Style Selector="Border.fileStatusBadge.warning TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource LogWarnBrush}" />
+    </Style>
+
+    <Style Selector="Border.fileStatusBadge.danger">
+        <Setter Property="Background" Value="{DynamicResource DangerSubtleBrush}" />
+    </Style>
+
+    <Style Selector="Border.fileStatusBadge.danger TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
+    </Style>
 </Styles>

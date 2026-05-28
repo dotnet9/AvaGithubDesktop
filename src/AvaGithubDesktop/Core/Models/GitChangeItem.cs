@@ -21,24 +21,6 @@ public sealed record GitChangeItem(string StatusCode, string Path, GitChangeKind
         var code => code
     };
 
-    public string StatusBackground => IsConflict
-        ? "#FDE7E9"
-        : Kind switch
-    {
-        GitChangeKind.Staged => "#DFF6DD",
-        GitChangeKind.Untracked => "#FFF4CE",
-        _ => "#EAF2FF"
-    };
-
-    public string StatusForeground => IsConflict
-        ? "#A4262C"
-        : Kind switch
-    {
-        GitChangeKind.Staged => "#0E6F32",
-        GitChangeKind.Untracked => "#8A5A00",
-        _ => "#0757A8"
-    };
-
     private static IReadOnlyList<string> ResolveGitPaths(string path)
     {
         if (string.IsNullOrWhiteSpace(path))

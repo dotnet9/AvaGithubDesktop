@@ -19,26 +19,6 @@ public sealed record GitCommitFileItem(string StatusCode, string Path)
         _ => "Changed"
     };
 
-    public string StatusBackground => DisplayStatus switch
-    {
-        "Added" => "#DFF6DD",
-        "Deleted" => "#FDE7E9",
-        "Renamed" => "#FFF4CE",
-        "Copied" => "#FFF4CE",
-        "Conflict" => "#FDE7E9",
-        _ => "#EAF2FF"
-    };
-
-    public string StatusForeground => DisplayStatus switch
-    {
-        "Added" => "#0E6F32",
-        "Deleted" => "#A4262C",
-        "Renamed" => "#8A5A00",
-        "Copied" => "#8A5A00",
-        "Conflict" => "#A4262C",
-        _ => "#0757A8"
-    };
-
     private static string ResolveGitPath(string path)
     {
         var renameSeparatorIndex = path.IndexOf(" -> ", StringComparison.Ordinal);

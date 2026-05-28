@@ -722,16 +722,13 @@
                                                 TextTrimming="CharacterEllipsis" />
                                             <Border
                                                 Grid.Column="2"
-                                                Padding="7,2"
+                                                Classes="fileStatusBadge"
+                                                Classes.added="{Binding IsStatusAddedTone}"
+                                                Classes.warning="{Binding IsStatusWarningTone}"
+                                                Classes.danger="{Binding IsStatusDangerTone}"
                                                 HorizontalAlignment="Right"
-                                                VerticalAlignment="Center"
-                                                Background="{Binding StatusBackground}"
-                                                CornerRadius="4">
-                                                <TextBlock
-                                                    FontSize="11"
-                                                    FontWeight="SemiBold"
-                                                    Foreground="{Binding StatusForeground}"
-                                                    Text="{Binding DisplayStatus}" />
+                                                VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding DisplayStatus}" />
                                             </Border>
                                         </Grid>
                                     </Border>
@@ -1040,16 +1037,13 @@
                                                     </Border.ContextFlyout>
                                                     <Grid ColumnDefinitions="90,*" ColumnSpacing="8">
                                                         <Border
-                                                            Padding="7,2"
+                                                            Classes="fileStatusBadge"
+                                                            Classes.added="{Binding IsStatusAddedTone}"
+                                                            Classes.warning="{Binding IsStatusWarningTone}"
+                                                            Classes.danger="{Binding IsStatusDangerTone}"
                                                             HorizontalAlignment="Left"
-                                                            VerticalAlignment="Center"
-                                                            Background="{Binding StatusBackground}"
-                                                            CornerRadius="4">
-                                                            <TextBlock
-                                                                FontSize="11"
-                                                                FontWeight="SemiBold"
-                                                                Foreground="{Binding StatusForeground}"
-                                                                Text="{Binding DisplayStatus}" />
+                                                            VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding DisplayStatus}" />
                                                         </Border>
                                                         <TextBlock
                                                             Grid.Column="1"

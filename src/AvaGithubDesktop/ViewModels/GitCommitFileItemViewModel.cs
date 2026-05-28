@@ -41,9 +41,11 @@ public sealed class GitCommitFileItemViewModel : ReactiveObject
 
     public string DisplayStatus => File.DisplayStatus;
 
-    public string StatusBackground => File.StatusBackground;
+    public bool IsStatusAddedTone => string.Equals(DisplayStatus, "Added", StringComparison.Ordinal);
 
-    public string StatusForeground => File.StatusForeground;
+    public bool IsStatusWarningTone => DisplayStatus is "Renamed" or "Copied";
+
+    public bool IsStatusDangerTone => DisplayStatus is "Deleted" or "Conflict";
 
     public bool CanOpenFileLocation => !string.Equals(DisplayStatus, "Deleted", StringComparison.Ordinal);
 
