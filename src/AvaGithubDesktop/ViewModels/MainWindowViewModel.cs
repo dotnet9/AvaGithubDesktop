@@ -2114,7 +2114,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
             true,
             _localizer.Format(AvaGithubDesktopL.StatusRevertingCommitFormat, targetCommit.ShortSha),
-            _localizer.Format(AvaGithubDesktopL.StatusRevertedCommitFormat, targetCommit.ShortSha),
+            () => _localizer.Format(AvaGithubDesktopL.StatusRevertedCommitFormat, targetCommit.ShortSha),
             ex => _localizer.Format(AvaGithubDesktopL.StatusRevertCommitFailedFormat, ex.Message),
             () => _gitRepositoryService.RevertCommitAsync(RootPath, targetCommit.Sha, CancellationToken.None),
             ReloadRepositoryWorkspaceAsync,
@@ -2138,7 +2138,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
             true,
             _localizer.Format(AvaGithubDesktopL.StatusCherryPickingCommitFormat, targetCommit.ShortSha),
-            _localizer.Format(AvaGithubDesktopL.StatusCherryPickedCommitFormat, targetCommit.ShortSha),
+            () => _localizer.Format(AvaGithubDesktopL.StatusCherryPickedCommitFormat, targetCommit.ShortSha),
             ex => _localizer.Format(AvaGithubDesktopL.StatusCherryPickCommitFailedFormat, ex.Message),
             () => _gitRepositoryService.CherryPickCommitAsync(RootPath, targetCommit.Sha, CancellationToken.None),
             ReloadRepositoryWorkspaceAsync,
@@ -2363,7 +2363,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
             true,
             GetMarkResolvedStartedMessage(conflicts),
-            GetMarkResolvedCompletedMessage(conflicts),
+            () => GetMarkResolvedCompletedMessage(conflicts),
             ex => _localizer.Format(AvaGithubDesktopL.StatusMarkResolvedFailedFormat, ex.Message),
             () => _gitRepositoryService.MarkConflictsResolvedAsync(
                 RootPath,
@@ -2426,7 +2426,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
             true,
             GetDiscardChangesStartedMessage(changes),
-            GetDiscardChangesCompletedMessage(changes),
+            () => GetDiscardChangesCompletedMessage(changes),
             ex => _localizer.Format(AvaGithubDesktopL.StatusDiscardChangesFailedFormat, ex.Message),
             () => _gitRepositoryService.DiscardChangesAsync(
                 RootPath,
@@ -2634,7 +2634,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
             true,
             startedMessage,
-            _localizer.Format(completedFormat, committedSummary),
+            () => _localizer.Format(completedFormat, committedSummary),
             ex => _localizer.Format(failedFormat, ex.Message),
             async () =>
             {
@@ -2710,7 +2710,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
             true,
             _localizer.Format(AvaGithubDesktopL.StatusPushingTagsFormat, RemoteName),
-            _localizer.Format(AvaGithubDesktopL.StatusPushedTagsFormat, RemoteName),
+            () => _localizer.Format(AvaGithubDesktopL.StatusPushedTagsFormat, RemoteName),
             ex => _localizer.Format(AvaGithubDesktopL.StatusPushTagsFailedFormat, ex.Message),
             () => _gitRepositoryService.PushTagsAsync(RootPath, RemoteName, CancellationToken.None),
             ReloadRepositoryWorkspaceAsync,
@@ -2733,7 +2733,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
             true,
             _localizer.Get(AvaGithubDesktopL.StatusUpdatingSubmodules),
-            _localizer.Get(AvaGithubDesktopL.StatusUpdatedSubmodules),
+            () => _localizer.Get(AvaGithubDesktopL.StatusUpdatedSubmodules),
             ex => _localizer.Format(AvaGithubDesktopL.StatusUpdateSubmodulesFailedFormat, ex.Message),
             () => _gitRepositoryService.UpdateSubmodulesAsync(RootPath, CancellationToken.None),
             ReloadRepositoryWorkspaceAsync,
@@ -2863,7 +2863,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
             true,
             _localizer.Get(AvaGithubDesktopL.StatusRestoringStash),
-            _localizer.Get(AvaGithubDesktopL.StatusRestoredStash),
+            () => _localizer.Get(AvaGithubDesktopL.StatusRestoredStash),
             ex => _localizer.Format(AvaGithubDesktopL.StatusRestoreStashFailedFormat, ex.Message),
             () => _gitRepositoryService.RestoreStashAsync(RootPath, stashName, CancellationToken.None),
             ReloadRepositoryWorkspaceAsync,
@@ -2887,7 +2887,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
             true,
             _localizer.Get(AvaGithubDesktopL.StatusDiscardingStash),
-            _localizer.Get(AvaGithubDesktopL.StatusDiscardedStash),
+            () => _localizer.Get(AvaGithubDesktopL.StatusDiscardedStash),
             ex => _localizer.Format(AvaGithubDesktopL.StatusDiscardStashFailedFormat, ex.Message),
             () => _gitRepositoryService.DiscardStashAsync(RootPath, stashName, CancellationToken.None),
             ReloadRepositoryWorkspaceAsync,
@@ -3364,7 +3364,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
             true,
             _localizer.Format(AvaGithubDesktopL.StatusRenamingBranchFormat, request.OldBranchName, request.NewBranchName),
-            _localizer.Format(AvaGithubDesktopL.StatusRenamedBranchFormat, request.OldBranchName, request.NewBranchName),
+            () => _localizer.Format(AvaGithubDesktopL.StatusRenamedBranchFormat, request.OldBranchName, request.NewBranchName),
             ex => _localizer.Format(AvaGithubDesktopL.StatusRenameBranchFailedFormat, ex.Message),
             () => _gitRepositoryService.RenameBranchAsync(
                 RootPath,
@@ -3426,7 +3426,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
             true,
             _localizer.Format(AvaGithubDesktopL.StatusSettingUpstreamFormat, branchName, request.UpstreamBranchName),
-            _localizer.Format(AvaGithubDesktopL.StatusSetUpstreamFormat, branchName, request.UpstreamBranchName),
+            () => _localizer.Format(AvaGithubDesktopL.StatusSetUpstreamFormat, branchName, request.UpstreamBranchName),
             ex => _localizer.Format(AvaGithubDesktopL.StatusSetUpstreamFailedFormat, ex.Message),
             () => _gitRepositoryService.SetUpstreamAsync(
                 RootPath,
@@ -3455,7 +3455,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
             true,
             _localizer.Format(AvaGithubDesktopL.StatusUnsettingUpstreamFormat, branchName, upstream),
-            _localizer.Format(AvaGithubDesktopL.StatusUnsetUpstreamFormat, branchName),
+            () => _localizer.Format(AvaGithubDesktopL.StatusUnsetUpstreamFormat, branchName),
             ex => _localizer.Format(AvaGithubDesktopL.StatusUnsetUpstreamFailedFormat, ex.Message),
             () => _gitRepositoryService.UnsetUpstreamAsync(RootPath, branchName, CancellationToken.None),
             ReloadRepositoryWorkspaceAsync,
@@ -3485,7 +3485,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
             true,
             _localizer.Format(AvaGithubDesktopL.StatusDeletingBranchFormat, branch.Name),
-            _localizer.Format(AvaGithubDesktopL.StatusDeletedBranchFormat, branch.Name),
+            () => _localizer.Format(AvaGithubDesktopL.StatusDeletedBranchFormat, branch.Name),
             ex => _localizer.Format(AvaGithubDesktopL.StatusDeleteBranchFailedFormat, ex.Message),
             () => _gitRepositoryService.DeleteBranchAsync(RootPath, branch.Name, CancellationToken.None),
             ReloadRepositoryWorkspaceAsync,
@@ -3510,7 +3510,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
             true,
             _localizer.Format(AvaGithubDesktopL.StatusSettingDefaultBranchFormat, branchName, remoteName),
-            _localizer.Format(AvaGithubDesktopL.StatusSetDefaultBranchFormat, branchName),
+            () => _localizer.Format(AvaGithubDesktopL.StatusSetDefaultBranchFormat, branchName),
             ex => _localizer.Format(AvaGithubDesktopL.StatusSetDefaultBranchFailedFormat, ex.Message),
             () => _gitRepositoryService.SetDefaultBranchAsync(
                 RootPath,
@@ -3534,34 +3534,32 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
 
         var defaultBranch = DefaultBranch;
-        IsUpdatingBranch = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(
-            _localizer.Format(AvaGithubDesktopL.StatusUpdatingFromDefaultBranchFormat, defaultBranch, CurrentBranch)));
-
-        try
+        var result = GitMergeResult.Success;
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            _localizer.Format(AvaGithubDesktopL.StatusUpdatingFromDefaultBranchFormat, defaultBranch, CurrentBranch),
+            () =>
+            {
+                var messageKey = result == GitMergeResult.AlreadyUpToDate
+                    ? AvaGithubDesktopL.StatusUpdateFromDefaultBranchAlreadyUpToDateFormat
+                    : AvaGithubDesktopL.StatusUpdatedFromDefaultBranchFormat;
+                return _localizer.Format(messageKey, defaultBranch, CurrentBranch);
+            },
+            ex => _localizer.Format(AvaGithubDesktopL.StatusUpdateFromDefaultBranchFailedFormat, ex.Message),
+            async () =>
+            {
+                result = await _gitRepositoryService.MergeBranchAsync(
+                    RootPath,
+                    defaultBranch,
+                    CancellationToken.None);
+            },
+            ReloadRepositoryWorkspaceAsync,
+            TryReloadRepositoryWorkspaceAsync,
+            value => IsUpdatingBranch = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            var result = await _gitRepositoryService.MergeBranchAsync(
-                RootPath,
-                defaultBranch,
-                CancellationToken.None);
-            await ReloadRepositoryWorkspaceAsync();
-            var messageKey = result == GitMergeResult.AlreadyUpToDate
-                ? AvaGithubDesktopL.StatusUpdateFromDefaultBranchAlreadyUpToDateFormat
-                : AvaGithubDesktopL.StatusUpdatedFromDefaultBranchFormat;
-            _eventBus.Publish(new StatusMessageChangedCommand(
-                _localizer.Format(messageKey, defaultBranch, CurrentBranch)));
-        }
-        catch (Exception ex)
-        {
-            // Update from default branch 底层是一次普通 merge；冲突时保留 Git 状态并刷新 Changes 方便继续解决。
-            await TryReloadRepositoryWorkspaceAsync();
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusUpdateFromDefaultBranchFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsUpdatingBranch = false;
+            ErrorMessage = errorMessage;
         }
     }
 
@@ -3580,34 +3578,32 @@ public sealed class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        IsMergingBranch = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(
-            _localizer.Format(AvaGithubDesktopL.StatusMergingBranchFormat, request.SourceBranchName, CurrentBranch)));
-
-        try
+        var result = GitMergeResult.Success;
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            _localizer.Format(AvaGithubDesktopL.StatusMergingBranchFormat, request.SourceBranchName, CurrentBranch),
+            () =>
+            {
+                var messageKey = result == GitMergeResult.AlreadyUpToDate
+                    ? AvaGithubDesktopL.StatusMergeBranchAlreadyUpToDateFormat
+                    : AvaGithubDesktopL.StatusMergedBranchFormat;
+                return _localizer.Format(messageKey, request.SourceBranchName, CurrentBranch);
+            },
+            ex => _localizer.Format(AvaGithubDesktopL.StatusMergeBranchFailedFormat, ex.Message),
+            async () =>
+            {
+                result = await _gitRepositoryService.MergeBranchAsync(
+                    RootPath,
+                    request.SourceBranchName,
+                    CancellationToken.None);
+            },
+            ReloadRepositoryWorkspaceAsync,
+            TryReloadRepositoryWorkspaceAsync,
+            value => IsMergingBranch = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            var result = await _gitRepositoryService.MergeBranchAsync(
-                RootPath,
-                request.SourceBranchName,
-                CancellationToken.None);
-            await ReloadRepositoryWorkspaceAsync();
-            var messageKey = result == GitMergeResult.AlreadyUpToDate
-                ? AvaGithubDesktopL.StatusMergeBranchAlreadyUpToDateFormat
-                : AvaGithubDesktopL.StatusMergedBranchFormat;
-            _eventBus.Publish(new StatusMessageChangedCommand(
-                _localizer.Format(messageKey, request.SourceBranchName, CurrentBranch)));
-        }
-        catch (Exception ex)
-        {
-            // merge 冲突会让 Git 留在合并状态；刷新工作区可以立即展示冲突文件，便于后续继续处理。
-            await TryReloadRepositoryWorkspaceAsync();
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusMergeBranchFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsMergingBranch = false;
+            ErrorMessage = errorMessage;
         }
     }
 
@@ -3626,34 +3622,32 @@ public sealed class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        IsMergingBranch = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(
-            _localizer.Format(AvaGithubDesktopL.StatusSquashMergingBranchFormat, request.SourceBranchName, CurrentBranch)));
-
-        try
+        var result = GitMergeResult.Success;
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            _localizer.Format(AvaGithubDesktopL.StatusSquashMergingBranchFormat, request.SourceBranchName, CurrentBranch),
+            () =>
+            {
+                var messageKey = result == GitMergeResult.AlreadyUpToDate
+                    ? AvaGithubDesktopL.StatusSquashMergeBranchAlreadyUpToDateFormat
+                    : AvaGithubDesktopL.StatusSquashMergedBranchFormat;
+                return _localizer.Format(messageKey, request.SourceBranchName, CurrentBranch);
+            },
+            ex => _localizer.Format(AvaGithubDesktopL.StatusSquashMergeBranchFailedFormat, ex.Message),
+            async () =>
+            {
+                result = await _gitRepositoryService.SquashMergeBranchAsync(
+                    RootPath,
+                    request.SourceBranchName,
+                    CancellationToken.None);
+            },
+            ReloadRepositoryWorkspaceAsync,
+            TryReloadRepositoryWorkspaceAsync,
+            value => IsMergingBranch = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            var result = await _gitRepositoryService.SquashMergeBranchAsync(
-                RootPath,
-                request.SourceBranchName,
-                CancellationToken.None);
-            await ReloadRepositoryWorkspaceAsync();
-            var messageKey = result == GitMergeResult.AlreadyUpToDate
-                ? AvaGithubDesktopL.StatusSquashMergeBranchAlreadyUpToDateFormat
-                : AvaGithubDesktopL.StatusSquashMergedBranchFormat;
-            _eventBus.Publish(new StatusMessageChangedCommand(
-                _localizer.Format(messageKey, request.SourceBranchName, CurrentBranch)));
-        }
-        catch (Exception ex)
-        {
-            // squash merge 失败后可能留下 SQUASH_MSG 或冲突文件，刷新工作区可以让用户继续处理当前 Git 状态。
-            await TryReloadRepositoryWorkspaceAsync();
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusSquashMergeBranchFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsMergingBranch = false;
+            ErrorMessage = errorMessage;
         }
     }
 
@@ -3672,34 +3666,32 @@ public sealed class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        IsRebasingBranch = true;
         ErrorMessage = string.Empty;
-        _eventBus.Publish(new StatusMessageChangedCommand(
-            _localizer.Format(AvaGithubDesktopL.StatusRebasingBranchFormat, CurrentBranch, request.BaseBranchName)));
-
-        try
+        var result = GitRebaseResult.Success;
+        var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
+            true,
+            _localizer.Format(AvaGithubDesktopL.StatusRebasingBranchFormat, CurrentBranch, request.BaseBranchName),
+            () =>
+            {
+                var messageKey = result == GitRebaseResult.AlreadyUpToDate
+                    ? AvaGithubDesktopL.StatusRebaseBranchAlreadyUpToDateFormat
+                    : AvaGithubDesktopL.StatusRebasedBranchFormat;
+                return _localizer.Format(messageKey, CurrentBranch, request.BaseBranchName);
+            },
+            ex => _localizer.Format(AvaGithubDesktopL.StatusRebaseBranchFailedFormat, ex.Message),
+            async () =>
+            {
+                result = await _gitRepositoryService.RebaseCurrentBranchAsync(
+                    RootPath,
+                    request.BaseBranchName,
+                    CancellationToken.None);
+            },
+            ReloadRepositoryWorkspaceAsync,
+            TryReloadRepositoryWorkspaceAsync,
+            value => IsRebasingBranch = value));
+        if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            var result = await _gitRepositoryService.RebaseCurrentBranchAsync(
-                RootPath,
-                request.BaseBranchName,
-                CancellationToken.None);
-            await ReloadRepositoryWorkspaceAsync();
-            var messageKey = result == GitRebaseResult.AlreadyUpToDate
-                ? AvaGithubDesktopL.StatusRebaseBranchAlreadyUpToDateFormat
-                : AvaGithubDesktopL.StatusRebasedBranchFormat;
-            _eventBus.Publish(new StatusMessageChangedCommand(
-                _localizer.Format(messageKey, CurrentBranch, request.BaseBranchName)));
-        }
-        catch (Exception ex)
-        {
-            // rebase 冲突会让 Git 留在变基状态；刷新工作区后用户可以在 Changes 中继续处理冲突文件。
-            await TryReloadRepositoryWorkspaceAsync();
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusRebaseBranchFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-        finally
-        {
-            IsRebasingBranch = false;
+            ErrorMessage = errorMessage;
         }
     }
 
@@ -3842,7 +3834,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
             canRun,
             _localizer.Get(startedKey),
-            _localizer.Get(completedKey),
+            () => _localizer.Get(completedKey),
             ex => _localizer.Format(failedFormatKey, ex.Message),
             operation,
             ReloadRepositoryWorkspaceAsync,
@@ -3874,7 +3866,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
             true,
             _localizer.Format(AvaGithubDesktopL.StatusCreatingBranchFormat, request.BranchName, CurrentBranch),
-            _localizer.Format(AvaGithubDesktopL.StatusCreatedBranchFormat, request.BranchName),
+            () => _localizer.Format(AvaGithubDesktopL.StatusCreatedBranchFormat, request.BranchName),
             ex => _localizer.Format(AvaGithubDesktopL.StatusCreateBranchFailedFormat, ex.Message),
             async () =>
             {
@@ -3907,7 +3899,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         var errorMessage = await _repositoryOperationCommandService.RunAsync(new RepositoryOperationCommandRequest(
             true,
             _localizer.Format(AvaGithubDesktopL.StatusCheckingOutBranchFormat, targetBranch),
-            _localizer.Format(AvaGithubDesktopL.StatusCheckedOutBranchFormat, targetBranch),
+            () => _localizer.Format(AvaGithubDesktopL.StatusCheckedOutBranchFormat, targetBranch),
             ex => _localizer.Format(AvaGithubDesktopL.StatusCheckoutBranchFailedFormat, ex.Message),
             () => _gitRepositoryService.CheckoutBranchAsync(RootPath, targetBranch, CancellationToken.None),
             ReloadRepositoryWorkspaceAsync,

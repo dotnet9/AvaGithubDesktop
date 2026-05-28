@@ -27,7 +27,7 @@ public sealed class RepositoryOperationCommandService : IRepositoryOperationComm
         {
             await request.Operation();
             await request.ReloadWorkspaceAsync();
-            _eventBus.Publish(new StatusMessageChangedCommand(request.CompletedMessage));
+            _eventBus.Publish(new StatusMessageChangedCommand(request.CreateCompletedMessage()));
             return null;
         }
         catch (Exception ex)
