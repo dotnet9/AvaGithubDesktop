@@ -19,6 +19,7 @@ public sealed class OperationLogView : TemplatedControl
     private readonly RelayCommand _openLogFolderCommand;
     private CancellationTokenSource? _readCancellationTokenSource;
     private bool _isReading;
+    private TextBox? _filterTextBox;
     private ScrollViewer? _scrollViewer;
     private SelectableTextBlock? _textView;
 
@@ -188,9 +189,21 @@ public sealed class OperationLogView : TemplatedControl
 
     public ICommand OpenLogFolderCommand => _openLogFolderCommand;
 
+    public void FocusFilter()
+    {
+        if (_filterTextBox is null)
+        {
+            return;
+        }
+
+        _filterTextBox.Focus();
+        _filterTextBox.SelectAll();
+    }
+
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
+        _filterTextBox = e.NameScope.Find<TextBox>("PART_FilterTextBox");
         _scrollViewer = e.NameScope.Find<ScrollViewer>("PART_ScrollViewer");
         _textView = e.NameScope.Find<SelectableTextBlock>("PART_TextView");
         RenderAllLogs();

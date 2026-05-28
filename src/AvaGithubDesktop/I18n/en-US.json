@@ -31,6 +31,7 @@
       "MenuShowBranchesList": "Show branches list",
       "MenuFocusCommitSummary": "Go to Summary",
       "MenuFocusChangesFilter": "Focus changes filter",
+      "MenuFocusOperationLogFilter": "Focus operation log filter",
       "MenuShowStashedChanges": "Show stashed changes",
       "MenuHideStashedChanges": "Hide stashed changes",
       "MenuToggleFullScreen": "Toggle full screen",
