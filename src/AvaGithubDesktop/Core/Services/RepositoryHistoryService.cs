@@ -160,6 +160,11 @@ public sealed class RepositoryHistoryService : IRepositoryHistoryService
 
     private static string? ReadOriginRemoteUrl(string repositoryPath)
     {
+        var arguments = new[] { "config", "--get", "remote.origin.url" };
+        var commandText = GitCommandLog.FormatCommand(repositoryPath, arguments);
+        var stopwatch = Stopwatch.StartNew();
+        GitCommandLog.LogStarted(commandText);
+
         try
         {
             var startInfo = new ProcessStartInfo("git")
@@ -173,29 +178,41 @@ public sealed class RepositoryHistoryService : IRepositoryHistoryService
             };
             startInfo.ArgumentList.Add("-C");
             startInfo.ArgumentList.Add(repositoryPath);
-            startInfo.ArgumentList.Add("config");
-            startInfo.ArgumentList.Add("--get");
-            startInfo.ArgumentList.Add("remote.origin.url");
+            foreach (var argument in arguments)
+            {
+                startInfo.ArgumentList.Add(argument);
+            }
 
             using var process = Process.Start(startInfo);
             if (process is null)
             {
+                stopwatch.Stop();
+                GitCommandLog.LogFailed(
+                    commandText,
+                    stopwatch.Elapsed,
+                    new InvalidOperationException("Unable to start git."));
                 return null;
             }
 
             if (!process.WaitForExit(1500))
             {
                 process.Kill(entireProcessTree: true);
+                stopwatch.Stop();
+                GitCommandLog.LogTimedOut(commandText, stopwatch.Elapsed);
                 return null;
             }
 
             var output = process.StandardOutput.ReadToEnd().Trim();
+            stopwatch.Stop();
+            GitCommandLog.LogCompleted(commandText, process.ExitCode, stopwatch.Elapsed);
             return process.ExitCode == 0 && !string.IsNullOrWhiteSpace(output)
                 ? output
                 : null;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            stopwatch.Stop();
+            GitCommandLog.LogFailed(commandText, stopwatch.Elapsed, ex);
             return null;
         }
     }

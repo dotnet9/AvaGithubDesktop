@@ -1629,6 +1629,9 @@ public sealed class GitRepositoryService : IGitRepositoryService
         CancellationToken cancellationToken,
         bool allowFailure)
     {
+        var commandText = GitCommandLog.FormatCommand(workingDirectory, arguments);
+        var stopwatch = Stopwatch.StartNew();
+        GitCommandLog.LogStarted(commandText);
         var startInfo = new ProcessStartInfo
         {
             FileName = "git",
@@ -1648,22 +1651,38 @@ public sealed class GitRepositoryService : IGitRepositoryService
             startInfo.ArgumentList.Add(argument);
         }
 
-        using var process = Process.Start(startInfo)
-            ?? throw new InvalidOperationException("Unable to start git.");
+        int exitCode;
+        string stdout;
+        string stderr;
+        try
+        {
+            using var process = Process.Start(startInfo)
+                ?? throw new InvalidOperationException("Unable to start git.");
 
-        var stdoutTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
-        var stderrTask = process.StandardError.ReadToEndAsync(cancellationToken);
-        await process.WaitForExitAsync(cancellationToken);
+            var stdoutTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
+            var stderrTask = process.StandardError.ReadToEndAsync(cancellationToken);
+            await process.WaitForExitAsync(cancellationToken);
 
-        var stdout = (await stdoutTask).Trim();
-        var stderr = (await stderrTask).Trim();
+            stdout = (await stdoutTask).Trim();
+            stderr = (await stderrTask).Trim();
+            exitCode = process.ExitCode;
+        }
+        catch (Exception ex)
+        {
+            stopwatch.Stop();
+            GitCommandLog.LogFailed(commandText, stopwatch.Elapsed, ex);
+            throw;
+        }
 
-        if (process.ExitCode != 0 && !allowFailure)
+        stopwatch.Stop();
+        GitCommandLog.LogCompleted(commandText, exitCode, stopwatch.Elapsed);
+
+        if (exitCode != 0 && !allowFailure)
         {
             throw new InvalidOperationException(string.IsNullOrWhiteSpace(stderr) ? "Git command failed." : stderr);
         }
 
-        return process.ExitCode == 0 ? stdout : string.Empty;
+        return exitCode == 0 ? stdout : string.Empty;
     }
 
     private static async Task<bool> RunGitToFileAsync(
@@ -1672,6 +1691,9 @@ public sealed class GitRepositoryService : IGitRepositoryService
         CancellationToken cancellationToken,
         params string[] arguments)
     {
+        var commandText = GitCommandLog.FormatCommand(workingDirectory, arguments);
+        var stopwatch = Stopwatch.StartNew();
+        GitCommandLog.LogStarted(commandText);
         var startInfo = new ProcessStartInfo
         {
             FileName = "git",
@@ -1688,22 +1710,33 @@ public sealed class GitRepositoryService : IGitRepositoryService
             startInfo.ArgumentList.Add(argument);
         }
 
-        using var process = Process.Start(startInfo)
-            ?? throw new InvalidOperationException("Unable to start git.");
-
-        await using var outputStream = File.Create(outputPath);
-        var stdoutTask = process.StandardOutput.BaseStream.CopyToAsync(outputStream, cancellationToken);
-        var stderrTask = process.StandardError.ReadToEndAsync(cancellationToken);
-        await process.WaitForExitAsync(cancellationToken);
-        await stdoutTask;
-        await outputStream.FlushAsync(cancellationToken);
-        await stderrTask;
-
-        if (process.ExitCode != 0)
+        int exitCode;
+        long outputLength;
+        try
         {
-            return false;
+            using var process = Process.Start(startInfo)
+                ?? throw new InvalidOperationException("Unable to start git.");
+
+            await using var outputStream = File.Create(outputPath);
+            var stdoutTask = process.StandardOutput.BaseStream.CopyToAsync(outputStream, cancellationToken);
+            var stderrTask = process.StandardError.ReadToEndAsync(cancellationToken);
+            await process.WaitForExitAsync(cancellationToken);
+            await stdoutTask;
+            await outputStream.FlushAsync(cancellationToken);
+            await stderrTask;
+            exitCode = process.ExitCode;
+            outputLength = new FileInfo(outputPath).Length;
+        }
+        catch (Exception ex)
+        {
+            stopwatch.Stop();
+            GitCommandLog.LogFailed(commandText, stopwatch.Elapsed, ex);
+            throw;
         }
 
-        return new FileInfo(outputPath).Length > 0;
+        stopwatch.Stop();
+        GitCommandLog.LogCompleted(commandText, exitCode, stopwatch.Elapsed);
+
+        return exitCode == 0 && outputLength > 0;
     }
 }
