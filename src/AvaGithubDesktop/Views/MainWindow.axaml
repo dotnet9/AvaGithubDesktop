@@ -159,6 +159,7 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFetchLfs}}" Command="{Binding FetchLfsCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuPullLfs}}" Command="{Binding PullLfsCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuUpdateSubmodules}}" Command="{Binding UpdateSubmodulesCommand}" IsEnabled="{Binding CanUpdateSubmodules}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRemoveRepositoryFromList}}" Command="{Binding RemoveCurrentRepositoryFromListCommand}" HotKey="Ctrl+Back" />
                     <Separator />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Open}}" Command="{Binding OpenRepositoryCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Refresh}}" Command="{Binding RefreshRepositoryCommand}" HotKey="F5" />

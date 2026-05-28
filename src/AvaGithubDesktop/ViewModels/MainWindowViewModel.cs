@@ -194,6 +194,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         OpenRepositoryInExternalEditorCommand = ReactiveCommand.CreateFromTask(OpenRepositoryInExternalEditorAsync, canUseCurrentRepository);
         ShowRepositoryInFileManagerCommand = ReactiveCommand.CreateFromTask(ShowRepositoryInFileManagerAsync, canUseCurrentRepository);
         ManageRemoteCommand = ReactiveCommand.CreateFromTask(ManageRemoteAsync, canUseCurrentRepository);
+        RemoveCurrentRepositoryFromListCommand = ReactiveCommand.CreateFromTask(RemoveCurrentRepositoryFromListAsync, canUseCurrentRepository);
         CopyCurrentRepositoryNameCommand = ReactiveCommand.CreateFromTask(CopyCurrentRepositoryNameAsync, canUseCurrentRepository);
         CopyCurrentRepositoryPathCommand = ReactiveCommand.CreateFromTask(CopyCurrentRepositoryPathAsync, canUseCurrentRepository);
         CopyRemoteUrlCommand = ReactiveCommand.CreateFromTask(
@@ -417,6 +418,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ShowRepositoryInFileManagerCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ManageRemoteCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> RemoveCurrentRepositoryFromListCommand { get; }
 
     public ReactiveCommand<Unit, Unit> CopyCurrentRepositoryNameCommand { get; }
 
@@ -1814,6 +1817,11 @@ public sealed class MainWindowViewModel : ViewModelBase
             _knownRepositories = _knownRepositories
                 .Where(item => !_repositoryListGroupBuilder.PathsEqual(item.Path, repository.Path))
                 .ToArray();
+            if (HasRepository && _repositoryListGroupBuilder.PathsEqual(RootPath, repository.Path))
+            {
+                _settingsStore.Update(settings => settings with { LastRepositoryPath = null });
+            }
+
             RebuildRepositoryGroups();
 
             _eventBus.Publish(new StatusMessageChangedCommand(
@@ -2088,6 +2096,34 @@ public sealed class MainWindowViewModel : ViewModelBase
         if (!string.IsNullOrWhiteSpace(errorMessage))
         {
             ErrorMessage = errorMessage;
+        }
+    }
+
+    private async Task RemoveCurrentRepositoryFromListAsync()
+    {
+        var currentRepository = _knownRepositories
+            .FirstOrDefault(repository => _repositoryListGroupBuilder.PathsEqual(repository.Path, RootPath));
+
+        if (currentRepository is not null)
+        {
+            await RemoveKnownRepositoryAsync(currentRepository);
+            return;
+        }
+
+        try
+        {
+            ErrorMessage = string.Empty;
+            await _repositoryHistoryService.RemoveAsync(RootPath, CancellationToken.None);
+            _settingsStore.Update(settings => settings with { LastRepositoryPath = null });
+            await LoadRepositoryHistoryAsync();
+
+            _eventBus.Publish(new StatusMessageChangedCommand(
+                _localizer.Format(AvaGithubDesktopL.StatusRemovedRepositoryFromListFormat, RepositoryName)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusRemoveRepositoryFromListFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
         }
     }
 
