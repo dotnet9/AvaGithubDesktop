@@ -10,12 +10,31 @@ namespace AvaGithubDesktop.Core.Services;
 
 public sealed class HelpService : IHelpService
 {
+    private const string ReportIssueUrl = "https://github.com/dotnet9/AvaGithubDesktop/issues/new/choose";
+    private const string UserGuidesUrl = "https://docs.github.com/en/desktop";
     private static readonly string DocumentsFolder = Path.Combine(AppContext.BaseDirectory, "docs");
     private readonly IAppLocalizer _localizer;
+    private readonly IRepositoryShellService _repositoryShellService;
 
-    public HelpService(IAppLocalizer localizer)
+    public HelpService(IAppLocalizer localizer, IRepositoryShellService repositoryShellService)
     {
         _localizer = localizer;
+        _repositoryShellService = repositoryShellService;
+    }
+
+    public Task OpenReportIssueAsync()
+    {
+        return _repositoryShellService.OpenUrlAsync(ReportIssueUrl);
+    }
+
+    public Task OpenContactSupportAsync()
+    {
+        return _repositoryShellService.OpenUrlAsync(BuildContactSupportUrl());
+    }
+
+    public Task OpenUserGuidesAsync()
+    {
+        return _repositoryShellService.OpenUrlAsync(UserGuidesUrl);
     }
 
     public Task ShowChangelogWindowAsync()
@@ -66,20 +85,29 @@ public sealed class HelpService : IHelpService
 
     private string BuildAboutMarkdown()
     {
-        var assembly = typeof(App).Assembly;
-        var informationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
-                                   ?? assembly.GetName().Version?.ToString()
-                                   ?? "-";
-
         return string.Join(
             Environment.NewLine,
             "# AvaGithubDesktop",
             string.Empty,
             _localizer.Get(AvaGithubDesktopL.AboutDescription),
             string.Empty,
-            $"- {_localizer.Get(AvaGithubDesktopL.AboutVersionLabel)}：{informationalVersion}",
+            $"- {_localizer.Get(AvaGithubDesktopL.AboutVersionLabel)}：{GetInformationalVersion()}",
             $"- {_localizer.Get(AvaGithubDesktopL.AboutRepositoryLabel)}：https://github.com/dotnet9/AvaGithubDesktop",
             $"- {_localizer.Get(AvaGithubDesktopL.AboutBrandLabel)}：CodeWF");
+    }
+
+    private static string BuildContactSupportUrl()
+    {
+        var version = Uri.EscapeDataString(GetInformationalVersion());
+        return $"https://github.com/contact?from_desktop_app=1&app_version={version}";
+    }
+
+    private static string GetInformationalVersion()
+    {
+        var assembly = typeof(App).Assembly;
+        return assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+               ?? assembly.GetName().Version?.ToString()
+               ?? "-";
     }
 
     private static string ResolveDocumentPath(string fileName)

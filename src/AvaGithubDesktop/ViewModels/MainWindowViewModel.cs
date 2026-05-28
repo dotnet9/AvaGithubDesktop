@@ -353,6 +353,9 @@ public sealed class MainWindowViewModel : ViewModelBase
                 model => model.HasConflictFiles,
                 (hasRepository, canRunRepositoryCommand, hasConflictFiles) =>
                     hasRepository && canRunRepositoryCommand && hasConflictFiles));
+        ReportIssueCommand = ReactiveCommand.CreateFromTask(ReportIssueAsync);
+        ContactSupportCommand = ReactiveCommand.CreateFromTask(ContactSupportAsync);
+        ShowUserGuidesCommand = ReactiveCommand.CreateFromTask(ShowUserGuidesAsync);
         ShowChangelogCommand = ReactiveCommand.CreateFromTask(ShowChangelogAsync);
         ShowKeyboardShortcutsCommand = ReactiveCommand.CreateFromTask(ShowKeyboardShortcutsAsync);
         ShowLogFolderCommand = ReactiveCommand.CreateFromTask(ShowLogFolderAsync);
@@ -538,6 +541,12 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> DiscardAllChangesCommand { get; }
 
     public ReactiveCommand<Unit, Unit> MarkAllConflictsResolvedCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ReportIssueCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ContactSupportCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ShowUserGuidesCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ShowChangelogCommand { get; }
 
@@ -2571,6 +2580,35 @@ public sealed class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenHelpFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+    }
+
+    private async Task ReportIssueAsync()
+    {
+        await OpenHelpLinkAsync(_helpService.OpenReportIssueAsync, AvaGithubDesktopL.StatusOpenedReportIssue);
+    }
+
+    private async Task ContactSupportAsync()
+    {
+        await OpenHelpLinkAsync(_helpService.OpenContactSupportAsync, AvaGithubDesktopL.StatusOpenedContactSupport);
+    }
+
+    private async Task ShowUserGuidesAsync()
+    {
+        await OpenHelpLinkAsync(_helpService.OpenUserGuidesAsync, AvaGithubDesktopL.StatusOpenedUserGuides);
+    }
+
+    private async Task OpenHelpLinkAsync(Func<Task> openLinkAsync, string successStatusKey)
+    {
+        try
+        {
+            await openLinkAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(successStatusKey)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenHelpLinkFailedFormat, ex.Message);
             _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
         }
     }
