@@ -62,6 +62,7 @@ public partial class App : PrismApplication
         containerRegistry.RegisterSingleton<ITagDialogService, TagDialogService>();
         containerRegistry.RegisterSingleton<BranchesViewStateBuilder>();
         containerRegistry.RegisterSingleton<ChangedFilesViewStateBuilder>();
+        containerRegistry.RegisterSingleton<CommitFilesViewStateBuilder>();
         containerRegistry.RegisterSingleton<RepositoryListGroupBuilder>();
         containerRegistry.RegisterSingleton<ShellStatusViewModel>();
         containerRegistry.RegisterSingleton<MainWindowViewModel>();

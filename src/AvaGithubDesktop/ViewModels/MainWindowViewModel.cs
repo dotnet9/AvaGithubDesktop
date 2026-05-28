@@ -34,6 +34,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly IEventBus _eventBus;
     private readonly BranchesViewStateBuilder _branchesViewStateBuilder;
     private readonly ChangedFilesViewStateBuilder _changedFilesViewStateBuilder;
+    private readonly CommitFilesViewStateBuilder _commitFilesViewStateBuilder;
     private readonly RepositoryListGroupBuilder _repositoryListGroupBuilder;
     private string _repositoryPath;
     private string _repositoryName = "-";
@@ -127,6 +128,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         IEventBus eventBus,
         BranchesViewStateBuilder branchesViewStateBuilder,
         ChangedFilesViewStateBuilder changedFilesViewStateBuilder,
+        CommitFilesViewStateBuilder commitFilesViewStateBuilder,
         RepositoryListGroupBuilder repositoryListGroupBuilder,
         ShellStatusViewModel statusBar)
     {
@@ -151,6 +153,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _eventBus = eventBus;
         _branchesViewStateBuilder = branchesViewStateBuilder;
         _changedFilesViewStateBuilder = changedFilesViewStateBuilder;
+        _commitFilesViewStateBuilder = commitFilesViewStateBuilder;
         _repositoryListGroupBuilder = repositoryListGroupBuilder;
         StatusBar = statusBar;
         _isOperationLogVisible = _settingsStore.Current.IsOperationLogVisible ?? true;
@@ -3099,26 +3102,21 @@ public sealed class MainWindowViewModel : ViewModelBase
     private void ApplySelectedCommitFiles(GitCommitItem? commit, string? preferredSelectedPath)
     {
         // History 文件项也需要右键菜单命令，因此用轻量 ViewModel 包装模型并集中注入外部操作回调。
+        var state = _commitFilesViewStateBuilder.Build(
+            commit,
+            preferredSelectedPath,
+            CopyCommitFileFullPathAsync,
+            CopyCommitFileRelativePathAsync,
+            ShowCommitFileInFileManagerAsync,
+            OpenCommitFileInExternalEditorAsync);
+
         SelectedCommitFiles.Clear();
-        if (commit is null)
+        foreach (var file in state.Files)
         {
-            SelectedCommitFile = null;
-            return;
+            SelectedCommitFiles.Add(file);
         }
 
-        foreach (var file in commit.Files)
-        {
-            SelectedCommitFiles.Add(new GitCommitFileItemViewModel(
-                file,
-                CopyCommitFileFullPathAsync,
-                CopyCommitFileRelativePathAsync,
-                ShowCommitFileInFileManagerAsync,
-                OpenCommitFileInExternalEditorAsync));
-        }
-
-        SelectedCommitFile = !string.IsNullOrWhiteSpace(preferredSelectedPath)
-            ? SelectedCommitFiles.FirstOrDefault(file => file.Path == preferredSelectedPath) ?? SelectedCommitFiles.FirstOrDefault()
-            : SelectedCommitFiles.FirstOrDefault();
+        SelectedCommitFile = state.SelectedFile;
     }
 
     private void ApplyBranches(IReadOnlyList<GitBranchItem> branches)
