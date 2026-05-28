@@ -9,4 +9,10 @@ public sealed record AppSettings
     public string? ThemeKey { get; init; }
 
     public string? LastRepositoryPath { get; init; }
+
+    public double? WorkspaceSidebarWidth { get; init; }
+
+    public double? HistoryFileListWidth { get; init; }
+
+    public double? OperationLogHeight { get; init; }
 }

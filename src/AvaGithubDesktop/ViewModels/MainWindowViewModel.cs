@@ -562,6 +562,22 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> OpenDiffFileInExternalEditorCommand { get; }
 
+    public double? WorkspaceSidebarWidth => _settingsStore.Current.WorkspaceSidebarWidth;
+
+    public double? HistoryFileListWidth => _settingsStore.Current.HistoryFileListWidth;
+
+    public double? OperationLogHeight => _settingsStore.Current.OperationLogHeight;
+
+    public void SaveWorkspaceLayout(double workspaceSidebarWidth, double historyFileListWidth, double operationLogHeight)
+    {
+        _settingsStore.Update(settings => settings with
+        {
+            WorkspaceSidebarWidth = workspaceSidebarWidth,
+            HistoryFileListWidth = historyFileListWidth,
+            OperationLogHeight = operationLogHeight
+        });
+    }
+
     public string RepositoryPath
     {
         get => _repositoryPath;

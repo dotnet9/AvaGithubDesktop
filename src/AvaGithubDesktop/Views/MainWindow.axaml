@@ -594,7 +594,7 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Row="1">
+        <Grid x:Name="WorkspaceGrid" Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="360" MinWidth="260" MaxWidth="560" />
                 <ColumnDefinition Width="Auto" />
@@ -931,9 +931,11 @@
             <GridSplitter
                 Grid.Column="1"
                 Classes="workspaceSplitter vertical"
+                HorizontalAlignment="Stretch"
                 ResizeDirection="Columns"
                 ResizeBehavior="PreviousAndNext"
-                ShowsPreview="True" />
+                ShowsPreview="True"
+                VerticalAlignment="Stretch" />
 
             <Grid Grid.Column="2" Margin="18" RowDefinitions="Auto,*" RowSpacing="10">
                 <TextBlock
@@ -1072,7 +1074,7 @@
                             </Grid>
                         </Border>
 
-                        <Grid Grid.Row="1">
+                        <Grid x:Name="HistoryDiffGrid" Grid.Row="1">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="300" MinWidth="220" MaxWidth="480" />
                                 <ColumnDefinition Width="Auto" />
@@ -1130,9 +1132,11 @@
                             <GridSplitter
                                 Grid.Column="1"
                                 Classes="workspaceSplitter vertical"
+                                HorizontalAlignment="Stretch"
                                 ResizeDirection="Columns"
                                 ResizeBehavior="PreviousAndNext"
-                                ShowsPreview="True" />
+                                ShowsPreview="True"
+                                VerticalAlignment="Stretch" />
 
                             <Grid Grid.Column="2" RowDefinitions="Auto,*">
                                 <Border Classes="diffHeader">
@@ -1192,10 +1196,12 @@
         <GridSplitter
             Grid.Row="2"
             Classes="workspaceSplitter horizontal"
+            HorizontalAlignment="Stretch"
             IsVisible="{Binding IsOperationLogVisible}"
             ResizeDirection="Rows"
             ResizeBehavior="PreviousAndNext"
-            ShowsPreview="True" />
+            ShowsPreview="True"
+            VerticalAlignment="Stretch" />
 
         <Border
             Grid.Row="3"

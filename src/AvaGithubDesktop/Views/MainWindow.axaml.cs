@@ -13,11 +13,17 @@ public partial class MainWindow : CodeWFWindow
 {
     private const double DefaultOperationLogHeight = 180;
     private const double OperationLogMinHeight = 80;
+    private const double WorkspaceSidebarMinWidth = 260;
+    private const double WorkspaceSidebarMaxWidth = 560;
+    private const double HistoryFileListMinWidth = 220;
+    private const double HistoryFileListMaxWidth = 480;
     private WindowState _windowStateBeforeFullScreen = WindowState.Normal;
     private TextBox? _lastFocusedTextBox;
     private GridLength _lastVisibleOperationLogHeight = new(DefaultOperationLogHeight);
     private INotifyPropertyChanged? _subscribedViewModel;
     private RowDefinition OperationLogRow => MainLayoutGrid.RowDefinitions[3];
+    private ColumnDefinition WorkspaceSidebarColumn => WorkspaceGrid.ColumnDefinitions[0];
+    private ColumnDefinition HistoryFileListColumn => HistoryDiffGrid.ColumnDefinitions[0];
 
     public MainWindow()
     {
@@ -25,7 +31,11 @@ public partial class MainWindow : CodeWFWindow
         AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
         AddHandler(GotFocusEvent, OnGotFocus, RoutingStrategies.Tunnel);
         DataContextChanged += (_, _) => SubscribeToViewModel();
-        Closed += (_, _) => UnsubscribeFromViewModel();
+        Closed += (_, _) =>
+        {
+            SaveWorkspaceLayout();
+            UnsubscribeFromViewModel();
+        };
     }
 
     public MainWindow(MainWindowViewModel viewModel)
@@ -43,6 +53,7 @@ public partial class MainWindow : CodeWFWindow
         {
             _subscribedViewModel = viewModel;
             _subscribedViewModel.PropertyChanged += OnViewModelPropertyChanged;
+            ApplyWorkspaceLayout(viewModel);
             SyncOperationLogRow(viewModel.IsOperationLogVisible);
         }
     }
@@ -83,6 +94,65 @@ public partial class MainWindow : CodeWFWindow
 
         OperationLogRow.MinHeight = 0;
         OperationLogRow.Height = new GridLength(0);
+    }
+
+    private void ApplyWorkspaceLayout(MainWindowViewModel viewModel)
+    {
+        ApplyColumnWidth(
+            WorkspaceSidebarColumn,
+            viewModel.WorkspaceSidebarWidth,
+            WorkspaceSidebarMinWidth,
+            WorkspaceSidebarMaxWidth);
+        ApplyColumnWidth(
+            HistoryFileListColumn,
+            viewModel.HistoryFileListWidth,
+            HistoryFileListMinWidth,
+            HistoryFileListMaxWidth);
+
+        if (TryClamp(viewModel.OperationLogHeight, OperationLogMinHeight, double.PositiveInfinity, out var operationLogHeight))
+        {
+            _lastVisibleOperationLogHeight = new GridLength(operationLogHeight);
+        }
+    }
+
+    private void SaveWorkspaceLayout()
+    {
+        if (DataContext is not MainWindowViewModel viewModel)
+        {
+            return;
+        }
+
+        viewModel.SaveWorkspaceLayout(
+            WorkspaceSidebarColumn.Width.Value,
+            HistoryFileListColumn.Width.Value,
+            GetCurrentOperationLogHeight());
+    }
+
+    private double GetCurrentOperationLogHeight()
+    {
+        return OperationLogRow.Height.Value > 0
+            ? OperationLogRow.Height.Value
+            : Math.Max(OperationLogMinHeight, _lastVisibleOperationLogHeight.Value);
+    }
+
+    private static void ApplyColumnWidth(ColumnDefinition column, double? width, double min, double max)
+    {
+        if (TryClamp(width, min, max, out var value))
+        {
+            column.Width = new GridLength(value);
+        }
+    }
+
+    private static bool TryClamp(double? value, double min, double max, out double clamped)
+    {
+        clamped = 0;
+        if (value is not { } actual || double.IsNaN(actual) || double.IsInfinity(actual))
+        {
+            return false;
+        }
+
+        clamped = Math.Clamp(actual, min, max);
+        return true;
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)

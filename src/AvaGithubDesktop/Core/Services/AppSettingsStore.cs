@@ -9,6 +9,9 @@ public sealed class AppSettingsStore : IAppSettingsStore
     private const string CultureNameKey = nameof(AppSettings.CultureName);
     private const string ThemeKey = nameof(AppSettings.ThemeKey);
     private const string LastRepositoryPathKey = nameof(AppSettings.LastRepositoryPath);
+    private const string WorkspaceSidebarWidthKey = nameof(AppSettings.WorkspaceSidebarWidth);
+    private const string HistoryFileListWidthKey = nameof(AppSettings.HistoryFileListWidth);
+    private const string OperationLogHeightKey = nameof(AppSettings.OperationLogHeight);
     private readonly object _syncRoot = new();
     private AppSettings? _settings;
 
@@ -42,7 +45,10 @@ public sealed class AppSettingsStore : IAppSettingsStore
             IsOperationLogVisible = Get<bool?>(configPath, IsOperationLogVisibleKey),
             CultureName = Get<string>(configPath, CultureNameKey),
             ThemeKey = Get<string>(configPath, ThemeKey),
-            LastRepositoryPath = Get<string>(configPath, LastRepositoryPathKey)
+            LastRepositoryPath = Get<string>(configPath, LastRepositoryPathKey),
+            WorkspaceSidebarWidth = Get<double?>(configPath, WorkspaceSidebarWidthKey),
+            HistoryFileListWidth = Get<double?>(configPath, HistoryFileListWidthKey),
+            OperationLogHeight = Get<double?>(configPath, OperationLogHeightKey)
         };
     }
 
@@ -55,6 +61,9 @@ public sealed class AppSettingsStore : IAppSettingsStore
             AppConfigHelper.Set(configPath, CultureNameKey, settings.CultureName);
             AppConfigHelper.Set(configPath, ThemeKey, settings.ThemeKey);
             AppConfigHelper.Set(configPath, LastRepositoryPathKey, settings.LastRepositoryPath);
+            AppConfigHelper.Set(configPath, WorkspaceSidebarWidthKey, settings.WorkspaceSidebarWidth);
+            AppConfigHelper.Set(configPath, HistoryFileListWidthKey, settings.HistoryFileListWidth);
+            AppConfigHelper.Set(configPath, OperationLogHeightKey, settings.OperationLogHeight);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Xml.XmlException)
         {
