@@ -25,6 +25,10 @@
     x:DataType="vm:MainWindowViewModel"
     mc:Ignorable="d">
 
+    <codewf:CodeWFWindow.KeyBindings>
+        <KeyBinding Gesture="Ctrl+Enter" Command="{Binding CommitCommand}" />
+    </codewf:CodeWFWindow.KeyBindings>
+
     <codewf:CodeWFWindow.LeftContent>
         <StackPanel Margin="8,0,0,0" Orientation="Horizontal" Spacing="8">
             <Image
@@ -40,10 +44,10 @@
                 Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.AppTitle}}" />
             <Menu Classes="titleBar">
                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFile}}">
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuNewRepository}}" Command="{Binding CreateRepositoryCommand}" />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAddLocalRepository}}" Command="{Binding BrowseRepositoryCommand}" />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCloneRepository}}" Command="{Binding CloneRepositoryCommand}" />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRefresh}}" Command="{Binding RefreshRepositoryCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuNewRepository}}" Command="{Binding CreateRepositoryCommand}" HotKey="Ctrl+N" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAddLocalRepository}}" Command="{Binding BrowseRepositoryCommand}" HotKey="Ctrl+O" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCloneRepository}}" Command="{Binding CloneRepositoryCommand}" HotKey="Ctrl+Shift+O" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRefresh}}" Command="{Binding RefreshRepositoryCommand}" HotKey="F5" />
                     <Separator />
                     <MenuItem Header="{Binding AccountButtonText}" IsEnabled="False" IsVisible="{Binding IsSignedIn}" />
                     <MenuItem Header="{Binding AccountEndpointText}" IsEnabled="False" IsVisible="{Binding IsSignedIn}" />
@@ -51,41 +55,43 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.SignOut}}" Command="{Binding SignOutCommand}" IsVisible="{Binding IsSignedIn}" />
                 </MenuItem>
                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRepository}}">
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuPush}}" Command="{Binding PushRepositoryCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuPush}}" Command="{Binding PushRepositoryCommand}" HotKey="Ctrl+P" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuPushTags}}" Command="{Binding PushTagsCommand}" />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuPull}}" Command="{Binding PullRepositoryCommand}" />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFetch}}" Command="{Binding FetchRepositoryCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuPull}}" Command="{Binding PullRepositoryCommand}" HotKey="Ctrl+Shift+P" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFetch}}" Command="{Binding FetchRepositoryCommand}" HotKey="Ctrl+Shift+T" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFetchAllRemotes}}" Command="{Binding FetchAllRemotesCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFetchLfs}}" Command="{Binding FetchLfsCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuPullLfs}}" Command="{Binding PullLfsCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuUpdateSubmodules}}" Command="{Binding UpdateSubmodulesCommand}" IsEnabled="{Binding CanUpdateSubmodules}" />
                     <Separator />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Open}}" Command="{Binding OpenRepositoryCommand}" />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Refresh}}" Command="{Binding RefreshRepositoryCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Refresh}}" Command="{Binding RefreshRepositoryCommand}" HotKey="F5" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuManageRemote}}" Command="{Binding ManageRemoteCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyRemoteUrl}}" Command="{Binding CopyRemoteUrlCommand}" />
                     <Separator />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuViewOnGitHub}}" Command="{Binding ViewRepositoryOnGitHubCommand}" />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCreateIssueOnGitHub}}" Command="{Binding CreateIssueOnGitHubCommand}" />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuOpenInExternalEditor}}" Command="{Binding OpenRepositoryInExternalEditorCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuViewOnGitHub}}" Command="{Binding ViewRepositoryOnGitHubCommand}" HotKey="Ctrl+Shift+G" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCreateIssueOnGitHub}}" Command="{Binding CreateIssueOnGitHubCommand}" HotKey="Ctrl+I" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuOpenInExternalEditor}}" Command="{Binding OpenRepositoryInExternalEditorCommand}" HotKey="Ctrl+Shift+A" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuOpenInShell}}" Command="{Binding OpenRepositoryInShellCommand}" />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowInFileManager}}" Command="{Binding ShowRepositoryInFileManagerCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowInFileManager}}" Command="{Binding ShowRepositoryInFileManagerCommand}" HotKey="Ctrl+Shift+F" />
                     <Separator />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyRepositoryName}}" Command="{Binding CopyCurrentRepositoryNameCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyRepositoryPath}}" Command="{Binding CopyCurrentRepositoryPathCommand}" />
                 </MenuItem>
                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuBranch}}">
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuNewBranch}}" Command="{Binding CreateBranchCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuNewBranch}}" Command="{Binding CreateBranchCommand}" HotKey="Ctrl+Shift+N" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyBranchName}}" Command="{Binding CopyCurrentBranchNameCommand}" IsEnabled="{Binding CanCopyCurrentBranchName}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyUpstreamBranchName}}" Command="{Binding CopyUpstreamBranchNameCommand}" IsEnabled="{Binding CanCopyUpstreamBranchName}" />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRenameBranch}}" Command="{Binding RenameCurrentBranchCommand}" IsEnabled="{Binding CanRenameCurrentBranch}" />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuDeleteBranch}}" Command="{Binding DeleteCurrentBranchCommand}" IsEnabled="{Binding CanDeleteCurrentBranch}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRenameBranch}}" Command="{Binding RenameCurrentBranchCommand}" HotKey="Ctrl+Shift+R" IsEnabled="{Binding CanRenameCurrentBranch}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuDeleteBranch}}" Command="{Binding DeleteCurrentBranchCommand}" HotKey="Ctrl+Shift+D" IsEnabled="{Binding CanDeleteCurrentBranch}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuSetUpstream}}" Command="{Binding SetUpstreamCommand}" IsEnabled="{Binding CanSetUpstream}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuUnsetUpstream}}" Command="{Binding UnsetUpstreamCommand}" IsEnabled="{Binding CanUnsetUpstream}" />
                     <Separator />
-                    <MenuItem Header="{Binding UpdateFromDefaultBranchMenuText}" Command="{Binding UpdateFromDefaultBranchCommand}" />
+                    <MenuItem Header="{Binding UpdateFromDefaultBranchMenuText}" Command="{Binding UpdateFromDefaultBranchCommand}" HotKey="Ctrl+Shift+U" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyDefaultBranchName}}" Command="{Binding CopyDefaultBranchNameCommand}" IsEnabled="{Binding CanCopyDefaultBranchName}" />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuMergeBranch}}" Command="{Binding MergeBranchCommand}" />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuSquashMergeBranch}}" Command="{Binding SquashMergeBranchCommand}" />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRebaseBranch}}" Command="{Binding RebaseBranchCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuMergeBranch}}" Command="{Binding MergeBranchCommand}" HotKey="Ctrl+Shift+M" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuSquashMergeBranch}}" Command="{Binding SquashMergeBranchCommand}" HotKey="Ctrl+Shift+H" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRebaseBranch}}" Command="{Binding RebaseBranchCommand}" HotKey="Ctrl+Shift+E" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuSetCurrentBranchAsDefault}}" Command="{Binding SetCurrentBranchAsDefaultCommand}" IsEnabled="{Binding CanSetCurrentBranchAsDefault}" />
                     <Separator IsVisible="{Binding HasRepositoryOperationInProgress}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuContinueMerge}}" Command="{Binding ContinueMergeCommand}" IsVisible="{Binding HasMergeInProgress}" />
@@ -98,15 +104,21 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuContinueCherryPick}}" Command="{Binding ContinueCherryPickCommand}" IsVisible="{Binding HasCherryPickInProgress}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAbortCherryPick}}" Command="{Binding AbortCherryPickCommand}" IsVisible="{Binding HasCherryPickInProgress}" />
                     <Separator IsVisible="{Binding HasRepositoryOperationInProgress}" />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCompareOnGitHub}}" Command="{Binding CompareCurrentBranchOnGitHubCommand}" />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuViewBranchOnGitHub}}" Command="{Binding ViewCurrentBranchOnGitHubCommand}" />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCreatePullRequest}}" Command="{Binding CreatePullRequestCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCompareOnGitHub}}" Command="{Binding CompareCurrentBranchOnGitHubCommand}" HotKey="Ctrl+Shift+C" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuViewBranchOnGitHub}}" Command="{Binding ViewCurrentBranchOnGitHubCommand}" HotKey="Ctrl+Alt+B" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCreatePullRequest}}" Command="{Binding CreatePullRequestCommand}" HotKey="Ctrl+R" />
                     <Separator />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuStashAllChanges}}" Command="{Binding StashAllChangesCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuStashAllChanges}}" Command="{Binding StashAllChangesCommand}" HotKey="Ctrl+Shift+S" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuRestoreStash}}" Command="{Binding RestoreStashCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuDiscardStash}}" Command="{Binding DiscardStashCommand}" />
                 </MenuItem>
                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuView}}">
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Changes}}" Command="{Binding ShowChangesCommand}" HotKey="Ctrl+1" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.History}}" Command="{Binding ShowHistoryCommand}" HotKey="Ctrl+2" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowRepositoryList}}" Click="ShowRepositorySelectorMenuItem_Click" HotKey="Ctrl+T" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowBranchesList}}" Click="ShowBranchSelectorMenuItem_Click" HotKey="Ctrl+B" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFocusChangesFilter}}" Click="FocusChangesFilterMenuItem_Click" HotKey="Ctrl+L" />
+                    <Separator />
                     <MenuItem
                         Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.ShowOperationLog}}"
                         Command="{Binding ToggleOperationLogCommand}"
@@ -183,6 +195,7 @@
                 </MenuItem>
                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuHelp}}">
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Changelog}}" Command="{Binding ShowChangelogCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.KeyboardShortcuts}}" Command="{Binding ShowKeyboardShortcutsCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAbout}}" Command="{Binding ShowAboutCommand}" />
                 </MenuItem>
             </Menu>
@@ -195,6 +208,7 @@
             Classes="toolbarBand">
             <Grid ColumnDefinitions="360,230,230,*" ColumnSpacing="0">
                 <Button
+                    x:Name="RepositorySelectorButton"
                     Classes="repositorySelector toolbarSplit"
                     HorizontalAlignment="Stretch"
                     ToolTip.Tip="{Binding RepositorySelectorDetail}">
@@ -204,6 +218,7 @@
                                 <Grid Width="330" RowDefinitions="Auto,*" RowSpacing="10">
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                         <TextBox
+                                            x:Name="RepositoryFilterTextBox"
                                             Classes="repositoryFilter"
                                             PlaceholderText="{i18n:I18n {x:Static l:AvaGithubDesktopL.RepositoryFilterPlaceholder}}"
                                             Text="{Binding RepositoryFilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -331,6 +346,7 @@
                     </Grid>
                 </Button>
                 <Button
+                    x:Name="BranchSelectorButton"
                     Grid.Column="1"
                     Classes="branchSelector toolbarSplit"
                     HorizontalAlignment="Stretch"
@@ -352,6 +368,7 @@
                                             Text="{Binding BranchesHeaderText}" />
                                     </Grid>
                                     <TextBox
+                                        x:Name="BranchFilterTextBox"
                                         Grid.Row="1"
                                         Classes="branchFilter"
                                         PlaceholderText="{i18n:I18n {x:Static l:AvaGithubDesktopL.BranchFilterPlaceholder}}"
@@ -608,6 +625,7 @@
                         IsVisible="{Binding IsChangesSelected}">
                         <Grid RowDefinitions="Auto,Auto" RowSpacing="7">
                             <TextBox
+                                x:Name="ChangesFilterTextBox"
                                 Grid.Row="0"
                                 Classes="changesFilter"
                                 IsEnabled="{Binding HasRepository}"
@@ -671,6 +689,8 @@
                             SelectedItem="{Binding SelectedChange, Mode=TwoWay}">
                             <ListBox.ContextFlyout>
                                 <MenuFlyout>
+                                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuMarkAllConflictsResolved}}" Command="{Binding MarkAllConflictsResolvedCommand}" IsVisible="{Binding HasConflictFiles}" />
+                                    <Separator IsVisible="{Binding HasConflictFiles}" />
                                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuDiscardAllChanges}}" Command="{Binding DiscardAllChangesCommand}" />
                                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuStashAllChanges}}" Command="{Binding StashAllChangesCommand}" />
                                 </MenuFlyout>
@@ -682,6 +702,8 @@
                                         Padding="10,0">
                                         <Border.ContextFlyout>
                                             <MenuFlyout>
+                                                <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuMarkConflictResolved}}" Command="{Binding MarkResolvedCommand}" IsVisible="{Binding IsConflict}" />
+                                                <Separator IsVisible="{Binding IsConflict}" />
                                                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyFilePath}}" Command="{Binding CopyFullPathCommand}" />
                                                 <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuCopyRelativePath}}" Command="{Binding CopyRelativePathCommand}" />
                                                 <Separator />

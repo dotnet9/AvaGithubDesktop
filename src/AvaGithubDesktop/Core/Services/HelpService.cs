@@ -27,6 +27,17 @@ public sealed class HelpService : IHelpService
         return Task.CompletedTask;
     }
 
+    public Task ShowKeyboardShortcutsWindowAsync()
+    {
+        var path = ResolveDocumentPath("快捷键.md");
+        var markdown = File.ReadAllText(path);
+        ShowWindow(new MarkdownDocumentWindow(
+            _localizer.Get(AvaGithubDesktopL.KeyboardShortcuts),
+            markdown,
+            Path.GetDirectoryName(path)));
+        return Task.CompletedTask;
+    }
+
     public Task ShowAboutWindowAsync()
     {
         ShowWindow(new MarkdownDocumentWindow(

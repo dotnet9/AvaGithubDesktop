@@ -16,6 +16,7 @@
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
     <Content Include="..\..\docs\更新日志.md" Link="docs\更新日志.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="..\..\docs\快捷键.md" Link="docs\快捷键.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

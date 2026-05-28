@@ -11,6 +11,7 @@ public sealed class GitChangeItemViewModel : ReactiveObject
     private readonly Func<GitChangeItemViewModel, Task> _showInFileManagerAsync;
     private readonly Func<GitChangeItemViewModel, Task> _openInExternalEditorAsync;
     private readonly Func<GitChangeItemViewModel, Task> _discardChangesAsync;
+    private readonly Func<GitChangeItemViewModel, Task> _markResolvedAsync;
     private bool _isIncluded;
 
     public GitChangeItemViewModel(
@@ -19,7 +20,8 @@ public sealed class GitChangeItemViewModel : ReactiveObject
         Func<GitChangeItemViewModel, Task> copyRelativePathAsync,
         Func<GitChangeItemViewModel, Task> showInFileManagerAsync,
         Func<GitChangeItemViewModel, Task> openInExternalEditorAsync,
-        Func<GitChangeItemViewModel, Task> discardChangesAsync)
+        Func<GitChangeItemViewModel, Task> discardChangesAsync,
+        Func<GitChangeItemViewModel, Task> markResolvedAsync)
     {
         Change = change;
         _copyFullPathAsync = copyFullPathAsync;
@@ -27,12 +29,14 @@ public sealed class GitChangeItemViewModel : ReactiveObject
         _showInFileManagerAsync = showInFileManagerAsync;
         _openInExternalEditorAsync = openInExternalEditorAsync;
         _discardChangesAsync = discardChangesAsync;
+        _markResolvedAsync = markResolvedAsync;
         _isIncluded = true;
         CopyFullPathCommand = ReactiveCommand.CreateFromTask(CopyFullPathAsync);
         CopyRelativePathCommand = ReactiveCommand.CreateFromTask(CopyRelativePathAsync);
         ShowInFileManagerCommand = ReactiveCommand.CreateFromTask(ShowInFileManagerAsync);
         OpenInExternalEditorCommand = ReactiveCommand.CreateFromTask(OpenInExternalEditorAsync);
         DiscardChangesCommand = ReactiveCommand.CreateFromTask(DiscardChangesAsync);
+        MarkResolvedCommand = ReactiveCommand.CreateFromTask(MarkResolvedAsync);
     }
 
     public GitChangeItem Change { get; }
@@ -65,6 +69,8 @@ public sealed class GitChangeItemViewModel : ReactiveObject
 
     public ReactiveCommand<Unit, Unit> DiscardChangesCommand { get; }
 
+    public ReactiveCommand<Unit, Unit> MarkResolvedCommand { get; }
+
     public bool IsIncluded
     {
         get => _isIncluded;
@@ -94,5 +100,10 @@ public sealed class GitChangeItemViewModel : ReactiveObject
     private Task DiscardChangesAsync()
     {
         return _discardChangesAsync(this);
+    }
+
+    private Task MarkResolvedAsync()
+    {
+        return _markResolvedAsync(this);
     }
 }

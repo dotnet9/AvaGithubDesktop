@@ -61,6 +61,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isRestoringStash;
     private bool _isDiscardingStash;
     private bool _isDiscardingChanges;
+    private bool _isResolvingConflicts;
     private bool _isManagingRemote;
     private bool _isAmendingLastCommit;
     private bool _isCreatingTag;
@@ -214,6 +215,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         SynchronizeRepositoryCommand = ReactiveCommand.CreateFromTask(SynchronizeRepositoryAsync, canSynchronize);
         FetchRepositoryCommand = ReactiveCommand.CreateFromTask(FetchRepositoryAsync, canSynchronize);
         FetchAllRemotesCommand = ReactiveCommand.CreateFromTask(FetchAllRemotesAsync, canSynchronize);
+        FetchLfsCommand = ReactiveCommand.CreateFromTask(FetchLfsAsync, canSynchronize);
+        PullLfsCommand = ReactiveCommand.CreateFromTask(PullLfsAsync, canSynchronize);
         PullRepositoryCommand = ReactiveCommand.CreateFromTask(PullRepositoryAsync, canSynchronize);
         PushRepositoryCommand = ReactiveCommand.CreateFromTask(PushRepositoryAsync, canSynchronize);
         PushTagsCommand = ReactiveCommand.CreateFromTask(PushTagsAsync, canSynchronize);
@@ -318,7 +321,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         RestoreStashCommand = ReactiveCommand.CreateFromTask(RestoreStashAsync, this.WhenAnyValue(model => model.CanRestoreStash));
         DiscardStashCommand = ReactiveCommand.CreateFromTask(DiscardStashAsync, this.WhenAnyValue(model => model.CanDiscardStash));
         DiscardAllChangesCommand = ReactiveCommand.CreateFromTask(DiscardAllChangesAsync, this.WhenAnyValue(model => model.CanDiscardChanges));
+        MarkAllConflictsResolvedCommand = ReactiveCommand.CreateFromTask(
+            MarkAllConflictsResolvedAsync,
+            this.WhenAnyValue(
+                model => model.HasRepository,
+                model => model.CanRunRepositoryCommand,
+                model => model.HasConflictFiles,
+                (hasRepository, canRunRepositoryCommand, hasConflictFiles) =>
+                    hasRepository && canRunRepositoryCommand && hasConflictFiles));
         ShowChangelogCommand = ReactiveCommand.CreateFromTask(ShowChangelogAsync);
+        ShowKeyboardShortcutsCommand = ReactiveCommand.CreateFromTask(ShowKeyboardShortcutsAsync);
         ShowAboutCommand = ReactiveCommand.CreateFromTask(ShowAboutAsync);
         SignInCommand = ReactiveCommand.CreateFromTask(
             SignInAsync,
@@ -401,6 +413,10 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> FetchRepositoryCommand { get; }
 
     public ReactiveCommand<Unit, Unit> FetchAllRemotesCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> FetchLfsCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> PullLfsCommand { get; }
 
     public ReactiveCommand<Unit, Unit> PullRepositoryCommand { get; }
 
@@ -492,7 +508,11 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> DiscardAllChangesCommand { get; }
 
+    public ReactiveCommand<Unit, Unit> MarkAllConflictsResolvedCommand { get; }
+
     public ReactiveCommand<Unit, Unit> ShowChangelogCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ShowKeyboardShortcutsCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ShowAboutCommand { get; }
 
@@ -708,6 +728,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         !IsRestoringStash &&
         !IsDiscardingStash &&
         !IsDiscardingChanges &&
+        !IsResolvingConflicts &&
         !IsManagingRemote &&
         !IsCreatingTag &&
         !IsRevertingCommit &&
@@ -831,6 +852,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         private set
         {
             this.RaiseAndSetIfChanged(ref _isDiscardingChanges, value);
+            RaiseOperationStateChanged();
+        }
+    }
+
+    public bool IsResolvingConflicts
+    {
+        get => _isResolvingConflicts;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _isResolvingConflicts, value);
             RaiseOperationStateChanged();
         }
     }
@@ -1320,6 +1351,8 @@ public sealed class MainWindowViewModel : ViewModelBase
                 return _activeSyncOperation switch
                 {
                     RepositorySyncOperation.FetchAll => _localizer.Get(AvaGithubDesktopL.SyncFetchingAllRemotesTitle),
+                    RepositorySyncOperation.FetchLfs => _localizer.Format(AvaGithubDesktopL.SyncFetchingLfsTitleFormat, RemoteName),
+                    RepositorySyncOperation.PullLfs => _localizer.Format(AvaGithubDesktopL.SyncPullingLfsTitleFormat, RemoteName),
                     RepositorySyncOperation.UpdateSubmodules => _localizer.Get(AvaGithubDesktopL.SyncUpdatingSubmodulesTitle),
                     RepositorySyncOperation.Pull => _localizer.Format(AvaGithubDesktopL.SyncPullingTitleFormat, RemoteName),
                     RepositorySyncOperation.Publish => _localizer.Get(AvaGithubDesktopL.SyncPublishingBranchTitle),
@@ -2404,6 +2437,62 @@ public sealed class MainWindowViewModel : ViewModelBase
         await DiscardChangesAsync(new[] { change });
     }
 
+    private async Task MarkConflictResolvedAsync(GitChangeItemViewModel change)
+    {
+        await MarkConflictsResolvedAsync(new[] { change });
+    }
+
+    private async Task MarkAllConflictsResolvedAsync()
+    {
+        await MarkConflictsResolvedAsync(ChangedFiles.Where(change => change.IsConflict).ToArray());
+    }
+
+    private async Task MarkConflictsResolvedAsync(IReadOnlyList<GitChangeItemViewModel> changes)
+    {
+        var conflicts = changes.Where(change => change.IsConflict).ToArray();
+        if (!HasRepository || !CanRunRepositoryCommand || conflicts.Length == 0)
+        {
+            return;
+        }
+
+        IsResolvingConflicts = true;
+        ErrorMessage = string.Empty;
+        _eventBus.Publish(new StatusMessageChangedCommand(GetMarkResolvedStartedMessage(conflicts)));
+
+        try
+        {
+            await _gitRepositoryService.MarkConflictsResolvedAsync(
+                RootPath,
+                conflicts.Select(change => change.Change).ToArray(),
+                CancellationToken.None);
+            await ReloadRepositoryWorkspaceAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(GetMarkResolvedCompletedMessage(conflicts)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusMarkResolvedFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+        finally
+        {
+            IsResolvingConflicts = false;
+        }
+    }
+
+    private string GetMarkResolvedStartedMessage(IReadOnlyList<GitChangeItemViewModel> changes)
+    {
+        return changes.Count == 1
+            ? _localizer.Format(AvaGithubDesktopL.StatusMarkingResolvedFormat, changes[0].Path)
+            : _localizer.Format(AvaGithubDesktopL.StatusMarkingResolvedCountFormat, changes.Count);
+    }
+
+    private string GetMarkResolvedCompletedMessage(IReadOnlyList<GitChangeItemViewModel> changes)
+    {
+        return changes.Count == 1
+            ? _localizer.Format(AvaGithubDesktopL.StatusMarkedResolvedFormat, changes[0].Path)
+            : _localizer.Format(AvaGithubDesktopL.StatusMarkedResolvedCountFormat, changes.Count);
+    }
+
     private async Task DiscardAllChangesAsync()
     {
         if (!CanDiscardChanges)
@@ -2668,6 +2757,20 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private async Task ShowKeyboardShortcutsAsync()
+    {
+        try
+        {
+            await _helpService.ShowKeyboardShortcutsWindowAsync();
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusOpenedKeyboardShortcuts)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenHelpFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+    }
+
     private async Task ShowAboutAsync()
     {
         try
@@ -2821,6 +2924,12 @@ public sealed class MainWindowViewModel : ViewModelBase
     private Task FetchAllRemotesAsync() =>
         RunRemoteOperationAsync(RepositorySyncOperation.FetchAll);
 
+    private Task FetchLfsAsync() =>
+        RunRemoteOperationAsync(RepositorySyncOperation.FetchLfs);
+
+    private Task PullLfsAsync() =>
+        RunRemoteOperationAsync(RepositorySyncOperation.PullLfs);
+
     private Task PullRepositoryAsync() =>
         RunRemoteOperationAsync(RepositorySyncOperation.Pull);
 
@@ -2916,6 +3025,12 @@ public sealed class MainWindowViewModel : ViewModelBase
                 case RepositorySyncOperation.FetchAll:
                     await _gitRepositoryService.FetchAllAsync(RootPath, CancellationToken.None);
                     break;
+                case RepositorySyncOperation.FetchLfs:
+                    await _gitRepositoryService.FetchLfsAsync(RootPath, RemoteName, CancellationToken.None);
+                    break;
+                case RepositorySyncOperation.PullLfs:
+                    await _gitRepositoryService.PullLfsAsync(RootPath, RemoteName, CancellationToken.None);
+                    break;
                 case RepositorySyncOperation.Pull:
                     await _gitRepositoryService.PullAsync(RootPath, RemoteName, CancellationToken.None);
                     break;
@@ -2952,6 +3067,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         operation switch
         {
             RepositorySyncOperation.FetchAll => _localizer.Get(AvaGithubDesktopL.StatusFetchingAllRemotes),
+            RepositorySyncOperation.FetchLfs => _localizer.Format(AvaGithubDesktopL.StatusFetchingLfsFormat, RemoteName),
+            RepositorySyncOperation.PullLfs => _localizer.Format(AvaGithubDesktopL.StatusPullingLfsFormat, RemoteName),
             RepositorySyncOperation.Pull => _localizer.Format(AvaGithubDesktopL.StatusPullingFormat, RemoteName),
             RepositorySyncOperation.Publish => _localizer.Format(AvaGithubDesktopL.StatusPublishingBranchFormat, CurrentBranch, RemoteName),
             RepositorySyncOperation.Push => _localizer.Format(AvaGithubDesktopL.StatusPushingFormat, RemoteName),
@@ -2962,6 +3079,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         operation switch
         {
             RepositorySyncOperation.FetchAll => _localizer.Get(AvaGithubDesktopL.StatusFetchedAllRemotes),
+            RepositorySyncOperation.FetchLfs => _localizer.Format(AvaGithubDesktopL.StatusFetchedLfsFormat, RemoteName),
+            RepositorySyncOperation.PullLfs => _localizer.Format(AvaGithubDesktopL.StatusPulledLfsFormat, RemoteName),
             RepositorySyncOperation.Pull => _localizer.Format(AvaGithubDesktopL.StatusPulledFormat, RemoteName),
             RepositorySyncOperation.Publish => _localizer.Format(AvaGithubDesktopL.StatusPublishedBranchFormat, CurrentBranch, RemoteName),
             RepositorySyncOperation.Push => _localizer.Format(AvaGithubDesktopL.StatusPushedFormat, RemoteName),
@@ -2972,6 +3091,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         operation switch
         {
             RepositorySyncOperation.FetchAll => AvaGithubDesktopL.StatusFetchAllRemotesFailedFormat,
+            RepositorySyncOperation.FetchLfs => AvaGithubDesktopL.StatusFetchLfsFailedFormat,
+            RepositorySyncOperation.PullLfs => AvaGithubDesktopL.StatusPullLfsFailedFormat,
             RepositorySyncOperation.Pull => AvaGithubDesktopL.StatusPullFailedFormat,
             RepositorySyncOperation.Publish => AvaGithubDesktopL.StatusPublishBranchFailedFormat,
             RepositorySyncOperation.Push => AvaGithubDesktopL.StatusPushFailedFormat,
@@ -3227,7 +3348,8 @@ public sealed class MainWindowViewModel : ViewModelBase
                 CopyChangeRelativePathAsync,
                 ShowChangeInFileManagerAsync,
                 OpenChangeInExternalEditorAsync,
-                DiscardChangeAsync);
+                DiscardChangeAsync,
+                MarkConflictResolvedAsync);
             // 单个文件勾选变化会影响提交按钮、全选三态和“已选择”文案，需要集中刷新派生状态。
             var subscription = changeViewModel
                 .WhenAnyValue(model => model.IsIncluded)
@@ -4447,6 +4569,8 @@ public enum RepositorySyncOperation
     None,
     Fetch,
     FetchAll,
+    FetchLfs,
+    PullLfs,
     UpdateSubmodules,
     Pull,
     Publish,

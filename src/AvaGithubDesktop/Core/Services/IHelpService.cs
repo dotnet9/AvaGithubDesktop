@@ -4,5 +4,7 @@ public interface IHelpService
 {
     Task ShowChangelogWindowAsync();
 
+    Task ShowKeyboardShortcutsWindowAsync();
+
     Task ShowAboutWindowAsync();
 }

@@ -143,6 +143,16 @@ public interface IGitRepositoryService
         string repositoryPath,
         CancellationToken cancellationToken);
 
+    Task FetchLfsAsync(
+        string repositoryPath,
+        string remoteName,
+        CancellationToken cancellationToken);
+
+    Task PullLfsAsync(
+        string repositoryPath,
+        string remoteName,
+        CancellationToken cancellationToken);
+
     Task UpdateSubmodulesAsync(
         string repositoryPath,
         CancellationToken cancellationToken);
@@ -179,6 +189,11 @@ public interface IGitRepositoryService
         CancellationToken cancellationToken);
 
     Task DiscardChangesAsync(
+        string repositoryPath,
+        IReadOnlyList<GitChangeItem> changes,
+        CancellationToken cancellationToken);
+
+    Task MarkConflictsResolvedAsync(
         string repositoryPath,
         IReadOnlyList<GitChangeItem> changes,
         CancellationToken cancellationToken);

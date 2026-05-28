@@ -598,6 +598,26 @@ public sealed class GitRepositoryService : IGitRepositoryService
         await RunRequiredGitAsync(root, cancellationToken, "fetch", "--all", "--prune", "--recurse-submodules=on-demand");
     }
 
+    public async Task FetchLfsAsync(
+        string repositoryPath,
+        string remoteName,
+        CancellationToken cancellationToken)
+    {
+        var root = await ResolveRootAsync(repositoryPath, cancellationToken);
+        var normalizedRemoteName = NormalizeRemoteName(remoteName);
+        await RunRequiredGitAsync(root, cancellationToken, "lfs", "fetch", normalizedRemoteName);
+    }
+
+    public async Task PullLfsAsync(
+        string repositoryPath,
+        string remoteName,
+        CancellationToken cancellationToken)
+    {
+        var root = await ResolveRootAsync(repositoryPath, cancellationToken);
+        var normalizedRemoteName = NormalizeRemoteName(remoteName);
+        await RunRequiredGitAsync(root, cancellationToken, "lfs", "pull", normalizedRemoteName);
+    }
+
     public async Task UpdateSubmodulesAsync(
         string repositoryPath,
         CancellationToken cancellationToken)
@@ -775,6 +795,27 @@ public sealed class GitRepositoryService : IGitRepositoryService
                 DeleteUntrackedPath(root, path);
             }
         }
+    }
+
+    public async Task MarkConflictsResolvedAsync(
+        string repositoryPath,
+        IReadOnlyList<GitChangeItem> changes,
+        CancellationToken cancellationToken)
+    {
+        var root = await ResolveRootAsync(repositoryPath, cancellationToken);
+        var paths = NormalizeGitPaths(changes
+            .Where(change => change.IsConflict)
+            .SelectMany(change => change.GitPaths)
+            .ToArray());
+        if (paths.Length == 0)
+        {
+            return;
+        }
+
+        await RunRequiredGitAsync(
+            root,
+            cancellationToken,
+            CreatePathArguments(new[] { "add" }, paths));
     }
 
     public async Task<string> LoadWorkingTreeDiffAsync(
