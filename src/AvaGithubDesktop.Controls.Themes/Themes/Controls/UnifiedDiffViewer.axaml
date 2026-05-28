@@ -14,7 +14,7 @@
         <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="CornerRadius" Value="0" />
-        <Setter Property="FontFamily" Value="Cascadia Mono, Consolas, Microsoft YaHei UI, monospace" />
+        <Setter Property="FontFamily" Value="Cascadia Mono, JetBrains Mono, Consolas, Noto Sans Mono CJK SC, Microsoft YaHei UI, monospace" />
         <Setter Property="FontSize" Value="12" />
         <Setter Property="Template">
             <ControlTemplate TargetType="{x:Type controls:UnifiedDiffViewer}">
@@ -56,7 +56,7 @@
         <Setter Property="GutterForeground" Value="{DynamicResource DiffGutterTextBrush}" />
         <Setter Property="PrefixForeground" Value="{DynamicResource DiffGutterTextBrush}" />
         <Setter Property="ContentForeground" Value="{DynamicResource DiffContentTextBrush}" />
-        <Setter Property="FontFamily" Value="Cascadia Mono, Consolas, Microsoft YaHei UI, monospace" />
+        <Setter Property="FontFamily" Value="Cascadia Mono, JetBrains Mono, Consolas, Noto Sans Mono CJK SC, Microsoft YaHei UI, monospace" />
         <Setter Property="FontSize" Value="12" />
         <Setter Property="Template">
             <ControlTemplate TargetType="{x:Type controls:UnifiedDiffLinePresenter}">

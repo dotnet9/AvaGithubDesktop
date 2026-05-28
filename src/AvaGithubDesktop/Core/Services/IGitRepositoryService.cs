@@ -201,23 +201,27 @@ public interface IGitRepositoryService
     Task<string> LoadWorkingTreeDiffAsync(
         string repositoryPath,
         IReadOnlyList<string> paths,
+        bool hideWhitespaceChanges,
         CancellationToken cancellationToken);
 
     Task<GitFileDiffPreview> LoadWorkingTreeDiffPreviewAsync(
         string repositoryPath,
         IReadOnlyList<string> paths,
+        bool hideWhitespaceChanges,
         CancellationToken cancellationToken);
 
     Task<string> LoadCommitFileDiffAsync(
         string repositoryPath,
         string sha,
         string path,
+        bool hideWhitespaceChanges,
         CancellationToken cancellationToken);
 
     Task<GitFileDiffPreview> LoadCommitFileDiffPreviewAsync(
         string repositoryPath,
         string sha,
         IReadOnlyList<string> paths,
+        bool hideWhitespaceChanges,
         CancellationToken cancellationToken);
 
     Task CommitAsync(

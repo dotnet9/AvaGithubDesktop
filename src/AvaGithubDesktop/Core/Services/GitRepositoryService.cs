@@ -102,21 +102,44 @@ public sealed class GitRepositoryService : IGitRepositoryService
         }
 
         var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
-        var branch = await ResolveBranchAsync(root, cancellationToken);
-        var status = await RunRequiredGitAsync(root, cancellationToken, "status", "--porcelain=v1", "-b");
-        var upstream = await RunOptionalGitAsync(root, cancellationToken, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}");
-        var remotes = await RunOptionalGitAsync(root, cancellationToken, "remote");
+        var branchTask = ResolveBranchAsync(root, cancellationToken);
+        var statusTask = RunRequiredGitAsync(root, cancellationToken, "status", "--porcelain=v1", "-b");
+        var upstreamTask = RunOptionalGitAsync(root, cancellationToken, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}");
+        var remotesTask = RunOptionalGitAsync(root, cancellationToken, "remote");
+        var lastCommitTask = RunOptionalGitAsync(root, cancellationToken, "log", "-1", "--pretty=format:%h%x09%s%x09%cr");
+        var lastFetchedAtTask = ResolveLastFetchedAtAsync(root, cancellationToken);
+        var operationStateTask = ResolveOperationStateAsync(root, cancellationToken);
+
+        await Task.WhenAll(
+            branchTask,
+            statusTask,
+            upstreamTask,
+            remotesTask,
+            lastCommitTask,
+            lastFetchedAtTask,
+            operationStateTask);
+
+        var branch = await branchTask;
+        var status = await statusTask;
+        var upstream = await upstreamTask;
+        var remotes = await remotesTask;
         var remoteName = ResolveRemoteName(upstream, remotes);
-        var defaultBranch = await ResolveDefaultBranchAsync(root, remoteName, cancellationToken);
-        var remote = remoteName == "-"
-            ? string.Empty
-            : await RunOptionalGitAsync(root, cancellationToken, "remote", "get-url", remoteName);
-        var lastCommit = await RunOptionalGitAsync(root, cancellationToken, "log", "-1", "--pretty=format:%h%x09%s%x09%cr");
+        var defaultBranchTask = ResolveDefaultBranchAsync(root, remoteName, cancellationToken);
+        var remoteTask = remoteName == "-"
+            ? Task.FromResult(string.Empty)
+            : RunOptionalGitAsync(root, cancellationToken, "remote", "get-url", remoteName);
+        var currentBranchStashTask = LoadCurrentBranchStashAsync(root, branch, cancellationToken);
+
         var changes = GitRepositoryOutputParser.ParseChanges(status);
         var (ahead, behind) = GitRepositoryOutputParser.ParseAheadBehind(status);
-        var lastFetchedAt = await ResolveLastFetchedAtAsync(root, cancellationToken);
-        var operationState = await ResolveOperationStateAsync(root, cancellationToken);
-        var currentBranchStash = await LoadCurrentBranchStashAsync(root, branch, cancellationToken);
+        await Task.WhenAll(defaultBranchTask, remoteTask, currentBranchStashTask);
+
+        var defaultBranch = await defaultBranchTask;
+        var remote = await remoteTask;
+        var lastCommit = await lastCommitTask;
+        var lastFetchedAt = await lastFetchedAtTask;
+        var operationState = await operationStateTask;
+        var currentBranchStash = await currentBranchStashTask;
 
         return new GitRepositorySnapshot(
             RepositoryName: new DirectoryInfo(root).Name,
@@ -818,6 +841,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
     public async Task<string> LoadWorkingTreeDiffAsync(
         string repositoryPath,
         IReadOnlyList<string> paths,
+        bool hideWhitespaceChanges,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
@@ -836,14 +860,20 @@ public sealed class GitRepositoryService : IGitRepositoryService
         }
 
         var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
+        var unstagedPrefix = hideWhitespaceChanges
+            ? new[] { "diff", "--ignore-all-space" }
+            : new[] { "diff" };
+        var stagedPrefix = hideWhitespaceChanges
+            ? new[] { "diff", "--cached", "--ignore-all-space" }
+            : new[] { "diff", "--cached" };
         var unstaged = await RunOptionalGitAsync(
             root,
             cancellationToken,
-            CreatePathArguments(new[] { "diff" }, normalizedPaths));
+            CreatePathArguments(unstagedPrefix, normalizedPaths));
         var staged = await RunOptionalGitAsync(
             root,
             cancellationToken,
-            CreatePathArguments(new[] { "diff", "--cached" }, normalizedPaths));
+            CreatePathArguments(stagedPrefix, normalizedPaths));
 
         return JoinDiffs(unstaged, staged);
     }
@@ -851,6 +881,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
     public async Task<GitFileDiffPreview> LoadWorkingTreeDiffPreviewAsync(
         string repositoryPath,
         IReadOnlyList<string> paths,
+        bool hideWhitespaceChanges,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
@@ -894,7 +925,11 @@ public sealed class GitRepositoryService : IGitRepositoryService
             return GitFileDiffPreview.BinaryDiff(File.Exists(workingTreePath) ? workingTreePath : null);
         }
 
-        var diff = await LoadWorkingTreeDiffAsync(repositoryPath, normalizedPaths, cancellationToken);
+        var diff = await LoadWorkingTreeDiffAsync(
+            repositoryPath,
+            normalizedPaths,
+            hideWhitespaceChanges,
+            cancellationToken);
         return GitFileDiffPreview.TextDiff(diff);
     }
 
@@ -902,6 +937,7 @@ public sealed class GitRepositoryService : IGitRepositoryService
         string repositoryPath,
         string sha,
         string path,
+        bool hideWhitespaceChanges,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
@@ -915,22 +951,17 @@ public sealed class GitRepositoryService : IGitRepositoryService
         }
 
         var root = await RunRequiredGitAsync(repositoryPath, cancellationToken, "rev-parse", "--show-toplevel");
-        return await RunOptionalGitAsync(
-            root,
-            cancellationToken,
-            "show",
-            "--format=",
-            "--diff-merges=first-parent",
-            "--find-renames",
-            sha,
-            "--",
-            path);
+        var prefix = hideWhitespaceChanges
+            ? new[] { "show", "--format=", "--diff-merges=first-parent", "--find-renames", "--ignore-all-space", sha }
+            : new[] { "show", "--format=", "--diff-merges=first-parent", "--find-renames", sha };
+        return await RunOptionalGitAsync(root, cancellationToken, CreatePathArguments(prefix, [path]));
     }
 
     public async Task<GitFileDiffPreview> LoadCommitFileDiffPreviewAsync(
         string repositoryPath,
         string sha,
         IReadOnlyList<string> paths,
+        bool hideWhitespaceChanges,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(repositoryPath) || !Directory.Exists(repositoryPath))
@@ -970,7 +1001,9 @@ public sealed class GitRepositoryService : IGitRepositoryService
             root,
             cancellationToken,
             CreatePathArguments(
-                new[] { "show", "--format=", "--diff-merges=first-parent", "--find-renames", sha },
+                hideWhitespaceChanges
+                    ? new[] { "show", "--format=", "--diff-merges=first-parent", "--find-renames", "--ignore-all-space", sha }
+                    : new[] { "show", "--format=", "--diff-merges=first-parent", "--find-renames", sha },
                 normalizedPaths));
         return GitFileDiffPreview.TextDiff(diff);
     }

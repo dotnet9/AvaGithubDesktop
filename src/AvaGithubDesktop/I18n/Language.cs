@@ -37,6 +37,7 @@ public static class AvaGithubDesktopL
     public static readonly string MenuFocusCommitSummary = "AvaGithubDesktop.AvaGithubDesktopL.MenuFocusCommitSummary";
     public static readonly string MenuFocusChangesFilter = "AvaGithubDesktop.AvaGithubDesktopL.MenuFocusChangesFilter";
     public static readonly string MenuFocusOperationLogFilter = "AvaGithubDesktop.AvaGithubDesktopL.MenuFocusOperationLogFilter";
+    public static readonly string MenuHideWhitespaceChanges = "AvaGithubDesktop.AvaGithubDesktopL.MenuHideWhitespaceChanges";
     public static readonly string MenuShowStashedChanges = "AvaGithubDesktop.AvaGithubDesktopL.MenuShowStashedChanges";
     public static readonly string MenuHideStashedChanges = "AvaGithubDesktop.AvaGithubDesktopL.MenuHideStashedChanges";
     public static readonly string MenuToggleFullScreen = "AvaGithubDesktop.AvaGithubDesktopL.MenuToggleFullScreen";
@@ -322,6 +323,8 @@ public static class AvaGithubDesktopL
     public static readonly string StatusOpenHelpFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusOpenHelpFailedFormat";
     public static readonly string StatusOperationLogShown = "AvaGithubDesktop.AvaGithubDesktopL.StatusOperationLogShown";
     public static readonly string StatusOperationLogHidden = "AvaGithubDesktop.AvaGithubDesktopL.StatusOperationLogHidden";
+    public static readonly string StatusWhitespaceChangesHidden = "AvaGithubDesktop.AvaGithubDesktopL.StatusWhitespaceChangesHidden";
+    public static readonly string StatusWhitespaceChangesShown = "AvaGithubDesktop.AvaGithubDesktopL.StatusWhitespaceChangesShown";
     public static readonly string StatusLanguageSwitchedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusLanguageSwitchedFormat";
     public static readonly string StatusThemeSwitchedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusThemeSwitchedFormat";
     public static readonly string StatusLoadAccountFailedFormat = "AvaGithubDesktop.AvaGithubDesktopL.StatusLoadAccountFailedFormat";

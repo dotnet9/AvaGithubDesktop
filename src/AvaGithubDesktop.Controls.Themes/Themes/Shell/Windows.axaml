@@ -1,0 +1,7 @@
+<Styles
+    xmlns="https://github.com/avaloniaui"
+    xmlns:codewf="https://codewf.com">
+    <Style Selector="codewf|CodeWFWindow">
+        <Setter Property="TitleBarBorderThickness" Value="0,0,0,1" />
+    </Style>
+</Styles>

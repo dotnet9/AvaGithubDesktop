@@ -181,7 +181,7 @@
 
     <Style Selector="TextBox.diffViewer">
         <Setter Property="AcceptsReturn" Value="True" />
-        <Setter Property="FontFamily" Value="Consolas, Cascadia Mono, monospace" />
+        <Setter Property="FontFamily" Value="Cascadia Mono, JetBrains Mono, Consolas, Noto Sans Mono CJK SC, monospace" />
         <Setter Property="FontSize" Value="12" />
         <Setter Property="TextWrapping" Value="NoWrap" />
     </Style>

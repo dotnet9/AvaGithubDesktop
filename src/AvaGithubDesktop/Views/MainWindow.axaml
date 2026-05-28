@@ -76,6 +76,11 @@
                     <MenuItem Header="{Binding ToggleStashedChangesMenuText}" Command="{Binding ToggleStashedChangesVisibilityCommand}" HotKey="Ctrl+H" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFocusChangesFilter}}" Click="FocusChangesFilterMenuItem_Click" HotKey="Ctrl+L" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFocusOperationLogFilter}}" Click="FocusOperationLogFilterMenuItem_Click" HotKey="Ctrl+Shift+L" />
+                    <MenuItem
+                        Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuHideWhitespaceChanges}}"
+                        Command="{Binding ToggleHideWhitespaceChangesCommand}"
+                        IsChecked="{Binding HideWhitespaceChanges}"
+                        ToggleType="CheckBox" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuToggleFullScreen}}" Click="ToggleFullScreenMenuItem_Click" HotKey="F11" />
                     <Separator />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuExpandActiveResizable}}" Click="ExpandActiveResizableMenuItem_Click" HotKey="Ctrl+9" />

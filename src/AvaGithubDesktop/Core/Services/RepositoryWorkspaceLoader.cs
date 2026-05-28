@@ -17,8 +17,10 @@ public sealed class RepositoryWorkspaceLoader : IRepositoryWorkspaceLoader
         CancellationToken cancellationToken)
     {
         var snapshot = await _gitRepositoryService.LoadRepositoryAsync(repositoryPath, cancellationToken);
-        var branches = await _gitRepositoryService.LoadBranchesAsync(snapshot.RootPath, cancellationToken);
-        var history = await _gitRepositoryService.LoadHistoryAsync(snapshot.RootPath, historyCommitLimit, cancellationToken);
-        return new RepositoryWorkspaceState(snapshot, branches, history);
+        var branchesTask = _gitRepositoryService.LoadBranchesAsync(snapshot.RootPath, cancellationToken);
+        var historyTask = _gitRepositoryService.LoadHistoryAsync(snapshot.RootPath, historyCommitLimit, cancellationToken);
+
+        await Task.WhenAll(branchesTask, historyTask);
+        return new RepositoryWorkspaceState(snapshot, await branchesTask, await historyTask);
     }
 }

@@ -1,6 +1,12 @@
 <Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Styles.Resources>
         <x:Double x:Key="MenuFlyoutMaxHeight">Infinity</x:Double>
+        <x:Double x:Key="MenuFlyoutMinWidth">180</x:Double>
+        <x:Double x:Key="MenuFlyoutFontSize">13</x:Double>
+        <Thickness x:Key="MenuFlyoutPadding">4,6</Thickness>
+        <Thickness x:Key="MenuItemPadding">12,7</Thickness>
+        <Thickness x:Key="TopLevelMenuItemPadding">8,0</Thickness>
+        <CornerRadius x:Key="MenuItemCornerRadius">4</CornerRadius>
     </Styles.Resources>
 
     <Style Selector="Menu.titleBar">
@@ -14,13 +20,20 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Padding" Value="8,0" />
         <Setter Property="FontSize" Value="12" />
+        <Setter Property="MinHeight" Value="28" />
     </Style>
 
     <Style Selector="Menu.titleBar > MenuItem:pointerover">
         <Setter Property="Background" Value="{DynamicResource ToolbarHoverBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ToolbarTextBrush}" />
     </Style>
 
     <Style Selector="Menu.titleBar > MenuItem:open">
         <Setter Property="Background" Value="{DynamicResource ToolbarHoverBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ToolbarTextBrush}" />
+    </Style>
+
+    <Style Selector="MenuItem:disabled">
+        <Setter Property="Opacity" Value="0.62" />
     </Style>
 </Styles>

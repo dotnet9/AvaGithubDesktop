@@ -10,7 +10,7 @@
         <Setter Property="InfoForeground" Value="{DynamicResource LogInfoBrush}" />
         <Setter Property="WarnForeground" Value="{DynamicResource LogWarnBrush}" />
         <Setter Property="ErrorForeground" Value="{DynamicResource LogErrorBrush}" />
-        <Setter Property="FontFamily" Value="Cascadia Mono, Consolas, Microsoft YaHei UI, monospace" />
+        <Setter Property="FontFamily" Value="Cascadia Mono, JetBrains Mono, Consolas, Noto Sans Mono CJK SC, Microsoft YaHei UI, monospace" />
         <Setter Property="FontSize" Value="12" />
         <Setter Property="Template">
             <ControlTemplate TargetType="{x:Type controls:OperationLogView}">

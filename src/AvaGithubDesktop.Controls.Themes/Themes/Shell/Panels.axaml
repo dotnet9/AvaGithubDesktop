@@ -197,7 +197,7 @@
 
     <Style Selector="GridSplitter.workspaceSplitter">
         <Setter Property="Background" Value="{DynamicResource PanelBorderBrush}" />
-        <Setter Property="Opacity" Value="0.72" />
+        <Setter Property="Opacity" Value="0.84" />
     </Style>
 
     <Style Selector="GridSplitter.workspaceSplitter:pointerover">
@@ -206,14 +206,14 @@
     </Style>
 
     <Style Selector="GridSplitter.workspaceSplitter.vertical">
-        <Setter Property="Width" Value="6" />
-        <Setter Property="MinWidth" Value="6" />
+        <Setter Property="Width" Value="7" />
+        <Setter Property="MinWidth" Value="7" />
         <Setter Property="Cursor" Value="SizeWestEast" />
     </Style>
 
     <Style Selector="GridSplitter.workspaceSplitter.horizontal">
-        <Setter Property="Height" Value="6" />
-        <Setter Property="MinHeight" Value="6" />
+        <Setter Property="Height" Value="7" />
+        <Setter Property="MinHeight" Value="7" />
         <Setter Property="Cursor" Value="SizeNorthSouth" />
     </Style>
 </Styles>

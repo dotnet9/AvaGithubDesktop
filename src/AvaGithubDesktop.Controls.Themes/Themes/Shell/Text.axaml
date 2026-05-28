@@ -50,7 +50,7 @@
     </Style>
 
     <Style Selector="TextBlock.monospace">
-        <Setter Property="FontFamily" Value="Consolas, Cascadia Mono, Microsoft YaHei UI" />
+        <Setter Property="FontFamily" Value="Cascadia Mono, JetBrains Mono, Consolas, Noto Sans Mono CJK SC, Microsoft YaHei UI, monospace" />
         <Setter Property="FontSize" Value="12" />
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
     </Style>
@@ -73,7 +73,7 @@
     </Style>
 
     <Style Selector="TextBlock.commitSha">
-        <Setter Property="FontFamily" Value="Consolas, Cascadia Mono, Microsoft YaHei UI" />
+        <Setter Property="FontFamily" Value="Cascadia Mono, JetBrains Mono, Consolas, Noto Sans Mono CJK SC, Microsoft YaHei UI, monospace" />
         <Setter Property="FontSize" Value="12" />
         <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
     </Style>

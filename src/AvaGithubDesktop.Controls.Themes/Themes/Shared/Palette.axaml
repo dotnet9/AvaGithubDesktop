@@ -56,6 +56,20 @@
             <SolidColorBrush x:Key="LogInfoBrush" Color="#138A4A" />
             <SolidColorBrush x:Key="LogWarnBrush" Color="#9A6A00" />
             <SolidColorBrush x:Key="LogErrorBrush" Color="#D92D4B" />
+            <SolidColorBrush x:Key="MenuFlyoutBackground" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="MenuFlyoutBorderBrush" Color="#C5DDF4" />
+            <SolidColorBrush x:Key="MenuItemBackground" Color="Transparent" />
+            <SolidColorBrush x:Key="MenuItemForeground" Color="#102033" />
+            <SolidColorBrush x:Key="MenuItemPointeroverForeground" Color="#102033" />
+            <SolidColorBrush x:Key="MenuItemPointeroverBackground" Color="#EDF6FF" />
+            <SolidColorBrush x:Key="MenuItemPressedBackground" Color="#DCEEFF" />
+            <SolidColorBrush x:Key="MenuItemInputGestureTextForeground" Color="#6C7F94" />
+            <SolidColorBrush x:Key="MenuItemExpandIconForeground" Color="#6C7F94" />
+            <SolidColorBrush x:Key="MenuItemExpandIconOpenForeground" Color="#102033" />
+            <SolidColorBrush x:Key="MenuItemDisabledForeground" Color="#6C7F94" />
+            <SolidColorBrush x:Key="MenuItemDisabledInputGestureTextForeground" Color="#6C7F94" />
+            <SolidColorBrush x:Key="MenuItemDisabledExpandIconForeground" Color="#6C7F94" />
+            <SolidColorBrush x:Key="MenuItemSeparatorBackground" Color="#C5DDF4" />
         </ResourceDictionary>
 
         <ResourceDictionary x:Key="Dark">
@@ -111,6 +125,20 @@
             <SolidColorBrush x:Key="LogInfoBrush" Color="#86EFAC" />
             <SolidColorBrush x:Key="LogWarnBrush" Color="#FACC15" />
             <SolidColorBrush x:Key="LogErrorBrush" Color="#FB7185" />
+            <SolidColorBrush x:Key="MenuFlyoutBackground" Color="#0C182A" />
+            <SolidColorBrush x:Key="MenuFlyoutBorderBrush" Color="#1C3954" />
+            <SolidColorBrush x:Key="MenuItemBackground" Color="Transparent" />
+            <SolidColorBrush x:Key="MenuItemForeground" Color="#E7F3FF" />
+            <SolidColorBrush x:Key="MenuItemPointeroverForeground" Color="#E7F3FF" />
+            <SolidColorBrush x:Key="MenuItemPointeroverBackground" Color="#142B43" />
+            <SolidColorBrush x:Key="MenuItemPressedBackground" Color="#12395D" />
+            <SolidColorBrush x:Key="MenuItemInputGestureTextForeground" Color="#7F9BB8" />
+            <SolidColorBrush x:Key="MenuItemExpandIconForeground" Color="#7F9BB8" />
+            <SolidColorBrush x:Key="MenuItemExpandIconOpenForeground" Color="#E7F3FF" />
+            <SolidColorBrush x:Key="MenuItemDisabledForeground" Color="#7F9BB8" />
+            <SolidColorBrush x:Key="MenuItemDisabledInputGestureTextForeground" Color="#7F9BB8" />
+            <SolidColorBrush x:Key="MenuItemDisabledExpandIconForeground" Color="#7F9BB8" />
+            <SolidColorBrush x:Key="MenuItemSeparatorBackground" Color="#1C3954" />
         </ResourceDictionary>
 
         <ResourceDictionary x:Key="{x:Static themes:AvaGithubDesktopThemeVariants.Aquatic}">
@@ -166,6 +194,20 @@
             <SolidColorBrush x:Key="LogInfoBrush" Color="#138A4A" />
             <SolidColorBrush x:Key="LogWarnBrush" Color="#9A6A00" />
             <SolidColorBrush x:Key="LogErrorBrush" Color="#D93255" />
+            <SolidColorBrush x:Key="MenuFlyoutBackground" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="MenuFlyoutBorderBrush" Color="#B8DDE6" />
+            <SolidColorBrush x:Key="MenuItemBackground" Color="Transparent" />
+            <SolidColorBrush x:Key="MenuItemForeground" Color="#0B2631" />
+            <SolidColorBrush x:Key="MenuItemPointeroverForeground" Color="#0B2631" />
+            <SolidColorBrush x:Key="MenuItemPointeroverBackground" Color="#EAF8FA" />
+            <SolidColorBrush x:Key="MenuItemPressedBackground" Color="#D9F3F8" />
+            <SolidColorBrush x:Key="MenuItemInputGestureTextForeground" Color="#688794" />
+            <SolidColorBrush x:Key="MenuItemExpandIconForeground" Color="#688794" />
+            <SolidColorBrush x:Key="MenuItemExpandIconOpenForeground" Color="#0B2631" />
+            <SolidColorBrush x:Key="MenuItemDisabledForeground" Color="#688794" />
+            <SolidColorBrush x:Key="MenuItemDisabledInputGestureTextForeground" Color="#688794" />
+            <SolidColorBrush x:Key="MenuItemDisabledExpandIconForeground" Color="#688794" />
+            <SolidColorBrush x:Key="MenuItemSeparatorBackground" Color="#B8DDE6" />
         </ResourceDictionary>
 
         <ResourceDictionary x:Key="{x:Static themes:AvaGithubDesktopThemeVariants.Desert}">
@@ -221,6 +263,20 @@
             <SolidColorBrush x:Key="LogInfoBrush" Color="#178A4A" />
             <SolidColorBrush x:Key="LogWarnBrush" Color="#B56D00" />
             <SolidColorBrush x:Key="LogErrorBrush" Color="#C83542" />
+            <SolidColorBrush x:Key="MenuFlyoutBackground" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="MenuFlyoutBorderBrush" Color="#D5DDE7" />
+            <SolidColorBrush x:Key="MenuItemBackground" Color="Transparent" />
+            <SolidColorBrush x:Key="MenuItemForeground" Color="#1D2733" />
+            <SolidColorBrush x:Key="MenuItemPointeroverForeground" Color="#1D2733" />
+            <SolidColorBrush x:Key="MenuItemPointeroverBackground" Color="#F1F6FB" />
+            <SolidColorBrush x:Key="MenuItemPressedBackground" Color="#E5F0FB" />
+            <SolidColorBrush x:Key="MenuItemInputGestureTextForeground" Color="#7B8794" />
+            <SolidColorBrush x:Key="MenuItemExpandIconForeground" Color="#7B8794" />
+            <SolidColorBrush x:Key="MenuItemExpandIconOpenForeground" Color="#1D2733" />
+            <SolidColorBrush x:Key="MenuItemDisabledForeground" Color="#7B8794" />
+            <SolidColorBrush x:Key="MenuItemDisabledInputGestureTextForeground" Color="#7B8794" />
+            <SolidColorBrush x:Key="MenuItemDisabledExpandIconForeground" Color="#7B8794" />
+            <SolidColorBrush x:Key="MenuItemSeparatorBackground" Color="#D5DDE7" />
         </ResourceDictionary>
 
         <ResourceDictionary x:Key="{x:Static themes:AvaGithubDesktopThemeVariants.Dusk}">
@@ -276,6 +332,20 @@
             <SolidColorBrush x:Key="LogInfoBrush" Color="#9EF5B7" />
             <SolidColorBrush x:Key="LogWarnBrush" Color="#FFD166" />
             <SolidColorBrush x:Key="LogErrorBrush" Color="#FF7A90" />
+            <SolidColorBrush x:Key="MenuFlyoutBackground" Color="#162337" />
+            <SolidColorBrush x:Key="MenuFlyoutBorderBrush" Color="#29455F" />
+            <SolidColorBrush x:Key="MenuItemBackground" Color="Transparent" />
+            <SolidColorBrush x:Key="MenuItemForeground" Color="#ECF5FF" />
+            <SolidColorBrush x:Key="MenuItemPointeroverForeground" Color="#ECF5FF" />
+            <SolidColorBrush x:Key="MenuItemPointeroverBackground" Color="#20364F" />
+            <SolidColorBrush x:Key="MenuItemPressedBackground" Color="#1F4666" />
+            <SolidColorBrush x:Key="MenuItemInputGestureTextForeground" Color="#8CA5BF" />
+            <SolidColorBrush x:Key="MenuItemExpandIconForeground" Color="#8CA5BF" />
+            <SolidColorBrush x:Key="MenuItemExpandIconOpenForeground" Color="#ECF5FF" />
+            <SolidColorBrush x:Key="MenuItemDisabledForeground" Color="#8CA5BF" />
+            <SolidColorBrush x:Key="MenuItemDisabledInputGestureTextForeground" Color="#8CA5BF" />
+            <SolidColorBrush x:Key="MenuItemDisabledExpandIconForeground" Color="#8CA5BF" />
+            <SolidColorBrush x:Key="MenuItemSeparatorBackground" Color="#29455F" />
         </ResourceDictionary>
 
         <ResourceDictionary x:Key="{x:Static themes:AvaGithubDesktopThemeVariants.NightSky}">
@@ -331,10 +401,24 @@
             <SolidColorBrush x:Key="LogInfoBrush" Color="#86EFAC" />
             <SolidColorBrush x:Key="LogWarnBrush" Color="#FACC15" />
             <SolidColorBrush x:Key="LogErrorBrush" Color="#FB7185" />
+            <SolidColorBrush x:Key="MenuFlyoutBackground" Color="#0A1424" />
+            <SolidColorBrush x:Key="MenuFlyoutBorderBrush" Color="#1A3150" />
+            <SolidColorBrush x:Key="MenuItemBackground" Color="Transparent" />
+            <SolidColorBrush x:Key="MenuItemForeground" Color="#EAF6FF" />
+            <SolidColorBrush x:Key="MenuItemPointeroverForeground" Color="#EAF6FF" />
+            <SolidColorBrush x:Key="MenuItemPointeroverBackground" Color="#12233A" />
+            <SolidColorBrush x:Key="MenuItemPressedBackground" Color="#12385A" />
+            <SolidColorBrush x:Key="MenuItemInputGestureTextForeground" Color="#849EBC" />
+            <SolidColorBrush x:Key="MenuItemExpandIconForeground" Color="#849EBC" />
+            <SolidColorBrush x:Key="MenuItemExpandIconOpenForeground" Color="#EAF6FF" />
+            <SolidColorBrush x:Key="MenuItemDisabledForeground" Color="#849EBC" />
+            <SolidColorBrush x:Key="MenuItemDisabledInputGestureTextForeground" Color="#849EBC" />
+            <SolidColorBrush x:Key="MenuItemDisabledExpandIconForeground" Color="#849EBC" />
+            <SolidColorBrush x:Key="MenuItemSeparatorBackground" Color="#1A3150" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 
-    <FontFamily x:Key="ContentControlThemeFontFamily">Inter, Microsoft YaHei UI, Segoe UI</FontFamily>
-    <FontFamily x:Key="ControlContentThemeFontFamily">Inter, Microsoft YaHei UI, Segoe UI</FontFamily>
+    <FontFamily x:Key="ContentControlThemeFontFamily">Inter, Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei UI, PingFang SC, Segoe UI, sans-serif</FontFamily>
+    <FontFamily x:Key="ControlContentThemeFontFamily">Inter, Noto Sans CJK SC, Source Han Sans SC, Microsoft YaHei UI, PingFang SC, Segoe UI, sans-serif</FontFamily>
     <x:Double x:Key="ControlContentThemeFontSize">13</x:Double>
 </ResourceDictionary>

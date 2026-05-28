@@ -13,6 +13,7 @@ namespace AvaGithubDesktop.ViewModels;
 public sealed class MainWindowViewModel : ViewModelBase
 {
     private const int HistoryCommitLimit = 50;
+    private static readonly TimeSpan InitialDiffLoadDelay = TimeSpan.FromMilliseconds(180);
     private readonly IGitRepositoryService _gitRepositoryService;
     private readonly IRepositoryPickerService _repositoryPickerService;
     private readonly IRepositoryCloneDialogService _repositoryCloneDialogService;
@@ -78,8 +79,10 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _showConflictsOnly;
     private bool _isSigningIn;
     private bool _isOperationLogVisible;
+    private bool _hideWhitespaceChanges;
     private bool _isInitialized;
     private bool _isBulkUpdatingIncludedChanges;
+    private bool _isApplyingWorkspace;
     private int _changedFilesCount;
     private int _stagedCount;
     private int _unstagedCount;
@@ -101,6 +104,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private RepositorySection _selectedSection = RepositorySection.Changes;
     private int _historyCommitCount;
     private int _diffRequestVersion;
+    private CancellationTokenSource? _diffLoadCancellation;
     private bool _isDiffLoading;
     private string _diffTitle = string.Empty;
     private string _diffText = string.Empty;
@@ -164,6 +168,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _repositoryListGroupBuilder = repositoryListGroupBuilder;
         StatusBar = statusBar;
         _isOperationLogVisible = _settingsStore.Current.IsOperationLogVisible ?? true;
+        _hideWhitespaceChanges = _settingsStore.Current.HideWhitespaceChanges ?? false;
         _repositoryPath = ResolveDefaultRepositoryPath(_settingsStore.Current.LastRepositoryPath);
 
         Languages = new ObservableCollection<LanguageOption>
@@ -231,6 +236,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             CherryPickSelectedCommitAsync,
             this.WhenAnyValue(model => model.CanCherryPickSelectedCommit));
         ToggleOperationLogCommand = ReactiveCommand.Create(ToggleOperationLog);
+        ToggleHideWhitespaceChangesCommand = ReactiveCommand.Create(ToggleHideWhitespaceChanges);
         SelectThemeCommand = ReactiveCommand.Create<string?>(SelectThemeByKey);
         SelectSimplifiedChineseCommand = ReactiveCommand.Create(() => SelectLanguageByCulture("zh-CN"));
         SelectEnglishCommand = ReactiveCommand.Create(() => SelectLanguageByCulture("en-US"));
@@ -473,6 +479,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> CherryPickSelectedCommitCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ToggleOperationLogCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> ToggleHideWhitespaceChangesCommand { get; }
 
     public ReactiveCommand<string?, Unit> SelectThemeCommand { get; }
 
@@ -1697,6 +1705,22 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    public bool HideWhitespaceChanges
+    {
+        get => _hideWhitespaceChanges;
+        set
+        {
+            if (_hideWhitespaceChanges == value)
+            {
+                return;
+            }
+
+            this.RaiseAndSetIfChanged(ref _hideWhitespaceChanges, value);
+            _settingsStore.Update(settings => settings with { HideWhitespaceChanges = value });
+            QueueDiffLoad();
+        }
+    }
+
     public ThemeOption? SelectedTheme
     {
         get => _selectedTheme;
@@ -1768,8 +1792,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
 
         _isInitialized = true;
-        await LoadAccountsAsync();
-        await LoadRepositoryHistoryAsync();
+        await Task.WhenAll(LoadAccountsAsync(), LoadRepositoryHistoryAsync());
         if (Directory.Exists(RepositoryPath))
         {
             await OpenRepositoryAsync();
@@ -2057,6 +2080,15 @@ public sealed class MainWindowViewModel : ViewModelBase
         var messageKey = IsOperationLogVisible
             ? AvaGithubDesktopL.StatusOperationLogShown
             : AvaGithubDesktopL.StatusOperationLogHidden;
+        _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(messageKey)));
+    }
+
+    private void ToggleHideWhitespaceChanges()
+    {
+        HideWhitespaceChanges = !HideWhitespaceChanges;
+        var messageKey = HideWhitespaceChanges
+            ? AvaGithubDesktopL.StatusWhitespaceChangesHidden
+            : AvaGithubDesktopL.StatusWhitespaceChangesShown;
         _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(messageKey)));
     }
 
@@ -3069,9 +3101,19 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private void ApplyWorkspace(RepositoryWorkspaceState workspace)
     {
-        ApplySnapshot(workspace.Snapshot);
-        ApplyBranches(workspace.Branches);
-        ApplyHistory(workspace.History);
+        _isApplyingWorkspace = true;
+        try
+        {
+            ApplySnapshot(workspace.Snapshot);
+            ApplyBranches(workspace.Branches);
+            ApplyHistory(workspace.History);
+        }
+        finally
+        {
+            _isApplyingWorkspace = false;
+        }
+
+        QueueDiffLoad(InitialDiffLoadDelay);
     }
 
     private void ApplySnapshot(GitRepositorySnapshot snapshot)
@@ -4028,22 +4070,44 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private void QueueDiffLoad()
+    private void QueueDiffLoad(TimeSpan? delay = null)
     {
-        _ = LoadSelectedDiffAsync();
+        if (_isApplyingWorkspace)
+        {
+            return;
+        }
+
+        _diffLoadCancellation?.Cancel();
+        var cancellation = new CancellationTokenSource();
+        _diffLoadCancellation = cancellation;
+        _ = LoadSelectedDiffAsync(++_diffRequestVersion, delay ?? TimeSpan.Zero, cancellation);
     }
 
-    private async Task LoadSelectedDiffAsync()
+    private async Task LoadSelectedDiffAsync(
+        int requestVersion,
+        TimeSpan delay,
+        CancellationTokenSource cancellation)
     {
-        var requestVersion = ++_diffRequestVersion;
-        IsDiffLoading = true;
-        DiffPreview = GitFileDiffPreview.TextDiff(_localizer.Get(AvaGithubDesktopL.LoadingDiff));
+        var cancellationToken = cancellation.Token;
 
         try
         {
+            if (delay > TimeSpan.Zero)
+            {
+                await Task.Delay(delay, cancellationToken);
+            }
+
+            if (requestVersion != _diffRequestVersion)
+            {
+                return;
+            }
+
+            IsDiffLoading = true;
+            DiffPreview = GitFileDiffPreview.TextDiff(_localizer.Get(AvaGithubDesktopL.LoadingDiff));
+
             var (title, preview) = IsHistorySelected
-                ? await LoadSelectedHistoryDiffAsync()
-                : await LoadSelectedWorkingTreeDiffAsync();
+                ? await LoadSelectedHistoryDiffAsync(cancellationToken)
+                : await LoadSelectedWorkingTreeDiffAsync(cancellationToken);
 
             if (requestVersion != _diffRequestVersion)
             {
@@ -4052,6 +4116,9 @@ public sealed class MainWindowViewModel : ViewModelBase
 
             DiffTitle = title;
             DiffPreview = NormalizeDiffPreview(preview);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
         }
         catch (Exception ex)
         {
@@ -4066,11 +4133,18 @@ public sealed class MainWindowViewModel : ViewModelBase
             if (requestVersion == _diffRequestVersion)
             {
                 IsDiffLoading = false;
+                if (ReferenceEquals(_diffLoadCancellation, cancellation))
+                {
+                    _diffLoadCancellation = null;
+                }
             }
+
+            cancellation.Dispose();
         }
     }
 
-    private async Task<(string Title, GitFileDiffPreview Preview)> LoadSelectedWorkingTreeDiffAsync()
+    private async Task<(string Title, GitFileDiffPreview Preview)> LoadSelectedWorkingTreeDiffAsync(
+        CancellationToken cancellationToken)
     {
         if (SelectedChange is null || !HasRepository)
         {
@@ -4081,11 +4155,13 @@ public sealed class MainWindowViewModel : ViewModelBase
         var preview = await _gitRepositoryService.LoadWorkingTreeDiffPreviewAsync(
             RootPath,
             SelectedChange.GitPaths,
-            CancellationToken.None);
+            HideWhitespaceChanges,
+            cancellationToken);
         return (SelectedChange.Path, preview);
     }
 
-    private async Task<(string Title, GitFileDiffPreview Preview)> LoadSelectedHistoryDiffAsync()
+    private async Task<(string Title, GitFileDiffPreview Preview)> LoadSelectedHistoryDiffAsync(
+        CancellationToken cancellationToken)
     {
         if (SelectedCommit is null || SelectedCommitFile is null || !HasRepository)
         {
@@ -4097,7 +4173,8 @@ public sealed class MainWindowViewModel : ViewModelBase
             RootPath,
             SelectedCommit.Sha,
             SelectedCommitFile.GitPaths,
-            CancellationToken.None);
+            HideWhitespaceChanges,
+            cancellationToken);
         return (SelectedCommitFile.Path, preview);
     }
 

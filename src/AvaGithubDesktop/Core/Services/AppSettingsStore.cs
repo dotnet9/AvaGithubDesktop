@@ -6,6 +6,7 @@ namespace AvaGithubDesktop.Core.Services;
 public sealed class AppSettingsStore : IAppSettingsStore
 {
     private const string IsOperationLogVisibleKey = nameof(AppSettings.IsOperationLogVisible);
+    private const string HideWhitespaceChangesKey = nameof(AppSettings.HideWhitespaceChanges);
     private const string CultureNameKey = nameof(AppSettings.CultureName);
     private const string ThemeKey = nameof(AppSettings.ThemeKey);
     private const string LastRepositoryPathKey = nameof(AppSettings.LastRepositoryPath);
@@ -45,6 +46,7 @@ public sealed class AppSettingsStore : IAppSettingsStore
         return new AppSettings
         {
             IsOperationLogVisible = Get<bool?>(configPath, IsOperationLogVisibleKey),
+            HideWhitespaceChanges = Get<bool?>(configPath, HideWhitespaceChangesKey),
             CultureName = Get<string>(configPath, CultureNameKey),
             ThemeKey = Get<string>(configPath, ThemeKey),
             LastRepositoryPath = Get<string>(configPath, LastRepositoryPathKey),
@@ -62,6 +64,7 @@ public sealed class AppSettingsStore : IAppSettingsStore
         {
             var configPath = AppConfigHelper.GetDefaultConfigPath();
             AppConfigHelper.Set(configPath, IsOperationLogVisibleKey, settings.IsOperationLogVisible);
+            AppConfigHelper.Set(configPath, HideWhitespaceChangesKey, settings.HideWhitespaceChanges);
             AppConfigHelper.Set(configPath, CultureNameKey, settings.CultureName);
             AppConfigHelper.Set(configPath, ThemeKey, settings.ThemeKey);
             AppConfigHelper.Set(configPath, LastRepositoryPathKey, settings.LastRepositoryPath);
