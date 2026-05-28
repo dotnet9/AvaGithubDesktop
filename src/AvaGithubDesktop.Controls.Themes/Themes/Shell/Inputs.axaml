@@ -150,13 +150,33 @@
 
     <Style Selector="TextBox.commitSummary">
         <Setter Property="MinHeight" Value="30" />
+        <Setter Property="Padding" Value="9,0" />
+        <Setter Property="Background" Value="{DynamicResource PanelBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderContrastBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
     <Style Selector="TextBox.commitDescription">
         <Setter Property="MinHeight" Value="88" />
+        <Setter Property="Padding" Value="8,6" />
         <Setter Property="AcceptsReturn" Value="True" />
+        <Setter Property="Background" Value="{DynamicResource PanelBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style Selector="TextBox.commitSummary:focus">
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBorderBrush}" />
+    </Style>
+
+    <Style Selector="TextBox.commitDescription:focus">
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBorderBrush}" />
     </Style>
 
     <Style Selector="TextBox.diffViewer">
@@ -167,9 +187,28 @@
     </Style>
 
     <Style Selector="Button.commitButton">
-        <Setter Property="MinHeight" Value="25" />
+        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="Padding" Value="10,5" />
+        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Foreground" Value="{DynamicResource ToolbarTextBrush}" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Button.commitButton:pointerover">
+        <Setter Property="Background" Value="{DynamicResource ToolbarHoverBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ToolbarHoverBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ToolbarTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.commitButton:disabled">
+        <Setter Property="Background" Value="{DynamicResource PanelBorderBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+        <Setter Property="Opacity" Value="1" />
     </Style>
 
     <Style Selector="Button.branchCheckout">
@@ -185,9 +224,69 @@
     </Style>
 
     <Style Selector="Button.stashButton">
-        <Setter Property="MinHeight" Value="25" />
+        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="Padding" Value="10,5" />
+        <Setter Property="Background" Value="{DynamicResource PanelBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Button.stashButton:pointerover">
+        <Setter Property="Background" Value="{DynamicResource AccentSubtleBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+    </Style>
+
+    <Style Selector="Button.stashButton:disabled">
+        <Setter Property="Background" Value="{DynamicResource PanelBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+
+    <Style Selector="Button.commitButton TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource ToolbarTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.commitButton PathIcon.buttonGlyph">
+        <Setter Property="Width" Value="14" />
+        <Setter Property="Height" Value="14" />
+        <Setter Property="Foreground" Value="{DynamicResource ToolbarTextBrush}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.commitButton:disabled TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.commitButton:disabled PathIcon.buttonGlyph">
+        <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.stashButton TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+    </Style>
+
+    <Style Selector="Button.stashButton PathIcon.buttonGlyph">
+        <Setter Property="Width" Value="14" />
+        <Setter Property="Height" Value="14" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.stashButton:disabled TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.stashButton:disabled PathIcon.buttonGlyph">
+        <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+    </Style>
+
+    <Style Selector="CheckBox.commitOption">
+        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
     </Style>
 
     <Style Selector="Button.stashAction">
