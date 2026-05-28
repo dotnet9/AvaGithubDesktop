@@ -1,4 +1,8 @@
-<Styles xmlns="https://github.com/avaloniaui">
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Styles.Resources>
+        <x:Double x:Key="MenuFlyoutMaxHeight">Infinity</x:Double>
+    </Styles.Resources>
+
     <Style Selector="Menu.titleBar">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Height" Value="34" />

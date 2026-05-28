@@ -11,6 +11,7 @@ public static class AvaGithubDesktopL
 {
     public static readonly string AppTitle = "AvaGithubDesktop.AvaGithubDesktopL.AppTitle";
     public static readonly string MenuFile = "AvaGithubDesktop.AvaGithubDesktopL.MenuFile";
+    public static readonly string MenuEdit = "AvaGithubDesktop.AvaGithubDesktopL.MenuEdit";
     public static readonly string MenuRepository = "AvaGithubDesktop.AvaGithubDesktopL.MenuRepository";
     public static readonly string MenuBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuBranch";
     public static readonly string MenuNewBranch = "AvaGithubDesktop.AvaGithubDesktopL.MenuNewBranch";
@@ -45,6 +46,13 @@ public static class AvaGithubDesktopL
     public static readonly string MenuCloneRepository = "AvaGithubDesktop.AvaGithubDesktopL.MenuCloneRepository";
     public static readonly string MenuRefresh = "AvaGithubDesktop.AvaGithubDesktopL.MenuRefresh";
     public static readonly string MenuExit = "AvaGithubDesktop.AvaGithubDesktopL.MenuExit";
+    public static readonly string MenuUndo = "AvaGithubDesktop.AvaGithubDesktopL.MenuUndo";
+    public static readonly string MenuRedo = "AvaGithubDesktop.AvaGithubDesktopL.MenuRedo";
+    public static readonly string MenuCut = "AvaGithubDesktop.AvaGithubDesktopL.MenuCut";
+    public static readonly string MenuCopy = "AvaGithubDesktop.AvaGithubDesktopL.MenuCopy";
+    public static readonly string MenuPaste = "AvaGithubDesktop.AvaGithubDesktopL.MenuPaste";
+    public static readonly string MenuSelectAll = "AvaGithubDesktop.AvaGithubDesktopL.MenuSelectAll";
+    public static readonly string MenuFind = "AvaGithubDesktop.AvaGithubDesktopL.MenuFind";
     public static readonly string MenuPush = "AvaGithubDesktop.AvaGithubDesktopL.MenuPush";
     public static readonly string MenuPushTags = "AvaGithubDesktop.AvaGithubDesktopL.MenuPushTags";
     public static readonly string MenuPull = "AvaGithubDesktop.AvaGithubDesktopL.MenuPull";

@@ -11,11 +11,13 @@ namespace AvaGithubDesktop.Views;
 public partial class MainWindow : CodeWFWindow
 {
     private WindowState _windowStateBeforeFullScreen = WindowState.Normal;
+    private TextBox? _lastFocusedTextBox;
 
     public MainWindow()
     {
         InitializeComponent();
         AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
+        AddHandler(GotFocusEvent, OnGotFocus, RoutingStrategies.Tunnel);
     }
 
     public MainWindow(MainWindowViewModel viewModel)
@@ -59,6 +61,10 @@ public partial class MainWindow : CodeWFWindow
                 ShowBranchSelector();
                 e.Handled = true;
                 break;
+            case Key.F:
+                FocusChangesFilter();
+                e.Handled = true;
+                break;
             case Key.G:
                 FocusCommitSummary();
                 e.Handled = true;
@@ -67,6 +73,14 @@ public partial class MainWindow : CodeWFWindow
                 FocusChangesFilter();
                 e.Handled = true;
                 break;
+        }
+    }
+
+    private void OnGotFocus(object? sender, RoutedEventArgs e)
+    {
+        if (e.Source is TextBox textBox)
+        {
+            _lastFocusedTextBox = textBox;
         }
     }
 
@@ -170,6 +184,50 @@ public partial class MainWindow : CodeWFWindow
     private void ExitMenuItem_Click(object? sender, RoutedEventArgs e)
     {
         Close();
+    }
+
+    private void UndoMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        ExecuteTextBoxAction(textBox => textBox.Undo());
+    }
+
+    private void RedoMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        ExecuteTextBoxAction(textBox => textBox.Redo());
+    }
+
+    private void CutMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        ExecuteTextBoxAction(textBox => textBox.Cut());
+    }
+
+    private void CopyMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        ExecuteTextBoxAction(textBox => textBox.Copy());
+    }
+
+    private void PasteMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        ExecuteTextBoxAction(textBox => textBox.Paste());
+    }
+
+    private void SelectAllMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        ExecuteTextBoxAction(textBox => textBox.SelectAll());
+    }
+
+    private void ExecuteTextBoxAction(Action<TextBox> action)
+    {
+        if (GetEditTargetTextBox() is { } textBox)
+        {
+            action(textBox);
+        }
+    }
+
+    private TextBox? GetEditTargetTextBox()
+    {
+        return TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() as TextBox
+               ?? _lastFocusedTextBox;
     }
 
     private static void ExecuteCommandIfPossible(ICommand command)
