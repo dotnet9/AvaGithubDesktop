@@ -6,6 +6,7 @@
     <File Path="docs/开发日志.md" />
     <File Path="docs/更新日志.md" />
     <File Path="README.md" />
+    <File Path="UpdateLog.md" />
   </Folder>
   <Project Path="src/AvaGithubDesktop.Controls.Themes/AvaGithubDesktop.Controls.Themes.csproj" />
   <Project Path="src/AvaGithubDesktop.Controls/AvaGithubDesktop.Controls.csproj" />

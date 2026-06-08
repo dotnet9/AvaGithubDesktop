@@ -16,7 +16,7 @@
     MinWidth="960"
     MinHeight="620"
     Background="{DynamicResource AppBackgroundBrush}"
-    Icon="/Assets/app-logo.ico"
+    Icon="/Assets/logo.ico"
     TitleBarBackground="{DynamicResource ToolbarBackgroundBrush}"
     TitleBarBorderBrush="{DynamicResource ToolbarBorderBrush}"
     TitleBarForeground="{DynamicResource ToolbarTextBrush}"
@@ -35,7 +35,7 @@
                 Width="18"
                 Height="18"
                 VerticalAlignment="Center"
-                Source="/Assets/app-logo.png" />
+                Source="/Assets/logo.png" />
             <TextBlock
                 VerticalAlignment="Center"
                 FontSize="12"

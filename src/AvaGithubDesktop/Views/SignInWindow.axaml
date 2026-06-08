@@ -13,7 +13,7 @@
     CanMaximize="False"
     CanMinimize="False"
     CanResize="False"
-    Icon="/Assets/app-logo.ico"
+    Icon="/Assets/logo.ico"
     ShowInTaskbar="False"
     TitleBarBackground="{DynamicResource ToolbarBackgroundBrush}"
     TitleBarBorderBrush="{DynamicResource ToolbarBorderBrush}"

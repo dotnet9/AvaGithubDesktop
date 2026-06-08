@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <OutputType>Library</OutputType>
     <AssemblyName>AvaGithubDesktop.Controls</AssemblyName>
     <RootNamespace>AvaGithubDesktop.Controls</RootNamespace>
@@ -8,8 +8,8 @@
     <Title>AvaGithubDesktop.Controls</Title>
     <Description>Reusable controls for AvaGithubDesktop.</Description>
   </PropertyGroup>
-
   <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
     <PackageReference Include="Avalonia" />
     <PackageReference Include="CodeWF.LogViewer.Avalonia" />
   </ItemGroup>
