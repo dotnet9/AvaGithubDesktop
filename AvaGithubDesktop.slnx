@@ -5,6 +5,8 @@
     <File Path="docs/AvaGithubDesktop需求文档.md" />
     <File Path="docs/开发日志.md" />
     <File Path="docs/更新日志.md" />
+    <File Path="package_all.bat" />
+    <File Path="publish_all.bat" />
     <File Path="README.md" />
     <File Path="UpdateLog.md" />
   </Folder>

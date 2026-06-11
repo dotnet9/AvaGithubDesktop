@@ -117,15 +117,21 @@ if ([string]::IsNullOrWhiteSpace($Version)) {
     }
 
     [xml]$buildProps = Get-Content -Raw -Encoding UTF8 -LiteralPath $buildPropsPath
-    $versionNode = $buildProps.Project.PropertyGroup |
-        Where-Object { -not [string]::IsNullOrWhiteSpace($_.AvaGithubDesktopVersion) } |
-        Select-Object -First 1
+    foreach ($propertyGroup in @($buildProps.Project.PropertyGroup)) {
+        $versionNode = $propertyGroup.SelectSingleNode("AvaGithubDesktopVersion")
+        if ($null -eq $versionNode) {
+            $versionNode = $propertyGroup.SelectSingleNode("Version")
+        }
 
-    if ($null -eq $versionNode) {
-        throw "Directory.Build.props does not define AvaGithubDesktopVersion. Pass -Version explicitly."
+        if ($null -ne $versionNode -and -not [string]::IsNullOrWhiteSpace($versionNode.InnerText)) {
+            $Version = [string]$versionNode.InnerText
+            break
+        }
     }
 
-    $Version = [string]$versionNode.AvaGithubDesktopVersion
+    if ([string]::IsNullOrWhiteSpace($Version)) {
+        throw "Directory.Build.props does not define Version. Pass -Version explicitly."
+    }
 }
 
 $releaseVersion = Get-ReleaseVersion $Version

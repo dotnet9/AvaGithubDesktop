@@ -4,6 +4,8 @@ setlocal
 set "ROOT=%~dp0"
 set "PROJECT=%ROOT%src\AvaGithubDesktop\AvaGithubDesktop.csproj"
 set "PACKAGE_AFTER=false"
+set "WINDOWS_TFM=net11.0-windows"
+set "CROSS_PLATFORM_TFM=net11.0"
 
 if not "%~1"=="" (
     if /I "%~1"=="--package" (
@@ -16,12 +18,12 @@ if not "%~1"=="" (
 
 echo Publishing AvaGithubDesktop profiles...
 
-call :publish FolderProfile__win-x64 net10.0-windows win-x64 || exit /b 1
-call :publish FolderProfile__win-x86 net10.0-windows win-x86 || exit /b 1
-call :publish FolderProfile__linux-x64 net10.0 linux-x64 || exit /b 1
-call :publish FolderProfile__linux-arm64 net10.0 linux-arm64 || exit /b 1
-call :publish FolderProfile__osx-x64 net10.0 osx-x64 || exit /b 1
-call :publish FolderProfile__osx-arm64 net10.0 osx-arm64 || exit /b 1
+call :publish FolderProfile__win-x64 %WINDOWS_TFM% win-x64 || exit /b 1
+call :publish FolderProfile__win-x86 %WINDOWS_TFM% win-x86 || exit /b 1
+call :publish FolderProfile__linux-x64 %CROSS_PLATFORM_TFM% linux-x64 || exit /b 1
+call :publish FolderProfile__linux-arm64 %CROSS_PLATFORM_TFM% linux-arm64 || exit /b 1
+call :publish FolderProfile__osx-x64 %CROSS_PLATFORM_TFM% osx-x64 || exit /b 1
+call :publish FolderProfile__osx-arm64 %CROSS_PLATFORM_TFM% osx-arm64 || exit /b 1
 
 echo All AvaGithubDesktop publish profiles completed.
 
