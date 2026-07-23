@@ -42,7 +42,7 @@ public sealed class ShellStatusViewModel : ViewModelBase
 
     private void SetStatus(string status)
     {
-        Logger.Info(status, status, log2UI: true, log2File: true, log2Console: false);
+        Logger.Info(status);
         if (Dispatcher.UIThread.CheckAccess())
         {
             StatusText = status;

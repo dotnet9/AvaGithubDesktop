@@ -5,7 +5,6 @@ using AvaGithubDesktop.Core.Services;
 using AvaGithubDesktop.ViewModels;
 using AvaGithubDesktop.Views;
 using CodeWF.EventBus;
-using CodeWF.Log.Core;
 using CodeWF.Tools.Helpers;
 using Lang.Avalonia;
 using Lang.Avalonia.Json;
@@ -21,7 +20,6 @@ public partial class App : PrismApplication
         // CodeWF.Tools.Files 的 AppConfigHelper 支持 APP_CONFIG_FILE；这里固定读取输出目录的 App.config，
         // 便于人工维护 GitHub OAuth Client ID，而不是落到 exe/dll.config 这类生成文件名里。
         AppContext.SetData("APP_CONFIG_FILE", Path.Combine(AppContext.BaseDirectory, "App.config"));
-        ConfigureOperationLogger();
         AvaloniaXamlLoader.Load(this);
         var cultureName = GetConfiguredCultureName();
         var langPlugin = new JsonLangPlugin
@@ -69,17 +67,6 @@ public partial class App : PrismApplication
         containerRegistry.RegisterSingleton<ShellStatusViewModel>();
         containerRegistry.RegisterSingleton<MainWindowViewModel>();
         containerRegistry.Register<MainWindow>();
-    }
-
-    private static void ConfigureOperationLogger()
-    {
-        Logger.Level = LogType.Debug;
-        Logger.BatchProcessSize = 80;
-        Logger.LogUIDuration = 80;
-        Logger.MaxUIDisplayCount = 1200;
-        Logger.MaxLogFileSizeMB = 20;
-        Logger.TimeFormat = "HH:mm:ss";
-        Logger.EnableConsoleOutput = false;
     }
 
     private static string GetConfiguredCultureName()

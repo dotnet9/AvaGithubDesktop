@@ -194,13 +194,6 @@ public partial class MainWindow : CodeWFWindow
             return;
         }
 
-        if (e.Key == Key.L && e.KeyModifiers == (KeyModifiers.Control | KeyModifiers.Shift))
-        {
-            FocusOperationLogFilter();
-            e.Handled = true;
-            return;
-        }
-
         if (e.KeyModifiers != KeyModifiers.Control)
         {
             return;
@@ -315,21 +308,6 @@ public partial class MainWindow : CodeWFWindow
     private void FocusChangesFilterMenuItem_Click(object? sender, RoutedEventArgs e)
     {
         FocusChangesFilter();
-    }
-
-    private void FocusOperationLogFilter()
-    {
-        if (DataContext is MainWindowViewModel viewModel && !viewModel.IsOperationLogVisible)
-        {
-            viewModel.IsOperationLogVisible = true;
-        }
-
-        Dispatcher.UIThread.Post(() => OperationLogControl.FocusFilter());
-    }
-
-    private void FocusOperationLogFilterMenuItem_Click(object? sender, RoutedEventArgs e)
-    {
-        FocusOperationLogFilter();
     }
 
     private void FocusCommitSummary()

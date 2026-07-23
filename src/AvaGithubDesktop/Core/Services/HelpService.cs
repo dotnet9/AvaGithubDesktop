@@ -61,7 +61,8 @@ public sealed class HelpService : IHelpService
 
     public Task ShowLogFolderAsync()
     {
-        var directory = Logger.LogDir;
+        var directory = Logger.LogDirectory
+            ?? throw new InvalidOperationException("当前程序未启用文件日志。");
         if (!Directory.Exists(directory))
         {
             Directory.CreateDirectory(directory);

@@ -7,6 +7,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i18n="https://codewf.com"
     xmlns:l="clr-namespace:AvaGithubDesktop"
+    xmlns:log="using:CodeWF.LogViewer.Avalonia"
+    xmlns:logCore="using:CodeWF.Log.Core"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:AvaGithubDesktop.Core.Models"
     xmlns:vm="using:AvaGithubDesktop.ViewModels"
@@ -75,7 +77,6 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFocusCommitSummary}}" Click="FocusCommitSummaryMenuItem_Click" HotKey="Ctrl+G" />
                     <MenuItem Header="{Binding ToggleStashedChangesMenuText}" Command="{Binding ToggleStashedChangesVisibilityCommand}" HotKey="Ctrl+H" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFocusChangesFilter}}" Click="FocusChangesFilterMenuItem_Click" HotKey="Ctrl+L" />
-                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuFocusOperationLogFilter}}" Click="FocusOperationLogFilterMenuItem_Click" HotKey="Ctrl+Shift+L" />
                     <MenuItem
                         Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuHideWhitespaceChanges}}"
                         Command="{Binding ToggleHideWhitespaceChangesCommand}"
@@ -1227,18 +1228,19 @@
                 <Border Classes="operationLogHeader">
                     <TextBlock Classes="section" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.OperationLog}}" />
                 </Border>
-                <controls:OperationLogView
-                    x:Name="OperationLogControl"
+                <Border
                     Grid.Row="1"
-                    ClearText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogClear}}"
-                    CopyText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogCopy}}"
-                    DebugLevelText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogLevelDebug}}"
-                    ErrorLevelText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogLevelError}}"
-                    FatalLevelText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogLevelFatal}}"
-                    FilterPlaceholderText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogFilterPlaceholder}}"
-                    InfoLevelText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogLevelInfo}}"
-                    OpenLogFolderText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogOpenFolder}}"
-                    WarnLevelText="{i18n:I18n {x:Static l:AvaGithubDesktopL.LogLevelWarn}}" />
+                    Padding="8,5"
+                    Background="{DynamicResource PanelBackgroundBrush}">
+                    <log:LogView
+                        FontFamily="Cascadia Mono, JetBrains Mono, Consolas, Noto Sans Mono CJK SC, Microsoft YaHei UI, monospace"
+                        FontSize="12"
+                        MaximumLevel="{x:Static logCore:LogType.Fatal}"
+                        MaxDisplayCount="1200"
+                        MinimumLevel="{x:Static logCore:LogType.Debug}"
+                        RefreshInterval="0:0:0.08"
+                        TimestampFormat="HH:mm:ss" />
+                </Border>
             </Grid>
         </Border>
 

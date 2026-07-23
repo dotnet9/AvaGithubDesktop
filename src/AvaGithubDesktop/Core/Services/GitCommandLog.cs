@@ -54,7 +54,7 @@ internal static class GitCommandLog
 
     private static void WriteInfo(string message)
     {
-        Logger.Info(message, message, log2UI: true, log2File: true, log2Console: false);
+        Logger.Info(message);
     }
 
     private static string QuoteArgument(string argument, bool forceQuote = false)

@@ -11,6 +11,5 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
     <PackageReference Include="Avalonia" />
-    <PackageReference Include="CodeWF.LogViewer.Avalonia" />
   </ItemGroup>
 </Project>
