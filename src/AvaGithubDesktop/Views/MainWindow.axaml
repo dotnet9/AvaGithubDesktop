@@ -7,8 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i18n="https://codewf.com"
     xmlns:l="clr-namespace:AvaGithubDesktop"
-    xmlns:log="using:CodeWF.LogViewer.Avalonia"
-    xmlns:logCore="using:CodeWF.Log.Core"
+    xmlns:log="using:CodeWF.Log.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:AvaGithubDesktop.Core.Models"
     xmlns:vm="using:AvaGithubDesktop.ViewModels"
@@ -1235,9 +1234,9 @@
                     <log:LogView
                         FontFamily="Cascadia Mono, JetBrains Mono, Consolas, Noto Sans Mono CJK SC, Microsoft YaHei UI, monospace"
                         FontSize="12"
-                        MaximumLevel="{x:Static logCore:LogType.Fatal}"
+                        MaximumLevel="Critical"
                         MaxDisplayCount="1200"
-                        MinimumLevel="{x:Static logCore:LogType.Debug}"
+                        MinimumLevel="Debug"
                         RefreshInterval="0:0:0.08"
                         TimestampFormat="HH:mm:ss" />
                 </Border>

@@ -1,6 +1,7 @@
 using System.Text;
 using Avalonia;
 using CodeWF.Log.Core;
+using Microsoft.Extensions.Logging;
 using ReactiveUI.Avalonia;
 
 namespace AvaGithubDesktop;
@@ -12,9 +13,9 @@ internal sealed class Program
     {
         Logger.Initialize(new LoggerOptions
         {
-            MinimumLevel = LogType.Debug,
+            MinimumLevel = LogLevel.Debug,
             EnableConsole = false,
-            RecentUserLogCapacity = 1_200,
+            RecentEventCapacity = 1_200,
             File = new FileLogOptions
             {
                 DirectoryPath = Path.Combine(
