@@ -21,5 +21,9 @@ if ([string]::IsNullOrWhiteSpace($Version)) {
 Write-Host "发布 $RuntimeIdentifier (Version=$Version)"
 
 $tfm = if ($RuntimeIdentifier.StartsWith("win-", [StringComparison]::OrdinalIgnoreCase)) { "net11.0-windows" } else { "net11.0" }
-dotnet publish (Join-Path $repositoryRoot "src/AvaGithubDesktop/AvaGithubDesktop.csproj") -c Release -f $tfm -r $RuntimeIdentifier /p:PublishProfile=FolderProfile__$RuntimeIdentifier -p:Version=$Version
+# 全平台 NativeAOT：完整反射元数据保全（Prism/DryIoc），单线程 ILC 更稳；win-x86 保持自包含单文件
+$ilcArgs = @("-p:PublishAot=true", "-p:PublishTrimmed=true", "-p:PublishSingleFile=false",
+    "-p:IlcGenerateCompleteTypeMetadata=true", "-p:IlcTrimMetadata=false", "-p:IlcSingleThreaded=true")
+if ($RuntimeIdentifier -eq "win-x86") { $ilcArgs = @() }
+dotnet publish (Join-Path $repositoryRoot "src/AvaGithubDesktop/AvaGithubDesktop.csproj") -c Release -f $tfm -r $RuntimeIdentifier @ilcArgs /p:PublishProfile=FolderProfile__$RuntimeIdentifier -p:Version=$Version
 if ($LASTEXITCODE -ne 0) { throw "publish failed for $RuntimeIdentifier" }

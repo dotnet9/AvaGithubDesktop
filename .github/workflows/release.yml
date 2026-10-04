@@ -1,4 +1,4 @@
-name: release
+﻿name: release
 
 # Pushing a v* (or bare numeric) tag publishes: self-contained publishes for
 # six RIDs packaged through scripts/package_ava_github_desktop_artifacts.ps1
@@ -21,10 +21,42 @@ permissions:
 jobs:
   publish:
     name: Publish and package
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rid: win-x64
+            tfm: net11.0-windows
+            os: windows-latest
+            aot: true
+          - rid: win-x86
+            tfm: net11.0-windows
+            os: windows-latest
+            aot: false
+          - rid: linux-x64
+            tfm: net11.0
+            os: ubuntu-latest
+            aot: true
+          - rid: linux-arm64
+            tfm: net11.0
+            os: ubuntu-24.04-arm
+            aot: true
+          - rid: osx-x64
+            tfm: net11.0
+            os: macos-14
+            aot: true
+          - rid: osx-arm64
+            tfm: net11.0
+            os: macos-14
+            aot: true
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install NativeAOT prerequisites (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
@@ -45,58 +77,34 @@ jobs:
           "APP_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           Write-Host "Version: $version"
 
-      - name: Publish win-x64
+      - name: Publish (NativeAOT with full reflection metadata)
         shell: pwsh
-        run: >
-          dotnet publish src/AvaGithubDesktop/AvaGithubDesktop.csproj -c Release
-          -f net11.0-windows -r win-x64
-          -p:PublishProfile=FolderProfile__win-x64 -p:Version=$env:APP_VERSION
+        run: |
+          $aotArgs = @(
+            '-p:PublishAot=true',
+            '-p:PublishTrimmed=true',
+            '-p:PublishSingleFile=false',
+            '-p:IlcGenerateCompleteTypeMetadata=true',
+            '-p:IlcTrimMetadata=false',
+            '-p:IlcSingleThreaded=true'
+          )
+          if ('${{ matrix.aot }}' -eq 'false') { $aotArgs = @() }
+          dotnet publish src/AvaGithubDesktop/AvaGithubDesktop.csproj -c Release `
+            -f ${{ matrix.tfm }} -r ${{ matrix.rid }} @aotArgs `
+            /p:PublishProfile=FolderProfile__${{ matrix.rid }} -p:Version=$env:APP_VERSION
+          if ($LASTEXITCODE -ne 0) { throw "publish failed for ${{ matrix.rid }}" }
 
-      - name: Publish win-x86
-        shell: pwsh
-        run: >
-          dotnet publish src/AvaGithubDesktop/AvaGithubDesktop.csproj -c Release
-          -f net11.0-windows -r win-x86
-          -p:PublishProfile=FolderProfile__win-x86 -p:Version=$env:APP_VERSION
-
-      - name: Publish linux-x64
-        shell: pwsh
-        run: >
-          dotnet publish src/AvaGithubDesktop/AvaGithubDesktop.csproj -c Release
-          -f net11.0 -r linux-x64
-          -p:PublishProfile=FolderProfile__linux-x64 -p:Version=$env:APP_VERSION
-
-      - name: Publish linux-arm64
-        shell: pwsh
-        run: >
-          dotnet publish src/AvaGithubDesktop/AvaGithubDesktop.csproj -c Release
-          -f net11.0 -r linux-arm64
-          -p:PublishProfile=FolderProfile__linux-arm64 -p:Version=$env:APP_VERSION
-
-      - name: Publish osx-x64
-        shell: pwsh
-        run: >
-          dotnet publish src/AvaGithubDesktop/AvaGithubDesktop.csproj -c Release
-          -f net11.0 -r osx-x64
-          -p:PublishProfile=FolderProfile__osx-x64 -p:Version=$env:APP_VERSION
-
-      - name: Publish osx-arm64
-        shell: pwsh
-        run: >
-          dotnet publish src/AvaGithubDesktop/AvaGithubDesktop.csproj -c Release
-          -f net11.0 -r osx-arm64
-          -p:PublishProfile=FolderProfile__osx-arm64 -p:Version=$env:APP_VERSION
-
-      - name: Package (zip + SHA-256 per RID)
+      - name: Package (zip + SHA-256)
         shell: pwsh
         run: >
           pwsh scripts/package_ava_github_desktop_artifacts.ps1
+          -RuntimeIdentifier ${{ matrix.rid }}
           -Version "$env:APP_VERSION" -Force
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: AvaGithubDesktop-release
+          name: AvaGithubDesktop-${{ matrix.rid }}
           path: artifacts/release/*
           if-no-files-found: error
 
@@ -110,7 +118,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: AvaGithubDesktop-release
+          pattern: AvaGithubDesktop-*
           path: artifacts/release
           merge-multiple: true
 
