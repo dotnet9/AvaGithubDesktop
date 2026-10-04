@@ -89,6 +89,7 @@ jobs:
             '-p:IlcSingleThreaded=true'
           )
           if ('${{ matrix.aot }}' -eq 'false') { $aotArgs = @() }
+          if ('${{ matrix.os }}' -like 'macos*') { $aotArgs += '-p:StripSymbols=false' }
           dotnet publish src/AvaGithubDesktop/AvaGithubDesktop.csproj -c Release `
             -f ${{ matrix.tfm }} -r ${{ matrix.rid }} @aotArgs `
             /p:PublishProfile=FolderProfile__${{ matrix.rid }} -p:Version=$env:APP_VERSION
