@@ -556,7 +556,12 @@
       "StatusPushTagsFailedFormat": "推送标签失败：{0}",
       "StatusPublishingBranchFormat": "正在发布分支 {0} 到 {1}...",
       "StatusPublishedBranchFormat": "已发布分支 {0} 到 {1}。",
-      "StatusPublishBranchFailedFormat": "发布分支失败：{0}"
+      "StatusPublishBranchFailedFormat": "发布分支失败：{0}",
+      "CheckUpdate": "检查更新",
+      "StatusCheckingUpdate": "正在检查更新…",
+      "StatusUpToDate": "当前已是最新版本",
+      "StatusUpdateAvailableFormat": "发现新版本 {0}，已打开发布页",
+      "StatusUpdateCheckFailedFormat": "检查更新失败：{0}"
     }
   }
 }

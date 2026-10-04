@@ -1,4 +1,6 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Reflection;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -13,6 +15,7 @@ namespace AvaGithubDesktop.ViewModels;
 public sealed class MainWindowViewModel : ViewModelBase
 {
     private const int HistoryCommitLimit = 50;
+    private readonly UpdateChecker _updateChecker = new("dotnet9", "AvaGithubDesktop");
     private static readonly TimeSpan InitialDiffLoadDelay = TimeSpan.FromMilliseconds(180);
     private readonly IGitRepositoryService _gitRepositoryService;
     private readonly IRepositoryPickerService _repositoryPickerService;
@@ -369,6 +372,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         ShowKeyboardShortcutsCommand = ReactiveCommand.CreateFromTask(ShowKeyboardShortcutsAsync);
         ShowLogFolderCommand = ReactiveCommand.CreateFromTask(ShowLogFolderAsync);
         ShowAboutCommand = ReactiveCommand.CreateFromTask(ShowAboutAsync);
+        CheckUpdateCommand = ReactiveCommand.CreateFromTask(CheckUpdateAsync);
         SignInCommand = ReactiveCommand.CreateFromTask(
             SignInAsync,
             this.WhenAnyValue(model => model.IsSigningIn, isSigningIn => !isSigningIn));
@@ -568,6 +572,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ShowLogFolderCommand { get; }
 
     public ReactiveCommand<Unit, Unit> ShowAboutCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> CheckUpdateCommand { get; }
 
     public ReactiveCommand<Unit, Unit> SignInCommand { get; }
 
@@ -2741,6 +2747,40 @@ public sealed class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusOpenHelpFailedFormat, ex.Message);
+            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+        }
+    }
+
+    private async Task CheckUpdateAsync()
+    {
+        try
+        {
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusCheckingUpdate)));
+            Version? current = UpdateVersion.Parse(
+                typeof(MainWindowViewModel).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                    ?.InformationalVersion);
+            UpdateCheckResult result = await _updateChecker.CheckAsync(current ?? new Version(0, 0, 0));
+            if (!result.Succeeded)
+            {
+                ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusUpdateCheckFailedFormat, result.Error);
+                _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
+                return;
+            }
+
+            if (result.Update is { } update)
+            {
+                // 仅提醒不自动下载：提示并打开发布页
+                _eventBus.Publish(new StatusMessageChangedCommand(
+                    _localizer.Format(AvaGithubDesktopL.StatusUpdateAvailableFormat, update.Tag)));
+                Process.Start(new ProcessStartInfo(update.PageUrl) { UseShellExecute = true });
+                return;
+            }
+
+            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusUpToDate)));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusUpdateCheckFailedFormat, ex.Message);
             _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
         }
     }

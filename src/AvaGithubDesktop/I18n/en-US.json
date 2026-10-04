@@ -556,7 +556,12 @@
       "StatusPushTagsFailedFormat": "Push tags failed: {0}",
       "StatusPublishingBranchFormat": "Publishing branch {0} to {1}...",
       "StatusPublishedBranchFormat": "Published branch {0} to {1}.",
-      "StatusPublishBranchFailedFormat": "Publish branch failed: {0}"
+      "StatusPublishBranchFailedFormat": "Publish branch failed: {0}",
+      "CheckUpdate": "Check for updates",
+      "StatusCheckingUpdate": "Checking for updates…",
+      "StatusUpToDate": "You are already on the latest version",
+      "StatusUpdateAvailableFormat": "New version {0} found. Release page opened.",
+      "StatusUpdateCheckFailedFormat": "Update check failed: {0}"
     }
   }
 }

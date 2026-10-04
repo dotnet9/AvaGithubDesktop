@@ -1,4 +1,4 @@
-<codewf:CodeWFWindow
+﻿<codewf:CodeWFWindow
     x:Class="AvaGithubDesktop.Views.MainWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -231,6 +231,7 @@
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.KeyboardShortcuts}}" Command="{Binding ShowKeyboardShortcutsCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuShowLogsInFileManager}}" Command="{Binding ShowLogFolderCommand}" />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.Changelog}}" Command="{Binding ShowChangelogCommand}" />
+                    <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.CheckUpdate}}" Command="{Binding CheckUpdateCommand}" />
                     <Separator />
                     <MenuItem Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAbout}}" Command="{Binding ShowAboutCommand}" />
                 </MenuItem>
