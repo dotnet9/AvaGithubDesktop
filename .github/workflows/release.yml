@@ -26,29 +26,29 @@ jobs:
       matrix:
         include:
           - rid: win-x64
-            tfm: net11.0-windows
+            tfm: net10.0-windows
             os: windows-latest
             aot: true
           - rid: win-x86
-            tfm: net11.0-windows
+            tfm: net10.0-windows
             os: windows-latest
             aot: false
           - rid: linux-x64
-            tfm: net11.0
+            tfm: net10.0
             os: ubuntu-latest
             aot: true
           - rid: linux-arm64
-            tfm: net11.0
+            tfm: net10.0
             os: ubuntu-24.04-arm
             aot: true
           - rid: osx-x64
-            tfm: net11.0
+            tfm: net10.0
             os: macos-14
-            aot: false
+            aot: true
           - rid: osx-arm64
-            tfm: net11.0
+            tfm: net10.0
             os: macos-14
-            aot: false
+            aot: true
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -61,7 +61,7 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '11.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Compute version
         shell: pwsh
@@ -88,19 +88,30 @@ jobs:
             '-p:IlcTrimMetadata=false',
             '-p:IlcSingleThreaded=true'
           )
-          # macOS 在 .NET 11 rc.1 上有 swift auto-link 工具链 bug（GA 后恢复 AOT）
           if ('${{ matrix.aot }}' -eq 'false') { $aotArgs = @() }
+          if ('${{ matrix.os }}' -like 'macos*') { $aotArgs += '-p:StripSymbols=false' }
           dotnet publish src/AvaGithubDesktop/AvaGithubDesktop.csproj -c Release `
             -f ${{ matrix.tfm }} -r ${{ matrix.rid }} @aotArgs `
             /p:PublishProfile=FolderProfile__${{ matrix.rid }} -p:Version=$env:APP_VERSION
           if ($LASTEXITCODE -ne 0) { throw "publish failed for ${{ matrix.rid }}" }
 
-      - name: Package (zip + SHA-256)
+      - name: Package (Windows zip + SHA-256)
+        if: runner.os == 'Windows'
         shell: pwsh
         run: >
           pwsh scripts/package_ava_github_desktop_artifacts.ps1
           -RuntimeIdentifier ${{ matrix.rid }}
           -Version "$env:APP_VERSION" -Force
+
+      - name: 打包 Linux deb 安装包
+        if: runner.os == 'Linux'
+        shell: pwsh
+        run: pwsh scripts/package_linux_deb.ps1 -RuntimeIdentifier '${{ matrix.rid }}' -Version $env:APP_VERSION -Force
+
+      - name: 打包 macOS dmg 安装镜像
+        if: runner.os == 'MacOSX'
+        shell: bash
+        run: chmod +x scripts/package_macos_dmg.sh && ./scripts/package_macos_dmg.sh '${{ matrix.rid }}' "$APP_VERSION"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

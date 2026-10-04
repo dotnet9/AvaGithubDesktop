@@ -1,15 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <IsPackable>false</IsPackable>
-    <TargetFrameworks>net11.0;net11.0-windows</TargetFrameworks>
+    <TargetFrameworks>net10.0;net10.0-windows</TargetFrameworks>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>..\..\logo.ico</ApplicationIcon>
     <AssemblyName>AvaGithubDesktop</AssemblyName>
     <RootNamespace>AvaGithubDesktop</RootNamespace>
     <RuntimeIdentifiers>win-x64;win-x86;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
   </PropertyGroup>
-  <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net11.0-windows'))">
+  <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0-windows'))">
     <WindowsSupportedOSPlatformVersion>6.1</WindowsSupportedOSPlatformVersion>
   </PropertyGroup>
   <ItemGroup>
@@ -38,8 +38,8 @@
     <PackageReference Include="ReactiveUI.Avalonia" />
     <PackageReference Include="Semi.Avalonia" />
     <PackageReference Include="System.Reactive" />
-    <PackageReference Include="VC-LTL" Condition="'$(TargetFramework)' == 'net11.0-windows'" />
-    <PackageReference Include="YY-Thunks" Condition="'$(TargetFramework)' == 'net11.0-windows'" />
+    <PackageReference Include="VC-LTL" Condition="'$(TargetFramework)' == 'net10.0-windows'" />
+    <PackageReference Include="YY-Thunks" Condition="'$(TargetFramework)' == 'net10.0-windows'" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AvaGithubDesktop.Controls\AvaGithubDesktop.Controls.csproj" />
