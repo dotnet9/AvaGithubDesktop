@@ -44,11 +44,11 @@ jobs:
           - rid: osx-x64
             tfm: net11.0
             os: macos-14
-            aot: true
+            aot: false
           - rid: osx-arm64
             tfm: net11.0
             os: macos-14
-            aot: true
+            aot: false
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -88,8 +88,8 @@ jobs:
             '-p:IlcTrimMetadata=false',
             '-p:IlcSingleThreaded=true'
           )
+          # macOS 在 .NET 11 rc.1 上有 swift auto-link 工具链 bug（GA 后恢复 AOT）
           if ('${{ matrix.aot }}' -eq 'false') { $aotArgs = @() }
-          if ('${{ matrix.os }}' -like 'macos*') { $aotArgs += '-p:StripSymbols=false' }
           dotnet publish src/AvaGithubDesktop/AvaGithubDesktop.csproj -c Release `
             -f ${{ matrix.tfm }} -r ${{ matrix.rid }} @aotArgs `
             /p:PublishProfile=FolderProfile__${{ matrix.rid }} -p:Version=$env:APP_VERSION
