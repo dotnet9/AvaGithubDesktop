@@ -1,4 +1,4 @@
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AvaGithubDesktop.Core.Models;
@@ -19,11 +19,39 @@ public sealed class GitHubAccountService : IGitHubAccountService
         WriteIndented = true
     };
 
-    private static readonly string StoreFolder = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "AvaGithubDesktop");
+    private static readonly string StoreFolder = ResolveStoreFolder();
 
     private static readonly string StorePath = Path.Combine(StoreFolder, "accounts.json");
+
+    /// <summary>旧版账号库在 Roaming（%APPDATA% 下），首次升级一次性迁到 Local（应用数据标准位置），旧目录保留作备份。</summary>
+    private static string ResolveStoreFolder()
+    {
+        var folder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "AvaGithubDesktop");
+        try
+        {
+            var legacy = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "AvaGithubDesktop");
+            if (Directory.Exists(legacy) && !Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+                foreach (var file in Directory.EnumerateFiles(legacy, "*", SearchOption.AllDirectories))
+                {
+                    var target = Path.Combine(folder, Path.GetRelativePath(legacy, file));
+                    Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+                    File.Copy(file, target, overwrite: false);
+                }
+            }
+        }
+        catch
+        {
+            // 迁移失败不阻塞启动，旧目录原样保留
+        }
+
+        return folder;
+    }
 
     private readonly HttpClient _httpClient = new()
     {
