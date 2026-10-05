@@ -14,7 +14,7 @@
 #endif
 
 [Setup]
-AppId={{{D1E2F3A4-B5C6-4D7E-8F9A-0B1C2D3E4F5A}}
+AppId={{D1E2F3A4-B5C6-4D7E-8F9A-0B1C2D3E4F5A}}
 AppName=AvaGithubDesktop
 AppVersion={#AppVersion}
 AppPublisher=Dotnet9
