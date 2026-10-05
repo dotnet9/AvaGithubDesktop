@@ -4,8 +4,8 @@ setlocal
 set "ROOT=%~dp0"
 set "PROJECT=%ROOT%src\AvaGithubDesktop\AvaGithubDesktop.csproj"
 set "PACKAGE_AFTER=false"
-set "WINDOWS_TFM=net11.0-windows"
-set "CROSS_PLATFORM_TFM=net11.0"
+set "WINDOWS_TFM=net10.0-windows"
+set "CROSS_PLATFORM_TFM=net10.0"
 
 if not "%~1"=="" (
     if /I "%~1"=="--package" (
