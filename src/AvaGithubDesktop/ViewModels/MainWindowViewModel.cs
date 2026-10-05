@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using AvaGithubDesktop.Core.Messaging;
 using AvaGithubDesktop.Core.Models;
 using AvaGithubDesktop.Core.Services;
+using CodeWF.Tools.UpdateChecking;
 using CodeWF.EventBus;
 using ReactiveUI;
 
@@ -2756,7 +2757,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         try
         {
             _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusCheckingUpdate)));
-            Version? current = UpdateVersion.Parse(
+            Version? current = VersionUtil.Parse(
                 typeof(MainWindowViewModel).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
                     ?.InformationalVersion);
             UpdateCheckResult result = await _updateChecker.CheckAsync(current ?? new Version(0, 0, 0));
