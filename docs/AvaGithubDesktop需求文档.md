@@ -70,7 +70,7 @@ AvaGithubDesktop 是一个参考 GitHub Desktop 交互和常用工作流的跨�
 - 菜单弹层无限高、菜单 Hover/Open 状态、标题栏下边框、字体回退和各主题配色由主题包统一维护并通过截图验证。
 - 操作日志打印 AvaGithubDesktop 执行的详细 Git 命令、退出码和耗时，远端 URL 凭据写入日志前会脱敏。
 - 操作日志支持按关键字过滤，便于从详细 Git 命令记录中定位关键步骤。
-- 发布和打包脚本支持 `win-x64`、`win-x86`、`linux-x64`、`linux-arm64`、`osx-x64`、`osx-arm64` 六个平台产物。
+- 发布支持 `win-x64` / `linux-x64` / `linux-arm64` / `osx-x64` / `osx-arm64` 五个平台，产物为 Windows 安装包（Inno Setup）、Linux deb 与 macOS dmg。
 - Help 菜单可打开 Report issue、Contact GitHub support、Show User Guides、更新日志、快捷键说明、日志目录和关于窗口。
 - 主工作区支持拖拽调整左侧文件/提交列表与右侧 Diff 的空间占比，History 文件列表与 Diff 之间也可单独调整宽度。
 - 操作日志区域支持拖拽调整高度，便于临时查看更完整的 Git 操作记录，隐藏日志时不保留空白区域。

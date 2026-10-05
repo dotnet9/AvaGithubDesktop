@@ -19,7 +19,6 @@ if not "%~1"=="" (
 echo Publishing AvaGithubDesktop profiles...
 
 call :publish FolderProfile__win-x64 %WINDOWS_TFM% win-x64 || exit /b 1
-call :publish FolderProfile__win-x86 %WINDOWS_TFM% win-x86 || exit /b 1
 call :publish FolderProfile__linux-x64 %CROSS_PLATFORM_TFM% linux-x64 || exit /b 1
 call :publish FolderProfile__linux-arm64 %CROSS_PLATFORM_TFM% linux-arm64 || exit /b 1
 call :publish FolderProfile__osx-x64 %CROSS_PLATFORM_TFM% osx-x64 || exit /b 1
