@@ -29,10 +29,6 @@ jobs:
             tfm: net10.0-windows
             os: windows-latest
             aot: true
-          - rid: win-x86
-            tfm: net10.0-windows
-            os: windows-latest
-            aot: false
           - rid: linux-x64
             tfm: net10.0
             os: ubuntu-latest
