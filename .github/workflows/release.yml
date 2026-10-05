@@ -91,14 +91,6 @@ jobs:
             /p:PublishProfile=FolderProfile__${{ matrix.rid }} -p:Version=$env:APP_VERSION
           if ($LASTEXITCODE -ne 0) { throw "publish failed for ${{ matrix.rid }}" }
 
-      - name: Package (Windows zip + SHA-256)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: >
-          pwsh scripts/package_ava_github_desktop_artifacts.ps1
-          -RuntimeIdentifier ${{ matrix.rid }}
-          -Version "$env:APP_VERSION" -Force
-
       - name: Build Windows installer (Inno Setup)
         if: runner.os == 'Windows'
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
@@ -205,7 +197,6 @@ jobs:
           generate_release_notes: true
           files: |
             artifacts/release/*.exe
-            artifacts/release/*.zip
             artifacts/release/*.deb
             artifacts/release/*.dmg
             artifacts/release/*.sha256
