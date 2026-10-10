@@ -1,6 +1,6 @@
 using System.Text;
 using Avalonia;
-using CodeWF.Log.Core;
+using CodeWF.Toolkit.Logging;
 using Microsoft.Extensions.Logging;
 using ReactiveUI.Avalonia;
 

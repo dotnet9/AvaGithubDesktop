@@ -1,6 +1,6 @@
 using AvaGithubDesktop.Core.Messaging;
 using AvaGithubDesktop.Core.Models;
-using CodeWF.EventBus;
+using CodeWF.Toolkit.EventBus;
 
 namespace AvaGithubDesktop.Core.Services;
 

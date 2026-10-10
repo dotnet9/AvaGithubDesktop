@@ -1,5 +1,5 @@
 using AvaGithubDesktop.ViewModels;
-using CodeWF.AvaloniaControls.Controls;
+using CodeWF.Avalonia.Controls.Controls;
 
 namespace AvaGithubDesktop.Views;
 

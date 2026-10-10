@@ -4,7 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using AvaGithubDesktop.Views;
-using CodeWF.Log.Core;
+using CodeWF.Toolkit.Logging;
 
 namespace AvaGithubDesktop.Core.Services;
 

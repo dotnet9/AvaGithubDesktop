@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
-using CodeWF.Log.Core;
+using CodeWF.Toolkit.Logging;
 
 namespace AvaGithubDesktop.Core.Services;
 

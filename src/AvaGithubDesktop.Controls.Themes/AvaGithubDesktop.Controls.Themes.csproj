@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net10.0</TargetFrameworks>
     <OutputType>Library</OutputType>
     <AssemblyName>AvaGithubDesktop.Controls.Themes</AssemblyName>
     <RootNamespace>AvaGithubDesktop.Controls.Themes</RootNamespace>
@@ -11,7 +11,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
     <PackageReference Include="Avalonia" />
-    <PackageReference Include="CodeWF.AvaloniaControls" />
+    <PackageReference Include="CodeWF.Avalonia.Controls" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AvaGithubDesktop.Controls\AvaGithubDesktop.Controls.csproj" />

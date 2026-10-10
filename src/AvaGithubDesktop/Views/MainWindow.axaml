@@ -7,7 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i18n="https://codewf.com"
     xmlns:l="clr-namespace:AvaGithubDesktop"
-    xmlns:log="using:CodeWF.Log.Avalonia"
+    xmlns:log="using:CodeWF.Avalonia.Log"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:AvaGithubDesktop.Core.Models"
     xmlns:vm="using:AvaGithubDesktop.ViewModels"

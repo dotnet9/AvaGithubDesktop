@@ -4,10 +4,10 @@ using Avalonia.Markup.Xaml;
 using AvaGithubDesktop.Core.Services;
 using AvaGithubDesktop.ViewModels;
 using AvaGithubDesktop.Views;
-using CodeWF.EventBus;
-using CodeWF.Tools.Helpers;
-using Lang.Avalonia;
-using Lang.Avalonia.Json;
+using CodeWF.Toolkit.EventBus;
+using CodeWF.Toolkit.Files.Helpers;
+using CodeWF.Avalonia.Lang;
+using CodeWF.Avalonia.Lang.Json;
 using Prism.DryIoc;
 using Prism.Ioc;
 
@@ -17,7 +17,7 @@ public partial class App : PrismApplication
 {
     public override void Initialize()
     {
-        // CodeWF.Tools.Files 的 AppConfigHelper 支持 APP_CONFIG_FILE；这里固定读取输出目录的 App.config，
+        // CodeWF.Toolkit.Core.Files 的 AppConfigHelper 支持 APP_CONFIG_FILE；这里固定读取输出目录的 App.config，
         // 便于人工维护 GitHub OAuth Client ID，而不是落到 exe/dll.config 这类生成文件名里。
         AppContext.SetData("APP_CONFIG_FILE", Path.Combine(AppContext.BaseDirectory, "App.config"));
         AvaloniaXamlLoader.Load(this);

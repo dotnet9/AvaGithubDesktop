@@ -1,7 +1,7 @@
 using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
-using Lang.Avalonia;
+using CodeWF.Avalonia.Lang;
 
 namespace AvaGithubDesktop.Core.Services;
 

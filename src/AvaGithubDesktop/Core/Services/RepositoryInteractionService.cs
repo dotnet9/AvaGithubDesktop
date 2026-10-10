@@ -1,5 +1,5 @@
 using AvaGithubDesktop.Core.Messaging;
-using CodeWF.EventBus;
+using CodeWF.Toolkit.EventBus;
 
 namespace AvaGithubDesktop.Core.Services;
 

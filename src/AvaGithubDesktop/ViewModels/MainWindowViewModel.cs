@@ -7,8 +7,8 @@ using System.Reactive.Linq;
 using AvaGithubDesktop.Core.Messaging;
 using AvaGithubDesktop.Core.Models;
 using AvaGithubDesktop.Core.Services;
-using CodeWF.Tools.UpdateChecking;
-using CodeWF.EventBus;
+using CodeWF.Toolkit.Core.UpdateChecking;
+using CodeWF.Toolkit.EventBus;
 using ReactiveUI;
 
 namespace AvaGithubDesktop.ViewModels;

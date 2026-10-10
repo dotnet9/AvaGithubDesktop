@@ -1,8 +1,8 @@
 using Avalonia.Threading;
 using AvaGithubDesktop.Core.Messaging;
 using AvaGithubDesktop.Core.Services;
-using CodeWF.EventBus;
-using CodeWF.Log.Core;
+using CodeWF.Toolkit.EventBus;
+using CodeWF.Toolkit.Logging;
 using ReactiveUI;
 
 namespace AvaGithubDesktop.ViewModels;
