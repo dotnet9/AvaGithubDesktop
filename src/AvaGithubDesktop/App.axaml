@@ -15,7 +15,6 @@
     </prism:PrismApplication.DataTemplates>
 
     <prism:PrismApplication.Styles>
-        <FluentTheme />
         <semi:SemiTheme Locale="zh-CN" />
         <semi:UrsaSemiTheme Locale="zh-CN" />
         <codewf:ACSemiTheme />
