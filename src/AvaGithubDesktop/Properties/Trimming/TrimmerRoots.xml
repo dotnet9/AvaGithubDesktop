@@ -1,0 +1,33 @@
+<linker>
+  <!-- 保全容器反射构造及运行时视图定位所需的代码；完整元数据本身不会保留构造函数。 -->
+  <assembly fullname="AvaGithubDesktop" preserve="all" />
+  <assembly fullname="AvaGithubDesktop.Controls" preserve="all" />
+  <assembly fullname="AvaGithubDesktop.Controls.Themes" preserve="all" />
+  <assembly fullname="Prism" preserve="all" />
+  <assembly fullname="Prism.Avalonia" preserve="all" />
+  <assembly fullname="Prism.DryIoc.Avalonia" preserve="all" />
+  <assembly fullname="DryIoc" preserve="all" />
+  <assembly fullname="ReactiveUI" preserve="all" />
+  <assembly fullname="ReactiveUI.Avalonia" preserve="all" />
+  <assembly fullname="Splat" preserve="all" />
+
+  <!-- Markdown 及主题中仍有运行时 XAML、反射和动态资源访问。 -->
+  <assembly fullname="CodeWF.Avalonia.Controls" preserve="all" />
+  <assembly fullname="CodeWF.Avalonia.Markdown" preserve="all" />
+  <assembly fullname="CodeWF.Avalonia.Lang" preserve="all" />
+  <assembly fullname="CodeWF.Toolkit.EventBus" preserve="all" />
+  <assembly fullname="Markdig" preserve="all" />
+  <assembly fullname="AvaloniaEdit" preserve="all" />
+  <assembly fullname="Semi.Avalonia" preserve="all" />
+  <assembly fullname="Ursa" preserve="all" />
+  <assembly fullname="Ursa.Themes.Semi" preserve="all" />
+  <assembly fullname="Irihi.Avalonia.Shared" preserve="all" />
+  <assembly fullname="Irihi.Avalonia.Shared.Contracts" preserve="all" />
+  <assembly fullname="Avalonia" preserve="all" />
+  <assembly fullname="Avalonia.Base" preserve="all" />
+  <assembly fullname="Avalonia.Controls" preserve="all" />
+  <assembly fullname="Avalonia.Desktop" preserve="all" />
+  <assembly fullname="Avalonia.Markup" preserve="all" />
+  <assembly fullname="Avalonia.Markup.Xaml" preserve="all" />
+  <assembly fullname="Avalonia.Markup.Xaml.Loader" preserve="all" />
+</linker>

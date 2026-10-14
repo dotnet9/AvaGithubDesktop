@@ -1,4 +1,4 @@
-using AvaGithubDesktop.Core.Models;
+﻿using AvaGithubDesktop.Core.Models;
 using CodeWF.Toolkit.Files.Helpers;
 
 namespace AvaGithubDesktop.Core.Services;
@@ -10,6 +10,7 @@ public sealed class AppSettingsStore : IAppSettingsStore
     private const string ShowSideBySideDiffKey = nameof(AppSettings.ShowSideBySideDiff);
     private const string CultureNameKey = nameof(AppSettings.CultureName);
     private const string ThemeKey = nameof(AppSettings.ThemeKey);
+    private const string PaletteKey = nameof(AppSettings.PaletteKey);
     private const string LastRepositoryPathKey = nameof(AppSettings.LastRepositoryPath);
     private const string WorkspaceSidebarWidthKey = nameof(AppSettings.WorkspaceSidebarWidth);
     private const string HistoryFileListWidthKey = nameof(AppSettings.HistoryFileListWidth);
@@ -51,6 +52,7 @@ public sealed class AppSettingsStore : IAppSettingsStore
             ShowSideBySideDiff = Get<bool?>(configPath, ShowSideBySideDiffKey),
             CultureName = Get<string>(configPath, CultureNameKey),
             ThemeKey = Get<string>(configPath, ThemeKey),
+            PaletteKey = Get<string>(configPath, PaletteKey),
             LastRepositoryPath = Get<string>(configPath, LastRepositoryPathKey),
             WorkspaceSidebarWidth = Get<double?>(configPath, WorkspaceSidebarWidthKey),
             HistoryFileListWidth = Get<double?>(configPath, HistoryFileListWidthKey),
@@ -70,6 +72,7 @@ public sealed class AppSettingsStore : IAppSettingsStore
             AppConfigHelper.Set(configPath, ShowSideBySideDiffKey, settings.ShowSideBySideDiff);
             AppConfigHelper.Set(configPath, CultureNameKey, settings.CultureName);
             AppConfigHelper.Set(configPath, ThemeKey, settings.ThemeKey);
+            AppConfigHelper.Set(configPath, PaletteKey, settings.PaletteKey);
             AppConfigHelper.Set(configPath, LastRepositoryPathKey, settings.LastRepositoryPath);
             AppConfigHelper.Set(configPath, WorkspaceSidebarWidthKey, settings.WorkspaceSidebarWidth);
             AppConfigHelper.Set(configPath, HistoryFileListWidthKey, settings.HistoryFileListWidth);

@@ -1,10 +1,10 @@
-using AvaGithubDesktop.Core.Models;
+﻿using AvaGithubDesktop.Core.Models;
 
 namespace AvaGithubDesktop.Core.Services;
 
-public interface IThemeService
+public interface IThemeService : IDisposable
 {
     IReadOnlyList<ThemeOption> GetThemeOptions();
-
-    void ApplyTheme(ThemeOption theme);
+    IReadOnlyList<PaletteOption> GetPaletteOptions();
+    void ApplyTheme(ThemeOption theme, PaletteOption palette);
 }

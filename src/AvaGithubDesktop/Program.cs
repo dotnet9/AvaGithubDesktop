@@ -2,7 +2,7 @@ using System.Text;
 using Avalonia;
 using CodeWF.Toolkit.Logging;
 using Microsoft.Extensions.Logging;
-using ReactiveUI.Avalonia;
+using Avalonia.ReactiveUI;
 
 namespace AvaGithubDesktop;
 
@@ -44,7 +44,7 @@ internal sealed class Program
         return AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
-            .UseReactiveUI(_ => { })
+            .UseReactiveUI()
             .LogToTrace();
     }
 }

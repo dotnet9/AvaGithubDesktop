@@ -1,4 +1,4 @@
-namespace AvaGithubDesktop.Core.Models;
+﻿namespace AvaGithubDesktop.Core.Models;
 
 public sealed record AppSettings
 {
@@ -11,6 +11,8 @@ public sealed record AppSettings
     public string? CultureName { get; init; }
 
     public string? ThemeKey { get; init; }
+
+    public string? PaletteKey { get; init; }
 
     public string? LastRepositoryPath { get; init; }
 

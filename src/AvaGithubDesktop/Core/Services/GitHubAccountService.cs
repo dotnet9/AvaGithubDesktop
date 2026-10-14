@@ -1,23 +1,18 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using AvaGithubDesktop.Core.Models;
 using CodeWF.Toolkit.Files.Helpers;
 
 namespace AvaGithubDesktop.Core.Services;
 
-public sealed class GitHubAccountService : IGitHubAccountService
+public sealed partial class GitHubAccountService : IGitHubAccountService
 {
     private const string OAuthClientIdKey = "GitHubOAuthClientId";
     private const string DefaultOAuthClientId = "Ov23liudx8joiwZ3Ka4s";
     private const string DeviceGrantType = "urn:ietf:params:oauth:grant-type:device_code";
     private const string OAuthScopes = "repo user workflow";
-
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = true
-    };
 
     private static readonly string StoreFolder = ResolveStoreFolder();
 
@@ -78,9 +73,9 @@ public sealed class GitHubAccountService : IGitHubAccountService
         }
 
         await using var stream = File.OpenRead(StorePath);
-        var document = await JsonSerializer.DeserializeAsync<AccountStoreDocument>(
+        var document = await JsonSerializer.DeserializeAsync(
             stream,
-            JsonOptions,
+            AccountJsonContext.Default.AccountStoreDocument,
             cancellationToken);
         _accounts = SortAccounts(document?.Accounts ?? []);
         _isLoaded = true;
@@ -295,9 +290,9 @@ public sealed class GitHubAccountService : IGitHubAccountService
         }
 
         await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-        return await JsonSerializer.DeserializeAsync<T>(
+        return await JsonSerializer.DeserializeAsync(
                    responseStream,
-                   JsonOptions,
+                   GetJsonTypeInfo<T>(),
                    cancellationToken)
                ?? throw new InvalidOperationException("GitHub API returned an empty response.");
     }
@@ -323,7 +318,7 @@ public sealed class GitHubAccountService : IGitHubAccountService
             throw new InvalidOperationException(BuildApiErrorMessage(response, body));
         }
 
-        return JsonSerializer.Deserialize<T>(body, JsonOptions)
+        return JsonSerializer.Deserialize(body, GetJsonTypeInfo<T>())
                ?? throw new InvalidOperationException("GitHub OAuth returned an empty response.");
     }
 
@@ -349,7 +344,7 @@ public sealed class GitHubAccountService : IGitHubAccountService
 
         await using (var stream = File.Create(tempPath))
         {
-            await JsonSerializer.SerializeAsync(stream, document, JsonOptions, cancellationToken);
+            await JsonSerializer.SerializeAsync(stream, document, AccountJsonContext.Default.AccountStoreDocument, cancellationToken);
         }
 
         File.Move(tempPath, StorePath, overwrite: true);
@@ -416,4 +411,17 @@ public sealed class GitHubAccountService : IGitHubAccountService
         [property: JsonPropertyName("access_token")] string? AccessToken,
         [property: JsonPropertyName("error")] string? Error,
         [property: JsonPropertyName("error_description")] string? ErrorDescription);
+
+    private static JsonTypeInfo<T> GetJsonTypeInfo<T>() =>
+        (JsonTypeInfo<T>)(AccountJsonContext.Default.GetTypeInfo(typeof(T))
+            ?? throw new NotSupportedException($"JSON metadata is not registered for {typeof(T).Name}."));
+
+    // 保持既有 JSON 字段与认证流程，仅替换序列化元数据来源。
+    [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase, WriteIndented = true)]
+    [JsonSerializable(typeof(AccountStoreDocument))]
+    [JsonSerializable(typeof(GitHubUserApiResponse))]
+    [JsonSerializable(typeof(IReadOnlyList<GitHubEmailApiResponse>))]
+    [JsonSerializable(typeof(GitHubDeviceCodeApiResponse))]
+    [JsonSerializable(typeof(GitHubOAuthTokenApiResponse))]
+    private partial class AccountJsonContext : JsonSerializerContext;
 }

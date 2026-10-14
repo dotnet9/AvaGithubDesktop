@@ -1,4 +1,4 @@
-{
+﻿{
   "language": "简体中文",
   "description": "简体中文",
   "cultureName": "zh-CN",
@@ -561,7 +561,40 @@
       "StatusCheckingUpdate": "正在检查更新…",
       "StatusUpToDate": "当前已是最新版本",
       "StatusUpdateAvailableFormat": "发现新版本 {0}，已打开发布页",
-      "StatusUpdateCheckFailedFormat": "检查更新失败：{0}"
+      "StatusUpdateCheckFailedFormat": "检查更新失败：{0}",
+      "AboutChineseNameLabel": "中文名",
+      "AboutCompileTimeLabel": "编译时间",
+      "AboutAuthorLabel": "作者",
+      "AboutAuthorName": "沙漠尽头的狼",
+      "AboutWebsiteLabel": "网站",
+      "AboutBrandName": "CodeWF（码坊）",
+      "AboutVexTitle": "关于 AvaGithubDesktop",
+      "About": "关于",
+      "AboutCheckUpdateLabel": "更新",
+      "AboutCheckUpdate": "检查更新",
+      "AboutCheckingUpdate": "正在检查更新…",
+      "AboutUpToDate": "当前已是最新版本",
+      "AboutUpdateAvailable": "发现新版本：{0}。",
+      "AboutUpdateFailed": "检查更新失败：{0}",
+      "AboutPlatformLabel": "开发平台",
+      "AboutCopyrightLabel": "版权",
+      "AboutUpdateHint": "从 AvaGithubDesktop 更新服务检查新版本，下载后需退出并重新安装。",
+      "AboutDownload": "下载更新",
+      "AboutDownloading": "正在下载…",
+      "AboutInstall": "安装更新",
+      "AboutInstalling": "正在启动安装器…",
+      "AboutOpenRelease": "打开发布页",
+      "AboutOpenFolder": "打开所在目录",
+      "AboutReleaseNotes": "发布说明",
+      "AboutDownloadProgress": "正在下载 {0}",
+      "AboutDownloaded": "下载已校验，可开始安装。",
+      "AboutCanceled": "操作已取消。",
+      "ThemeDotNet": ".NET 紫",
+      "ThemeAurora": "AI 极光",
+      "ThemeEmber": "AI 赤陶",
+      "ThemeDefault": "默认蓝",
+      "Close": "关闭",
+      "FileLoggingUnavailable": "当前程序未启用文件日志。"
     }
   }
 }

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
@@ -42,19 +42,22 @@
   .menu div { padding:7px 10px; border-radius:7px; }
   .menu div:hover { background:#eef1f4; }
 </style>
+<link rel="stylesheet" href="assets/appearance.css">
 </head>
 <body>
 <div class="win">
   <div class="top">
-    <div class="logo"></div>
+    <div class="logo">A</div>
     <div class="repo">dotnet9 / QuickApp <small>· main ↑1</small></div>
     <div class="spacer"></div>
+    <select id="theme-mode" aria-label="主题模式"><option value="system">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option></select>
+    <div class="swatches" aria-label="主题配色"></div>
     <button class="btn" id="moreBtn">更多 ▾</button>
     <button class="btn primary">Commit to main</button>
   </div>
   <div class="menu" id="moreMenu">
     <div>拉取 / 推送</div><div>分支管理…</div><div>更新日志</div>
-    <div id="checkUpdateItem">检查更新</div><div>关于 AvaGithubDesktop</div>
+    <div id="checkUpdateItem">检查更新</div><div id="aboutItem">关于 AvaGithubDesktop</div>
   </div>
   <div class="body">
     <div class="side">
@@ -84,21 +87,17 @@
     <span>最近提交 3fd07c5 · 2 分钟前</span>
     <div class="spacer"></div>
     <span class="link" id="checkUpdateFoot">检查更新</span><span>·</span>
-    <span>v0.118.0.10</span>
+    <span>v0.118.0.13</span>
   </div>
   <div class="toast" id="toast"></div>
 </div>
-<script>
-  var menu = document.getElementById('moreMenu'), toast = document.getElementById('toast');
-  document.getElementById('moreBtn').onclick = function(e){ e.stopPropagation(); menu.classList.toggle('open'); };
-  document.body.onclick = function(){ menu.classList.remove('open'); };
-  function say(msg){ toast.textContent = msg; toast.classList.add('show'); setTimeout(function(){ toast.classList.remove('show'); }, 2600); }
-  function checkUpdate(){
-    say('正在检查更新…');
-    setTimeout(function(){ say('发现新版本 v0.119.0，已打开发布页'); }, 1200);
-  }
-  document.getElementById('checkUpdateItem').onclick = checkUpdate;
-  document.getElementById('checkUpdateFoot').onclick = checkUpdate;
-</script>
+<dialog id="about-dialog" aria-labelledby="about-title">
+  <div class="about-head"><img src="../logo.png" alt=""><div><h2 id="about-title">AvaGithubDesktop</h2><p>跨平台 Git 桌面客户端</p></div></div>
+  <div class="update-row"><div><strong>检查更新</strong><p>从 AvaGithubDesktop 更新服务检查新版本，下载后需退出并重新安装。</p></div><button class="btn primary" id="update-action">检查更新</button><p id="update-status" role="status"></p><progress id="update-progress" max="100" hidden></progress></div>
+  <dl class="about-info"><dt>版本</dt><dd>0.118.0.13</dd><dt>开发平台</dt><dd>.NET 10 · Avalonia 12</dd><dt>编译时间</dt><dd>2026-10-14 18:53:57</dd><dt>作者</dt><dd>沙漠尽头的狼</dd><dt>仓库</dt><dd><a href="https://github.com/dotnet9/AvaGithubDesktop">github.com/dotnet9/AvaGithubDesktop</a></dd><dt>版权</dt><dd>Copyright © 2026 CodeWF</dd></dl>
+  <div class="about-actions"><button class="btn" id="about-close">关闭</button></div>
+</dialog>
+<script src="assets/appearance.js"></script>
+
 </body>
 </html>

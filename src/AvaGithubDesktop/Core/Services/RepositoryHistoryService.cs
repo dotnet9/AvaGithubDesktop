@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using AvaGithubDesktop.Core.Models;
 
 namespace AvaGithubDesktop.Core.Services;
@@ -7,10 +8,6 @@ namespace AvaGithubDesktop.Core.Services;
 public sealed class RepositoryHistoryService : IRepositoryHistoryService
 {
     private const int MaxStoredRepositories = 100;
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
-    {
-        WriteIndented = true
-    };
 
     private static readonly string StoreDirectory = Path.Combine(
         ResolveApplicationDataFolder(),
@@ -61,7 +58,7 @@ public sealed class RepositoryHistoryService : IRepositoryHistoryService
         await JsonSerializer.SerializeAsync(
             stream,
             entries.Take(MaxStoredRepositories).ToArray(),
-            JsonOptions,
+            RepositoryHistoryJsonContext.Default.RepositoryHistoryEntryArray,
             cancellationToken);
     }
 
@@ -75,7 +72,7 @@ public sealed class RepositoryHistoryService : IRepositoryHistoryService
         try
         {
             await using var stream = File.OpenRead(StorePath);
-            var entries = await JsonSerializer.DeserializeAsync<List<RepositoryHistoryEntry>>(stream, JsonOptions, cancellationToken);
+            var entries = await JsonSerializer.DeserializeAsync(stream, RepositoryHistoryJsonContext.Default.ListRepositoryHistoryEntry, cancellationToken);
             return (entries ?? [])
                 .Where(IsValidStoredEntry)
                 .ToList();
@@ -231,3 +228,9 @@ public sealed class RepositoryHistoryService : IRepositoryHistoryService
             .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
     }
 }
+
+/// <summary>仓库历史使用源生成 JSON 元数据，兼容关闭反射序列化的 NativeAOT。</summary>
+[JsonSourceGenerationOptions(JsonSerializerDefaults.Web, WriteIndented = true)]
+[JsonSerializable(typeof(List<RepositoryHistoryEntry>))]
+[JsonSerializable(typeof(RepositoryHistoryEntry[]))]
+internal partial class RepositoryHistoryJsonContext : JsonSerializerContext;

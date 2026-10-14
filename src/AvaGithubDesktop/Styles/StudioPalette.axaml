@@ -1,0 +1,50 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- 仅在应用层映射共享配色，控件主题包保留默认资源。 -->
+    <SolidColorBrush x:Key="AppBackgroundBrush" Color="{DynamicResource StudioBackgroundColor}" />
+    <SolidColorBrush x:Key="DiffViewerBackgroundBrush" Color="{DynamicResource StudioBackgroundColor}" />
+    <SolidColorBrush x:Key="DiffLineBackgroundBrush" Color="{DynamicResource StudioBackgroundColor}" />
+    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="{DynamicResource StudioSurfaceColor}" />
+    <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="{DynamicResource StudioSurfaceColor}" />
+    <SolidColorBrush x:Key="StatusBarBackgroundBrush" Color="{DynamicResource StudioSurfaceColor}" />
+    <SolidColorBrush x:Key="DiffGutterBackgroundBrush" Color="{DynamicResource StudioSurfaceColor}" />
+    <SolidColorBrush x:Key="MenuFlyoutBackground" Color="{DynamicResource StudioSurfaceColor}" />
+    <SolidColorBrush x:Key="PanelAltBackgroundBrush" Color="{DynamicResource StudioRaisedColor}" />
+    <SolidColorBrush x:Key="HoverBackgroundBrush" Color="{DynamicResource StudioRaisedColor}" />
+    <SolidColorBrush x:Key="AccentSubtleBrush" Color="{DynamicResource StudioRaisedColor}" />
+    <SolidColorBrush x:Key="SelectionBackgroundBrush" Color="{DynamicResource StudioRaisedColor}" />
+    <SolidColorBrush x:Key="DiffHeaderBackgroundBrush" Color="{DynamicResource StudioRaisedColor}" />
+    <SolidColorBrush x:Key="DiffHunkBackgroundBrush" Color="{DynamicResource StudioRaisedColor}" />
+    <SolidColorBrush x:Key="MenuItemPointeroverBackground" Color="{DynamicResource StudioRaisedColor}" />
+    <SolidColorBrush x:Key="MenuItemPressedBackground" Color="{DynamicResource StudioRaisedColor}" />
+    <SolidColorBrush x:Key="PanelBorderBrush" Color="{DynamicResource StudioBorderColor}" />
+    <SolidColorBrush x:Key="PanelBorderContrastBrush" Color="{DynamicResource StudioBorderColor}" />
+    <SolidColorBrush x:Key="StatusBarBorderBrush" Color="{DynamicResource StudioBorderColor}" />
+    <SolidColorBrush x:Key="DiffGutterBorderBrush" Color="{DynamicResource StudioBorderColor}" />
+    <SolidColorBrush x:Key="MenuFlyoutBorderBrush" Color="{DynamicResource StudioBorderColor}" />
+    <SolidColorBrush x:Key="MenuItemSeparatorBackground" Color="{DynamicResource StudioBorderColor}" />
+    <SolidColorBrush x:Key="PrimaryTextBrush" Color="{DynamicResource StudioTextColor}" />
+    <SolidColorBrush x:Key="DiffContentTextBrush" Color="{DynamicResource StudioTextColor}" />
+    <SolidColorBrush x:Key="MenuItemForeground" Color="{DynamicResource StudioTextColor}" />
+    <SolidColorBrush x:Key="MenuItemPointeroverForeground" Color="{DynamicResource StudioTextColor}" />
+    <SolidColorBrush x:Key="MenuItemExpandIconOpenForeground" Color="{DynamicResource StudioTextColor}" />
+    <SolidColorBrush x:Key="SecondaryTextBrush" Color="{DynamicResource StudioMutedColor}" />
+    <SolidColorBrush x:Key="MutedTextBrush" Color="{DynamicResource StudioMutedColor}" />
+    <SolidColorBrush x:Key="DiffGutterTextBrush" Color="{DynamicResource StudioMutedColor}" />
+    <SolidColorBrush x:Key="DiffHeaderTextBrush" Color="{DynamicResource StudioMutedColor}" />
+    <SolidColorBrush x:Key="MenuItemInputGestureTextForeground" Color="{DynamicResource StudioMutedColor}" />
+    <SolidColorBrush x:Key="MenuItemExpandIconForeground" Color="{DynamicResource StudioMutedColor}" />
+    <SolidColorBrush x:Key="MenuItemDisabledForeground" Color="{DynamicResource StudioMutedColor}" />
+    <SolidColorBrush x:Key="MenuItemDisabledInputGestureTextForeground" Color="{DynamicResource StudioMutedColor}" />
+    <SolidColorBrush x:Key="MenuItemDisabledExpandIconForeground" Color="{DynamicResource StudioMutedColor}" />
+    <SolidColorBrush x:Key="AccentBrush" Color="{DynamicResource StudioAccentColor}" />
+    <SolidColorBrush x:Key="AccentBorderBrush" Color="{DynamicResource StudioAccentColor}" />
+    <SolidColorBrush x:Key="DiffHunkTextBrush" Color="{DynamicResource StudioAccentColor}" />
+    <SolidColorBrush x:Key="ToolbarBorderBrush" Color="{DynamicResource StudioSecondaryColor}" />
+    <SolidColorBrush x:Key="ToolbarBadgeBackgroundBrush" Color="{DynamicResource StudioGradientStartColor}" />
+    <SolidColorBrush x:Key="ToolbarSplitBorderBrush" Color="{DynamicResource StudioGradientStartColor}" />
+    <SolidColorBrush x:Key="ToolbarHoverBackgroundBrush" Color="{DynamicResource StudioGradientStartColor}" />
+    <LinearGradientBrush x:Key="ToolbarBackgroundBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Color="{DynamicResource StudioGradientStartColor}" Offset="0" />
+        <GradientStop Color="{DynamicResource StudioSecondaryColor}" Offset="1" />
+    </LinearGradientBrush>
+</ResourceDictionary>

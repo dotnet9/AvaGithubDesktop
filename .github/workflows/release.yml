@@ -73,22 +73,16 @@ jobs:
           "APP_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           Write-Host "Version: $version"
 
+      - name: Verify JSON contracts with reflection disabled
+        shell: pwsh
+        run: |
+          dotnet run --project scripts/serialization-verification/SerializationVerification.csproj -c Release
+          if ($LASTEXITCODE -ne 0) { throw 'serialization verification failed' }
+
       - name: Publish (NativeAOT with full reflection metadata)
         shell: pwsh
         run: |
-          $aotArgs = @(
-            '-p:PublishAot=true',
-            '-p:PublishTrimmed=true',
-            '-p:PublishSingleFile=false',
-            '-p:IlcGenerateCompleteTypeMetadata=true',
-            '-p:IlcTrimMetadata=false',
-            '-p:IlcSingleThreaded=true'
-          )
-          if ('${{ matrix.aot }}' -eq 'false') { $aotArgs = @() }
-          if ('${{ matrix.os }}' -like 'macos*') { $aotArgs += '-p:StripSymbols=false' }
-          dotnet publish src/AvaGithubDesktop/AvaGithubDesktop.csproj -c Release `
-            -f ${{ matrix.tfm }} -r ${{ matrix.rid }} @aotArgs `
-            /p:PublishProfile=FolderProfile__${{ matrix.rid }} -p:Version=$env:APP_VERSION
+          pwsh scripts/publish.ps1 -RuntimeIdentifier '${{ matrix.rid }}' -Version $env:APP_VERSION
           if ($LASTEXITCODE -ne 0) { throw "publish failed for ${{ matrix.rid }}" }
 
       - name: Build Windows installer (Inno Setup)

@@ -1,4 +1,6 @@
-using System.Reflection;
+﻿using System.Reflection;
+using CodeWF.Toolkit.Core.UpdateChecking;
+using AvaGithubDesktop.ViewModels;
 using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
@@ -14,11 +16,13 @@ public sealed class HelpService : IHelpService
     private const string UserGuidesUrl = "https://docs.github.com/en/desktop";
     private static readonly string DocumentsFolder = Path.Combine(AppContext.BaseDirectory, "docs");
     private readonly IAppLocalizer _localizer;
+    private readonly IUpdateService _updates;
     private readonly IRepositoryShellService _repositoryShellService;
 
-    public HelpService(IAppLocalizer localizer, IRepositoryShellService repositoryShellService)
+    public HelpService(IAppLocalizer localizer, IRepositoryShellService repositoryShellService, IUpdateService updates)
     {
         _localizer = localizer;
+        _updates = updates;
         _repositoryShellService = repositoryShellService;
     }
 
@@ -62,7 +66,7 @@ public sealed class HelpService : IHelpService
     public Task ShowLogFolderAsync()
     {
         var directory = Logger.LogDirectory
-            ?? throw new InvalidOperationException("当前程序未启用文件日志。");
+            ?? throw new InvalidOperationException(_localizer.Get(AvaGithubDesktopL.FileLoggingUnavailable));
         if (!Directory.Exists(directory))
         {
             Directory.CreateDirectory(directory);
@@ -77,24 +81,10 @@ public sealed class HelpService : IHelpService
 
     public Task ShowAboutWindowAsync()
     {
-        ShowWindow(new MarkdownDocumentWindow(
-            _localizer.Get(AvaGithubDesktopL.MenuAbout),
-            BuildAboutMarkdown(),
-            DocumentsFolder));
+        ShowWindow(new AboutWindow(new AboutViewModel(_updates, _localizer,
+            url => StartProcess(new ProcessStartInfo(url) { UseShellExecute = true }),
+            () => (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.Shutdown())));
         return Task.CompletedTask;
-    }
-
-    private string BuildAboutMarkdown()
-    {
-        return string.Join(
-            Environment.NewLine,
-            "# AvaGithubDesktop",
-            string.Empty,
-            _localizer.Get(AvaGithubDesktopL.AboutDescription),
-            string.Empty,
-            $"- {_localizer.Get(AvaGithubDesktopL.AboutVersionLabel)}：{GetInformationalVersion()}",
-            $"- {_localizer.Get(AvaGithubDesktopL.AboutRepositoryLabel)}：https://github.com/dotnet9/AvaGithubDesktop",
-            $"- {_localizer.Get(AvaGithubDesktopL.AboutBrandLabel)}：CodeWF");
     }
 
     private static string BuildContactSupportUrl()

@@ -1,0 +1,72 @@
+﻿<codewf:CodeWFWindow
+    x:Class="AvaGithubDesktop.Views.AboutWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:i18n="https://codewf.com"
+    xmlns:l="clr-namespace:AvaGithubDesktop"
+    xmlns:vm="clr-namespace:AvaGithubDesktop.ViewModels"
+    xmlns:codewf="https://codewf.com"
+    x:DataType="vm:AboutViewModel"
+    Title="{i18n:I18n {x:Static l:AvaGithubDesktopL.MenuAbout}}"
+    Width="650" Height="650" MinWidth="560" MinHeight="450"
+    Icon="/Assets/logo.ico" ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+    Background="{DynamicResource PanelBackgroundBrush}"
+    TitleBarBackground="{DynamicResource ToolbarBackgroundBrush}" TitleBarForeground="{DynamicResource ToolbarTextBrush}">
+    <Border Padding="24">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="18">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                    <Image Width="40" Height="40" Source="/Assets/logo.png" />
+                    <StackPanel Grid.Column="1" Spacing="3">
+                        <TextBlock FontSize="20" FontWeight="SemiBold" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.AppTitle}}" />
+                        <TextBlock Foreground="{DynamicResource SecondaryTextBrush}" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.AboutDescription}}" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Grid>
+                <Border Padding="14" CornerRadius="10" Background="{DynamicResource AccentSubtleBrush}">
+                    <StackPanel Spacing="10">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                            <StackPanel Spacing="5">
+                                <TextBlock FontWeight="SemiBold" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.AboutCheckUpdateLabel}}" />
+                                <TextBlock Foreground="{DynamicResource SecondaryTextBrush}" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.AboutUpdateHint}}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <Button Grid.Column="1" Classes="primary" VerticalAlignment="Center" Command="{Binding UpdateCommand}" Content="{Binding ActionText}" MinWidth="110" />
+                        </Grid>
+                        <TextBlock Text="{Binding StatusText}" IsVisible="{Binding StatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" TextWrapping="Wrap" />
+                        <ProgressBar IsVisible="{Binding IsDownloading}" IsIndeterminate="{Binding IsIndeterminate}" Value="{Binding Progress}" Minimum="0" Maximum="100" />
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="{Binding ProgressText}" IsVisible="{Binding IsDownloading}" />
+                            <Button Grid.Column="1" Command="{Binding CancelCommand}" Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.Cancel}}" IsVisible="{Binding IsBusy}" />
+                        </Grid>
+                        <Expander Header="{i18n:I18n {x:Static l:AvaGithubDesktopL.AboutReleaseNotes}}" IsVisible="{Binding ReleaseNotes, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                            <TextBlock MaxHeight="160" Text="{Binding ReleaseNotes}" TextWrapping="Wrap" />
+                        </Expander>
+                    </StackPanel>
+                </Border>
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="10" ColumnSpacing="16">
+                    <TextBlock Foreground="{DynamicResource SecondaryTextBrush}" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.AboutVersionLabel}}" />
+                    <Border Grid.Column="1" Padding="10,2" HorizontalAlignment="Left" Background="{DynamicResource AccentSubtleBrush}" CornerRadius="9">
+                        <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" Text="{Binding VersionText}" />
+                    </Border>
+                    <TextBlock Grid.Row="1" Foreground="{DynamicResource SecondaryTextBrush}" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.AboutPlatformLabel}}" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding PlatformText}" TextWrapping="Wrap" />
+                    <TextBlock Grid.Row="2" Foreground="{DynamicResource SecondaryTextBrush}" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.AboutCompileTimeLabel}}" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CompileTimeText}" />
+                    <TextBlock Grid.Row="3" Foreground="{DynamicResource SecondaryTextBrush}" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.AboutAuthorLabel}}" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.AboutAuthorName}}" />
+                    <TextBlock Grid.Row="4" Foreground="{DynamicResource SecondaryTextBrush}" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.AboutRepositoryLabel}}" />
+                    <Button Grid.Row="4" Grid.Column="1" Classes="link" HorizontalAlignment="Left" Command="{Binding RepositoryCommand}" Content="https://github.com/dotnet9/AvaGithubDesktop" />
+                    <TextBlock Grid.Row="5" Foreground="{DynamicResource SecondaryTextBrush}" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.AboutWebsiteLabel}}" />
+                    <Button Grid.Row="5" Grid.Column="1" Classes="link" HorizontalAlignment="Left" Command="{Binding WebsiteCommand}" Content="https://codewf.com" />
+                    <TextBlock Grid.Row="6" Foreground="{DynamicResource SecondaryTextBrush}" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.AboutBrandLabel}}" />
+                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.AboutBrandName}}" />
+                    <TextBlock Grid.Row="7" Foreground="{DynamicResource SecondaryTextBrush}" Text="{i18n:I18n {x:Static l:AvaGithubDesktopL.AboutCopyrightLabel}}" />
+                    <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding CopyrightText}" TextWrapping="Wrap" />
+                </Grid>
+                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+                    <Button Command="{Binding CheckCommand}" IsVisible="{Binding CanRecheck}" Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.AboutCheckUpdate}}" />
+                    <Button Command="{Binding CloseCommand}" Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.Close}}" MinWidth="86" />
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Border>
+</codewf:CodeWFWindow>

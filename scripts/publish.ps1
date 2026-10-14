@@ -27,5 +27,5 @@ $ilcArgs = @("-p:PublishAot=true", "-p:PublishTrimmed=true", "-p:PublishSingleFi
     "-p:IlcGenerateCompleteTypeMetadata=true", "-p:IlcTrimMetadata=false", "-p:IlcSingleThreaded=true")
 if ($RuntimeIdentifier -eq "win-x86") { $ilcArgs = @() }
 if ($RuntimeIdentifier.StartsWith("osx-", [StringComparison]::OrdinalIgnoreCase)) { $ilcArgs += "-p:StripSymbols=false" }
-dotnet publish (Join-Path $repositoryRoot "src/AvaGithubDesktop/AvaGithubDesktop.csproj") -c Release -f $tfm -r $RuntimeIdentifier @ilcArgs /p:PublishProfile=FolderProfile__$RuntimeIdentifier -p:Version=$Version
+dotnet publish (Join-Path $repositoryRoot "src/AvaGithubDesktop/AvaGithubDesktop.csproj") -c Release -f $tfm -r $RuntimeIdentifier -m:1 @ilcArgs /p:PublishProfile=FolderProfile__$RuntimeIdentifier -p:Version=$Version
 if ($LASTEXITCODE -ne 0) { throw "publish failed for $RuntimeIdentifier" }

@@ -1,10 +1,11 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Avalonia;
 using Avalonia.Markup.Xaml;
 using AvaGithubDesktop.Core.Services;
 using AvaGithubDesktop.ViewModels;
 using AvaGithubDesktop.Views;
 using CodeWF.Toolkit.EventBus;
+using CodeWF.Toolkit.Core.UpdateChecking;
 using CodeWF.Toolkit.Files.Helpers;
 using CodeWF.Avalonia.Lang;
 using CodeWF.Avalonia.Lang.Json;
@@ -33,11 +34,21 @@ public partial class App : PrismApplication
 
     protected override AvaloniaObject CreateShell()
     {
-        return Container.Resolve<MainWindow>();
+        var window = Container.Resolve<MainWindow>();
+        window.Closed += (_, _) =>
+        {
+            Container.Resolve<IThemeService>().Dispose();
+            if (Container.Resolve<IUpdateService>() is IDisposable updates) updates.Dispose();
+        };
+        return window;
     }
 
     protected override void RegisterTypes(IContainerRegistry containerRegistry)
     {
+        containerRegistry.RegisterInstance<IUpdateService>(new UpdateService(new UpdateServiceOptions
+        {
+            Owner = "dotnet9", Repository = "AvaGithubDesktop", ProductName = "AvaGithubDesktop"
+        }));
         containerRegistry.RegisterSingleton<IEventBus, EventBus>();
         containerRegistry.RegisterSingleton<IAppSettingsStore, AppSettingsStore>();
         containerRegistry.RegisterSingleton<IAppLocalizer, AppLocalizer>();

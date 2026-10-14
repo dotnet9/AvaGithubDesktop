@@ -1,13 +1,10 @@
 ﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Reflection;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using AvaGithubDesktop.Core.Messaging;
 using AvaGithubDesktop.Core.Models;
 using AvaGithubDesktop.Core.Services;
-using CodeWF.Toolkit.Core.UpdateChecking;
 using CodeWF.Toolkit.EventBus;
 using ReactiveUI;
 
@@ -16,7 +13,6 @@ namespace AvaGithubDesktop.ViewModels;
 public sealed class MainWindowViewModel : ViewModelBase
 {
     private const int HistoryCommitLimit = 50;
-    private readonly UpdateChecker _updateChecker = new("dotnet9", "AvaGithubDesktop");
     private static readonly TimeSpan InitialDiffLoadDelay = TimeSpan.FromMilliseconds(180);
     private readonly IGitRepositoryService _gitRepositoryService;
     private readonly IRepositoryPickerService _repositoryPickerService;
@@ -99,6 +95,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool? _areAllChangesIncluded = false;
     private LanguageOption? _selectedLanguage;
     private ThemeOption? _selectedTheme;
+    private PaletteOption? _selectedPalette;
     private GitChangeItemViewModel? _selectedChange;
     private GitCommitItem? _selectedCommit;
     private GitCommitFileItemViewModel? _selectedCommitFile;
@@ -187,9 +184,13 @@ public sealed class MainWindowViewModel : ViewModelBase
         _selectedTheme = FindTheme(_settingsStore.Current.ThemeKey)
                          ?? FindTheme("system")
                          ?? ThemeOptions.FirstOrDefault();
+        PaletteOptions = new ObservableCollection<PaletteOption>(_themeService.GetPaletteOptions());
+        // 兼容旧版本把水生等配色保存在 ThemeKey 中的配置。
+        _selectedPalette = PaletteOptions.FirstOrDefault(option => option.Key.Equals(
+            _settingsStore.Current.PaletteKey ?? _settingsStore.Current.ThemeKey, StringComparison.OrdinalIgnoreCase)) ?? PaletteOptions[0];
         if (_selectedTheme is not null)
         {
-            _themeService.ApplyTheme(_selectedTheme);
+            _themeService.ApplyTheme(_selectedTheme, _selectedPalette);
         }
 
         var canExecuteRepositoryCommand = this.WhenAnyValue(model => model.CanRunRepositoryCommand);
@@ -245,6 +246,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         ToggleHideWhitespaceChangesCommand = ReactiveCommand.Create(ToggleHideWhitespaceChanges);
         ToggleSideBySideDiffCommand = ReactiveCommand.Create(ToggleSideBySideDiff);
         SelectThemeCommand = ReactiveCommand.Create<string?>(SelectThemeByKey);
+        SelectPaletteCommand = ReactiveCommand.Create<string?>(SelectPaletteByKey);
         SelectSimplifiedChineseCommand = ReactiveCommand.Create(() => SelectLanguageByCulture("zh-CN"));
         SelectEnglishCommand = ReactiveCommand.Create(() => SelectLanguageByCulture("en-US"));
 
@@ -403,6 +405,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ObservableCollection<LanguageOption> Languages { get; }
 
     public ObservableCollection<ThemeOption> ThemeOptions { get; }
+    public ObservableCollection<PaletteOption> PaletteOptions { get; }
 
     public ObservableCollection<GitChangeItemViewModel> ChangedFiles { get; } = new();
 
@@ -493,6 +496,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ToggleSideBySideDiffCommand { get; }
 
     public ReactiveCommand<string?, Unit> SelectThemeCommand { get; }
+    public ReactiveCommand<string?, Unit> SelectPaletteCommand { get; }
 
     public ReactiveCommand<Unit, Unit> SelectSimplifiedChineseCommand { get; }
 
@@ -1764,7 +1768,7 @@ public sealed class MainWindowViewModel : ViewModelBase
                 return;
             }
 
-            _themeService.ApplyTheme(value);
+            _themeService.ApplyTheme(value, SelectedPalette!);
             _settingsStore.Update(settings => settings with { ThemeKey = value.Key });
             RaiseThemeSelectionChanged();
             _eventBus.Publish(new StatusMessageChangedCommand(
@@ -1772,19 +1776,37 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    public PaletteOption? SelectedPalette
+    {
+        get => _selectedPalette;
+        private set
+        {
+            if (value is null || Equals(_selectedPalette, value)) return;
+            this.RaiseAndSetIfChanged(ref _selectedPalette, value);
+            _themeService.ApplyTheme(SelectedTheme!, value);
+            _settingsStore.Update(settings => settings with { PaletteKey = value.Key });
+            RaiseThemeSelectionChanged();
+        }
+    }
+
+    public bool IsDotNetThemeSelected => IsPaletteSelected("dotnet");
+    public bool IsAuroraThemeSelected => IsPaletteSelected("aurora");
+    public bool IsEmberThemeSelected => IsPaletteSelected("ember");
+    public bool IsDefaultThemeSelected => IsPaletteSelected("default");
+
     public bool IsSystemThemeSelected => IsThemeSelected("system");
 
     public bool IsLightThemeSelected => IsThemeSelected("light");
 
     public bool IsDarkThemeSelected => IsThemeSelected("dark");
 
-    public bool IsAquaticThemeSelected => IsThemeSelected("aquatic");
+    public bool IsAquaticThemeSelected => IsPaletteSelected("aquatic");
 
-    public bool IsDesertThemeSelected => IsThemeSelected("desert");
+    public bool IsDesertThemeSelected => IsPaletteSelected("desert");
 
-    public bool IsDuskThemeSelected => IsThemeSelected("dusk");
+    public bool IsDuskThemeSelected => IsPaletteSelected("dusk");
 
-    public bool IsNightSkyThemeSelected => IsThemeSelected("night-sky");
+    public bool IsNightSkyThemeSelected => IsPaletteSelected("night-sky");
 
     public LanguageOption? SelectedLanguage
     {
@@ -2137,6 +2159,14 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private void SelectPaletteByKey(string? key)
+    {
+        var palette = PaletteOptions.FirstOrDefault(option => option.Key.Equals(key, StringComparison.OrdinalIgnoreCase));
+        if (palette is not null) SelectedPalette = palette;
+    }
+
+    private bool IsPaletteSelected(string key) => string.Equals(SelectedPalette?.Key, key, StringComparison.OrdinalIgnoreCase);
+
     private ThemeOption? FindTheme(string? key)
     {
         return string.IsNullOrWhiteSpace(key)
@@ -2151,6 +2181,10 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private void RaiseThemeSelectionChanged()
     {
+        this.RaisePropertyChanged(nameof(IsDotNetThemeSelected));
+        this.RaisePropertyChanged(nameof(IsAuroraThemeSelected));
+        this.RaisePropertyChanged(nameof(IsEmberThemeSelected));
+        this.RaisePropertyChanged(nameof(IsDefaultThemeSelected));
         this.RaisePropertyChanged(nameof(IsSystemThemeSelected));
         this.RaisePropertyChanged(nameof(IsLightThemeSelected));
         this.RaisePropertyChanged(nameof(IsDarkThemeSelected));
@@ -2752,39 +2786,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private async Task CheckUpdateAsync()
-    {
-        try
-        {
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusCheckingUpdate)));
-            Version? current = VersionUtil.Parse(
-                typeof(MainWindowViewModel).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                    ?.InformationalVersion);
-            UpdateCheckResult result = await _updateChecker.CheckAsync(current ?? new Version(0, 0, 0));
-            if (!result.Succeeded)
-            {
-                ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusUpdateCheckFailedFormat, result.Error);
-                _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-                return;
-            }
-
-            if (result.Update is { } update)
-            {
-                // 仅提醒不自动下载：提示并打开发布页
-                _eventBus.Publish(new StatusMessageChangedCommand(
-                    _localizer.Format(AvaGithubDesktopL.StatusUpdateAvailableFormat, update.Tag)));
-                Process.Start(new ProcessStartInfo(update.PageUrl) { UseShellExecute = true });
-                return;
-            }
-
-            _eventBus.Publish(new StatusMessageChangedCommand(_localizer.Get(AvaGithubDesktopL.StatusUpToDate)));
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = _localizer.Format(AvaGithubDesktopL.StatusUpdateCheckFailedFormat, ex.Message);
-            _eventBus.Publish(new StatusMessageChangedCommand(ErrorMessage));
-        }
-    }
+    private Task CheckUpdateAsync() => _helpService.ShowAboutWindowAsync();
 
     private async Task OpenRepositoryAsync()
     {

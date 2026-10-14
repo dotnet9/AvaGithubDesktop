@@ -1,1 +1,1 @@
-global using Unit = ReactiveUI.Primitives.RxVoid;
+global using Unit = System.Reactive.Unit;

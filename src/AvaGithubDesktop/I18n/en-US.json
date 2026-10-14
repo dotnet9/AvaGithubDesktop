@@ -1,4 +1,4 @@
-{
+﻿{
   "language": "English",
   "description": "English",
   "cultureName": "en-US",
@@ -561,7 +561,40 @@
       "StatusCheckingUpdate": "Checking for updates…",
       "StatusUpToDate": "You are already on the latest version",
       "StatusUpdateAvailableFormat": "New version {0} found. Release page opened.",
-      "StatusUpdateCheckFailedFormat": "Update check failed: {0}"
+      "StatusUpdateCheckFailedFormat": "Update check failed: {0}",
+      "AboutChineseNameLabel": "Chinese Name",
+      "AboutCompileTimeLabel": "Build Time",
+      "AboutAuthorLabel": "Author",
+      "AboutAuthorName": "Wolf at the End of the Desert",
+      "AboutWebsiteLabel": "Website",
+      "AboutBrandName": "CodeWF",
+      "AboutVexTitle": "About AvaGithubDesktop",
+      "About": "About",
+      "AboutCheckUpdateLabel": "Updates",
+      "AboutCheckUpdate": "Check for updates",
+      "AboutCheckingUpdate": "Checking for updates…",
+      "AboutUpToDate": "You are already on the latest version",
+      "AboutUpdateAvailable": "New version found: {0}.",
+      "AboutUpdateFailed": "Update check failed: {0}",
+      "AboutPlatformLabel": "Development platform",
+      "AboutCopyrightLabel": "Copyright",
+      "AboutUpdateHint": "Check the AvaGithubDesktop update service. Downloading an installer requires restarting the application.",
+      "AboutDownload": "Download update",
+      "AboutDownloading": "Downloading…",
+      "AboutInstall": "Install update",
+      "AboutInstalling": "Starting installer…",
+      "AboutOpenRelease": "Open release page",
+      "AboutOpenFolder": "Open containing folder",
+      "AboutReleaseNotes": "Release notes",
+      "AboutDownloadProgress": "Downloading {0}",
+      "AboutDownloaded": "Download verified. Ready to install.",
+      "AboutCanceled": "Operation canceled.",
+      "ThemeDotNet": ".NET Purple",
+      "ThemeAurora": "AI Aurora",
+      "ThemeEmber": "AI Ember",
+      "ThemeDefault": "Default Blue",
+      "Close": "Close",
+      "FileLoggingUnavailable": "File logging is not enabled for this application."
     }
   }
 }

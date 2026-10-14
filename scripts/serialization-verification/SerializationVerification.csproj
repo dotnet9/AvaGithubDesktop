@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CodeWF.Toolkit.Files" />
+    <PackageReference Include="CodeWF.Toolkit.Logging" />
+    <Compile Include="../../src/AvaGithubDesktop/Core/Services/GitHubAccountService.cs" Link="GitHubAccountService.cs" />
+    <Compile Include="../../src/AvaGithubDesktop/Core/Services/IGitHubAccountService.cs" Link="IGitHubAccountService.cs" />
+    <Compile Include="../../src/AvaGithubDesktop/Core/Services/RepositoryHistoryService.cs" Link="RepositoryHistoryService.cs" />
+    <Compile Include="../../src/AvaGithubDesktop/Core/Services/IRepositoryHistoryService.cs" Link="IRepositoryHistoryService.cs" />
+    <Compile Include="../../src/AvaGithubDesktop/Core/Services/GitCommandLog.cs" Link="GitCommandLog.cs" />
+    <Compile Include="../../src/AvaGithubDesktop/Core/Models/GitHubAccount.cs" Link="GitHubAccount.cs" />
+    <Compile Include="../../src/AvaGithubDesktop/Core/Models/RepositoryHistoryEntry.cs" Link="RepositoryHistoryEntry.cs" />
+  </ItemGroup>
+</Project>
