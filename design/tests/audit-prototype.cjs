@@ -54,6 +54,13 @@ const { chromium } = require('playwright');
         assert.equal(await page.locator('.top select').count(),0);
         await capture(`workspace-${culture}-${width}`);
       }
+      await page.setViewportSize({width:960,height:620});
+      assert.ok(await page.locator('#stash, #commit').evaluateAll(buttons=>buttons.every(button=>{
+        const bounds=button.getBoundingClientRect(), host=button.closest('.workspace').getBoundingClientRect();
+        return bounds.width>0&&bounds.height>0&&bounds.top>=host.top&&bounds.bottom<=host.bottom+1;
+      })), 'Commit and stash actions stay inside the minimum workspace');
+      assert.ok(await page.locator('.file-area').evaluate(element=>element.clientHeight>=100), 'Minimum workspace retains file navigation');
+      await capture(`workspace-minimum-${culture}`);
       await page.setViewportSize({width:1440,height:900});
       await menu('MenuHelp','MenuAbout');assert.ok(await page.locator('#about-dialog').evaluate(dialog=>dialog.open));
       assert.equal(await page.locator('#about-info dt').count(),8);assert.match(await page.locator('#about-info').innerText(),/2026-10-15 00:00:00/);assert.equal(await page.locator('.about-captions button').count(),3);
@@ -68,6 +75,15 @@ const { chromium } = require('playwright');
     await page.locator('#filter').fill('');await page.locator('[data-file="settings.json"]').click();assert.match(await page.locator('#diff-body').innerText(),/"palette"/);
     await page.locator('[data-file="README.md"]').click();assert.match(await page.locator('#diff-body').innerText(),/visible diff/);
     await page.locator('[data-view="history"]').click();assert.equal(await page.locator('.history-files').count(),1);await capture('workspace-history');
+    await page.setViewportSize({width:960,height:620});
+    await page.locator('.history-commit-header>b').evaluate(element=>element.textContent='Long commit summary '.repeat(40));
+    assert.ok(await page.locator('.history-commit-actions button').evaluateAll(buttons=>buttons.length===5&&buttons.every(button=>{
+      const bounds=button.getBoundingClientRect(), host=button.closest('.workspace').getBoundingClientRect();
+      return bounds.left>=host.left&&bounds.right<=host.right+1&&bounds.bottom<=host.bottom+1;
+    })), 'Every history action remains visible at minimum size');
+    assert.ok(await page.locator('.history-commit-header').evaluate(header=>header.getBoundingClientRect().bottom<=document.querySelector('.history-diff-body').getBoundingClientRect().top+1), 'Long history summary leaves the diff below the toolbar');
+    await capture('workspace-history-minimum');
+    await page.setViewportSize({width:1440,height:900});
     await page.keyboard.press('Control+1');await page.locator('#summary').fill('Improve Studio workspace');await page.locator('#commit').click();
     assert.equal(await page.evaluate(()=>AvaPrototype.getState().files.length),0);
     assert.equal(await page.evaluate(()=>AvaPrototype.getState().history[0].summary),'Improve Studio workspace');

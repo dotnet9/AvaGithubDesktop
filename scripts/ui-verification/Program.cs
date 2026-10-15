@@ -54,6 +54,9 @@ localizer.SetCulture("zh-CN");
 model.RepositoryPath = repository;
 var window = new MainWindow(model) { Width = 1440, Height = 900 };
 window.Show();
+ControlLocaleVerification.Run(window, ["zh-CN", "en-US"], localizer.SetCulture);
+// 显式打开隔离仓库，避免 Prism 初始外壳的异步初始化先于测试注入服务完成。
+model.OpenRepositoryCommand.Execute().Subscribe();
 PumpUntil(() => model.HasRepository && !model.IsLoading, () => $"HasRepository={model.HasRepository}; Loading={model.IsLoading}; Path={model.RepositoryPath}; Root={model.RootPath}; Error={model.ErrorMessage}");
 if (model.ChangedFiles.Count != 2 || model.HistoryCommits.Count != 1)
     throw new InvalidOperationException("The real Git workspace did not load both changes and its initial commit.");
@@ -95,9 +98,16 @@ foreach (var culture in new[] { "zh-CN", "en-US" })
     localizer.SetCulture(culture);
     // 切语会重新加载 Diff，必须等真实内容完成后再做布局和截图检查。
     PumpUntil(() => !model.IsDiffLoading && model.DiffText.Contains("visible diff", StringComparison.Ordinal), () => model.DiffText);
-    foreach (var width in new[] { 1440, 1120 })
+    foreach (var size in new[] { (Width: 1440, Height: 900), (Width: 1120, Height: 900), (Width: 960, Height: 620) })
     {
+        var width = size.Width;
         window.Width = width;
+        window.Height = size.Height;
+        if (width == 960)
+        {
+            model.CommitSummary = new string('W', 256);
+            model.CommitDescription = string.Join(Environment.NewLine, Enumerable.Range(1, 80).Select(line => "Long description line " + line));
+        }
         window.UpdateLayout();
         Dispatcher.UIThread.RunJobs();
         var swatches = window.FindControl<ListBox>("TitleBarPalettes")!;
@@ -131,12 +141,28 @@ foreach (var culture in new[] { "zh-CN", "en-US" })
         var right = (Control)window.RightContent!;
         if (left.TranslatePoint(new Point(left.Bounds.Width, 0), window)!.Value.X > right.TranslatePoint(default, window)!.Value.X)
             throw new InvalidOperationException("Title bar menus and appearance controls overlap.");
-        using var bitmap = new RenderTargetBitmap(new PixelSize(width, 900));
+        var workspace = window.FindControl<Grid>("WorkspaceGrid")!;
+        foreach (var action in window.GetVisualDescendants().OfType<Button>()
+            .Where(button => button.Classes.Contains("commitButton") || button.Classes.Contains("stashButton")))
+            VerifyInside(action, workspace, "Commit action at " + culture + "/" + width);
+        var changes = window.GetVisualDescendants().OfType<ListBox>().Single(list => list.Classes.Contains("changes") && list.IsEffectivelyVisible);
+        if (changes.Bounds.Height < 34) throw new InvalidOperationException("The changes list cannot display one complete file row at " + culture + "/" + width);
+        if (width == 960)
+        {
+            var description = window.GetVisualDescendants().OfType<TextBox>().Single(box => box.Classes.Contains("commitDescription") && box.IsEffectivelyVisible);
+            var scroll = description.GetVisualDescendants().OfType<ScrollViewer>().Single();
+            scroll.ScrollToEnd(); Dispatcher.UIThread.RunJobs(); window.UpdateLayout();
+            if (scroll.Offset.Y <= 0) throw new InvalidOperationException("The long commit description cannot scroll to its final lines.");
+        }
+        Console.WriteLine("PASS workspace content, file list and commit actions fit " + culture + "/" + width + "x" + size.Height);
+        using var bitmap = new RenderTargetBitmap(new PixelSize(width, size.Height));
         bitmap.Render(window);
         bitmap.Save(Path.Combine(directory, $"workspace-{culture}-{width}.png"), new PngBitmapEncoderOptions());
+        model.CommitSummary = model.CommitDescription = string.Empty;
     }
 }
 window.Width = 1440;
+window.Height = 900;
 model.ShowHistoryCommand.Execute().Subscribe();
 PumpUntil(() => !model.IsDiffLoading && model.DiffText.Contains("Verification", StringComparison.Ordinal), () => model.DiffText);
 window.UpdateLayout();
@@ -146,6 +172,30 @@ using (var bitmap = new RenderTargetBitmap(new PixelSize(1440, 900)))
     bitmap.Render(window);
     bitmap.Save(Path.Combine(directory, "workspace-history.png"), new PngBitmapEncoderOptions());
 }
+foreach (var culture in new[] { "zh-CN", "en-US" })
+{
+    localizer.SetCulture(culture);
+    PumpUntil(() => !model.IsDiffLoading && model.DiffText.Contains("Verification", StringComparison.Ordinal), () => model.DiffText);
+    window.Width = 960; window.Height = 620;
+    Dispatcher.UIThread.RunJobs(); window.UpdateLayout();
+    var history = window.FindControl<Grid>("HistoryDiffGrid")!;
+    var title = window.GetVisualDescendants().OfType<TextBlock>().Single(block => block.Classes.Contains("historyTitle"));
+    var originalTitle = title.Text;
+    title.SetCurrentValue(TextBlock.TextProperty, string.Join(" ", Enumerable.Repeat("Long commit summary", 40)));
+    Dispatcher.UIThread.RunJobs(); window.UpdateLayout();
+    VerifyInside(history, window.FindControl<Grid>("WorkspaceGrid")!, "History workspace at minimum size: " + culture);
+    foreach (var column in history.Children.OfType<Control>().Where(control => control is not GridSplitter))
+        VerifyInside(column, history, "History column at minimum size: " + culture);
+    foreach (var action in window.GetVisualDescendants().OfType<Button>()
+        .Where(button => button.IsEffectivelyVisible && button.Classes.Contains("inlineAction")))
+        VerifyInside(action, window.FindControl<Grid>("WorkspaceGrid")!, "History action at minimum size: " + culture);
+    using var bitmap = new RenderTargetBitmap(new PixelSize(960, 620));
+    bitmap.Render(window);
+    bitmap.Save(Path.Combine(directory, $"workspace-history-minimum-{culture}.png"), new PngBitmapEncoderOptions());
+    title.SetCurrentValue(TextBlock.TextProperty, originalTitle);
+    Console.WriteLine("PASS history files and diff fit minimum window: " + culture);
+}
+window.Width = 1440; window.Height = 900;
 model.SelectPaletteCommand.Execute("aurora").Subscribe();
 model.SelectThemeCommand.Execute("system").Subscribe();
 var saved = new AppSettingsStore().Current;
@@ -173,11 +223,26 @@ foreach (var culture in new[] { "zh-CN", "en-US" })
     using var bitmap = new RenderTargetBitmap(new PixelSize(650, 650));
     bitmap.Render(dialog);
     bitmap.Save(Path.Combine(directory, $"about-{culture}.png"), new PngBitmapEncoderOptions());
+    dialog.Width = dialog.MinWidth; dialog.Height = dialog.MinHeight;
+    Dispatcher.UIThread.RunJobs(); dialog.UpdateLayout();
+    var aboutScroll = dialog.GetVisualDescendants().OfType<ScrollViewer>().Single();
+    VerifyInside(aboutScroll, dialog, "About viewport at minimum size: " + culture);
+    aboutScroll.Offset = default; Dispatcher.UIThread.RunJobs(); dialog.UpdateLayout();
+    VerifyInside(dialog.GetVisualDescendants().OfType<Button>().Single(button => button.Command == about.UpdateCommand),
+        aboutScroll, "About update action at minimum size: " + culture);
+    aboutScroll.ScrollToEnd(); Dispatcher.UIThread.RunJobs(); dialog.UpdateLayout();
+    VerifyInside(dialog.GetVisualDescendants().OfType<Button>().Single(button => button.Command == about.CloseCommand),
+        aboutScroll, "About close action after scrolling: " + culture);
+    Console.WriteLine("PASS about update and close actions remain reachable at 560x450: " + culture);
+    using var narrowBitmap = new RenderTargetBitmap(new PixelSize(560, 450));
+    narrowBitmap.Render(dialog);
+    narrowBitmap.Save(Path.Combine(directory, $"about-minimum-{culture}.png"), new PngBitmapEncoderOptions());
+    dialog.Width = 650; dialog.Height = 650;
 }
 dialog.Close();
 window.Close();
 Logger.ShutdownAsync().GetAwaiter().GetResult();
-Console.WriteLine("PASS: real Git changes/diff/history, 16 shared palettes, four localized workspace layouts, independent settings restoration and two localized about windows.");
+Console.WriteLine("PASS: real Git changes/diff/history, 16 shared palettes, six localized workspace layouts, two minimum history layouts, independent settings restoration and localized about windows at normal/minimum size.");
 
 static void PumpUntil(Func<bool> completed, Func<string> diagnostic)
 {
@@ -190,6 +255,15 @@ static void PumpUntil(Func<bool> completed, Func<string> diagnostic)
         Thread.Sleep(10);
     }
     Dispatcher.UIThread.RunJobs();
+}
+
+static void VerifyInside(Control control, Control host, string description)
+{
+    var position = control.TranslatePoint(default, host) ?? throw new InvalidOperationException(description + ": missing visual host");
+    if (!control.IsEffectivelyVisible || control.Bounds.Width <= 0 || control.Bounds.Height <= 0
+        || position.X < -1 || position.Y < -1 || position.X + control.Bounds.Width > host.Bounds.Width + 1
+        || position.Y + control.Bounds.Height > host.Bounds.Height + 1)
+        throw new InvalidOperationException($"{description}: {control.Bounds.Size} at {position}, host {host.Bounds.Size}");
 }
 
 static void RunGit(string directory, params string[] arguments)

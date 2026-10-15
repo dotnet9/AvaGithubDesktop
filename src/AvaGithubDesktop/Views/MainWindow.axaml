@@ -922,7 +922,7 @@
                                 Classes="commitDescription"
                                 AcceptsReturn="True"
                                 IsEnabled="{Binding HasRepository}"
-                                MinHeight="88"
+                                MinHeight="88" MaxHeight="88"
                                 PlaceholderText="{i18n:I18n {x:Static l:AvaGithubDesktopL.CommitDescriptionPlaceholder}}"
                                 Text="{Binding CommitDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 TextWrapping="Wrap" />
@@ -990,7 +990,7 @@
                     <StackPanel
                         Grid.Row="0"
                         Grid.RowSpan="2"
-                        Width="560"
+                        MaxWidth="560"
                         Margin="0,76,0,0"
                         HorizontalAlignment="Center"
                         IsVisible="{Binding HasNoChanges}"
@@ -1067,8 +1067,9 @@
                                 <TextBlock
                                     Classes="historyTitle"
                                     Text="{Binding SelectedCommit.Summary}"
-                                    TextWrapping="Wrap" />
-                                <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="14">
+                                    TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis"
+                                    ToolTip.Tip="{Binding SelectedCommit.Summary}" />
+                                <Grid Grid.Row="1" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="14" RowSpacing="6">
                                     <TextBlock
                                         Classes="historyMeta"
                                         Text="{Binding SelectedCommit.AuthorDisplay}"
@@ -1077,7 +1078,7 @@
                                         Grid.Column="1"
                                         Classes="historyMeta"
                                         Text="{Binding SelectedCommit.RelativeDate}" />
-                                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                                    <WrapPanel Grid.Row="1" Grid.ColumnSpan="2" ItemSpacing="8" LineSpacing="4">
                                         <TextBlock
                                             Classes="commitSha"
                                             VerticalAlignment="Center"
@@ -1107,7 +1108,7 @@
                                             Command="{Binding RevertSelectedCommitCommand}"
                                             Content="{i18n:I18n {x:Static l:AvaGithubDesktopL.RevertCommit}}"
                                             IsEnabled="{Binding CanRevertSelectedCommit}" />
-                                    </StackPanel>
+                                    </WrapPanel>
                                 </Grid>
                             </Grid>
                         </Border>
@@ -1116,7 +1117,7 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="300" MinWidth="220" MaxWidth="480" />
                                 <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" MinWidth="360" />
+                                <ColumnDefinition Width="*" MinWidth="240" />
                             </Grid.ColumnDefinitions>
                             <Border Classes="historyFileColumn">
                                 <Grid RowDefinitions="Auto,*">

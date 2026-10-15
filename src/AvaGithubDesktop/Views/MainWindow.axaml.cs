@@ -33,6 +33,7 @@ public partial class MainWindow : CodeWFWindow
         InitializeComponent();
         AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
         AddHandler(GotFocusEvent, OnGotFocus, RoutingStrategies.Tunnel);
+        LayoutUpdated += (_, _) => ConstrainWorkspaceLayout();
         DataContextChanged += (_, _) => SubscribeToViewModel();
         Closed += (_, _) =>
         {
@@ -99,6 +100,20 @@ public partial class MainWindow : CodeWFWindow
 
         OperationLogRow.MinHeight = 0;
         OperationLogRow.Height = new GridLength(0);
+    }
+
+    /// <summary>紧凑窗口优先保留工作区，限制日志和分栏的可用尺寸而不改写用户首选尺寸。</summary>
+    private void ConstrainWorkspaceLayout()
+    {
+        if (MainLayoutGrid.Bounds.Height <= 0 || WorkspaceGrid.Bounds.Width <= 0) return;
+        var availableHeight = MainLayoutGrid.Bounds.Height - MainLayoutGrid.RowDefinitions[0].ActualHeight
+            - MainLayoutGrid.RowDefinitions[2].ActualHeight - MainLayoutGrid.RowDefinitions[4].ActualHeight;
+        OperationLogRow.MaxHeight = Math.Max(OperationLogMinHeight, availableHeight - 400);
+        WorkspaceSidebarColumn.MaxWidth = Math.Max(WorkspaceSidebarMinWidth,
+            Math.Min(WorkspaceSidebarMaxWidth, WorkspaceGrid.Bounds.Width - 508));
+        if (HistoryDiffGrid.Bounds.Width > 0)
+            HistoryFileListColumn.MaxWidth = Math.Max(HistoryFileListMinWidth,
+                Math.Min(HistoryFileListMaxWidth, HistoryDiffGrid.Bounds.Width - 246));
     }
 
     private void ApplyWorkspaceLayout(MainWindowViewModel viewModel)

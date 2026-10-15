@@ -17,7 +17,7 @@
   };
   const node = (tag,text,className) => { const item=document.createElement(tag); if(text!==undefined)item.textContent=text; if(className)item.className=className; return item; };
   const keyNode = (tag,key) => {const item=node(tag,t(key));item.dataset.key=key;return item;};
-  const version = '0.118.0.16';
+  const version = '0.118.0.17';
   const about = $('#about-dialog'), popup = $('#popup');
   let updateTimer, toastTimer, dialogAction, dialogKey;
   const scenario = new URLSearchParams(location.search).get('update')||'new';
@@ -82,8 +82,9 @@
     if(state.view==='history'){
       const entry=state.history[state.selectedCommit]||state.history[0];
       const head=node('div',undefined,'history-commit-header');head.append(node('b',entry?.summary||t('NoHistoryTitle')));
-      const meta=node('div',undefined,'history-commit-meta');meta.append(node('span',t('PrototypeAuthor')+' <verification@example.invalid>'),node('span',t('PrototypeJustNow')),node('span',entry?.sha||''));
-      for(const key of ['CopyCommitSha','ViewCommitOnGitHub','CreateTag','CherryPickCommit','RevertCommit']){const button=keyNode('button',key);button.onclick=()=>run({key});meta.append(button);}head.append(meta);container.append(head);
+      const meta=node('div',undefined,'history-commit-meta');meta.append(node('span',t('PrototypeAuthor')+' <verification@example.invalid>'),node('span',t('PrototypeJustNow')));
+      const actions=node('div',undefined,'history-commit-actions');actions.append(node('span',entry?.sha||''));
+      for(const key of ['CopyCommitSha','ViewCommitOnGitHub','CreateTag','CherryPickCommit','RevertCommit']){const button=keyNode('button',key);button.onclick=()=>run({key});actions.append(button);}head.append(meta,actions);container.append(head);
       const body=node('div',undefined,'history-diff-body');const files=node('div',undefined,'history-files');files.append(node('b',t('CommitChangedFilesCountFormat',2),'history-files-title'));
       for(const path of ['README.md','settings.json']){const button=node('button',undefined,'history-file'+(state.activeFile===path?' selected':''));button.append(node('small',t('PrototypeAdded')),node('span',path));button.onclick=()=>{state.activeFile=path;renderDiff();};files.append(button);}
       host=node('div',undefined,'history-code');body.append(files,node('div',undefined,'history-divider'),host);container.append(body);
