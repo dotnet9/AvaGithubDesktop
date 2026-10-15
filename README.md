@@ -1,10 +1,10 @@
-# AvaGithubDesktop
+﻿# AvaGithubDesktop
 
 AvaGithubDesktop 是一个受 GitHub Desktop 启发的 Avalonia 桌面 Git 客户端。
 
 ## 仓库规范
 
-- 当前版本：`0.118.0.14`，版本号统一维护在根目录 `Directory.Build.props` 的 `<Version>` 节点。
+- 当前版本：`0.118.0.15`，版本号统一维护在根目录 `Directory.Build.props` 的 `<Version>` 节点。
 - NuGet 包项目统一支持 `net8.0;net10.0`；Demo、App、测试与内部应用项目统一使用 `net10.0` / `net10.0-windows`。
 - 根目录 `logo.svg`、`logo.png`、`logo.ico` 是唯一图标源，子工程只通过 MSBuild `Link` 引用，不维护图标副本。
 - 运行时帮助、Markdown 示例、内置备忘录、设计说明等业务文档按功能保留；仓库级入口文档使用根目录 `README.md` 和 `UpdateLog.md`。
@@ -23,6 +23,18 @@ AvaGithubDesktop 是一个受 GitHub Desktop 启发的 Avalonia 桌面 Git 客�
 - 浅色、深色、跟随系统三态与八套配色分别选择并保存，包含 .NET 紫、AI 极光、AI 赤陶及 Semi 扩展配色。
 - 中英双语、完整快捷键体系与操作日志；关于界面提供程序集版本、运行平台、编译时间与检查/校验下载/安装流程。
 
+## 当前界面
+
+以下 PNG 来自 Windows x64 NativeAOT 验证器绘制的实际 App 视图；Git 仓库为隔离目录中创建的真实样例，包含提交、变更和差异。
+
+![中文工作区](docs/screenshots/studio-workspace-zh-CN-1440.png)
+
+![英文紧凑布局](docs/screenshots/studio-workspace-en-US-1120.png)
+
+![关于与更新](docs/screenshots/studio-about-zh-CN.png)
+
+![配色与视图巡览](docs/screenshots/studio-palettes.gif)
+
 ## 开发验证
 
 使用 .NET 10 SDK。国际化 JSON 输出到应用的 `I18n/`，强类型资源键通过 T4 生成；库翻译保持程序集内嵌，Lang 自动支持应用同键覆盖。
@@ -39,7 +51,7 @@ npm test --prefix design/tests
 pwsh scripts/publish.ps1 -RuntimeIdentifier win-x64
 ```
 
-更新回归覆盖 16 个 UI 状态场景，不启动真实安装器。离屏回归覆盖八套配色的浅深组合、真实配置落盘恢复和同一关于窗口的中英动态切换，不打开系统浏览器。Windows x64 NativeAOT 已实际启动并验收中文主窗口、深色日志对比度、AI 极光配色、英文动态切换、主题持久化和关于窗口；Linux/macOS 仅完成发布构建，未在 Windows 主机实机运行。
+更新回归覆盖 16 个 UI 状态场景。最新离屏回归验证真实 Git 变更、差异与历史，八套配色的浅深组合，中英文 × 1440/1120 宽度，独立主题与配置恢复，以及关于窗口的动态语言切换。Windows x64 已执行仓库脚本完成 App NativeAOT 发布，并将同一 UI 验证器编译为 NativeAOT 实际运行通过；不启动真实安装器。锁屏期间未补充人工键鼠、多 DPI 或跨屏检查，Linux/macOS 未实机运行。详情见 [验收记录](docs/UI-VERIFICATION.md)。
 
 本机联调可使用 `temp_nugets` 环境变量指定的包目录和仓外 NuGet 配置；仓库只提交正式版本 PackageReference，从 nuget.org 还原，不需要克隆库仓库。
 
