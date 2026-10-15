@@ -2,6 +2,7 @@
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using Avalonia.Threading;
 using AvaGithubDesktop.Core.Messaging;
 using AvaGithubDesktop.Core.Models;
 using AvaGithubDesktop.Core.Services;
@@ -389,17 +390,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             OpenDiffFileInExternalEditorAsync,
             this.WhenAnyValue(model => model.CanOpenDiffFileInExternalEditor));
 
-        _localizer.CultureChanged += (_, _) =>
-        {
-            UpdateAheadBehindText();
-            RaiseLocalizedDerivedText();
-            RebuildRepositoryGroups();
-            this.RaisePropertyChanged(nameof(RepositorySelectorTitle));
-            this.RaisePropertyChanged(nameof(RepositorySelectorDetail));
-            RaiseSyncStateChanged();
-            RaiseAccountStateChanged();
-            QueueDiffLoad();
-        };
+        _localizer.CultureChanged += OnCultureChanged;
     }
 
     public ObservableCollection<LanguageOption> Languages { get; }
@@ -1839,6 +1830,30 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public bool IsEnglishSelected =>
         string.Equals(SelectedLanguage?.CultureName, "en-US", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>同步全局语言和实际选择控件，不重复触发业务设置器。</summary>
+    private void OnCultureChanged(object? sender, EventArgs args)
+    {
+        if (!Dispatcher.UIThread.CheckAccess())
+        {
+            Dispatcher.UIThread.Post(() => OnCultureChanged(sender, args));
+            return;
+        }
+
+        var language = Languages.FirstOrDefault(option =>
+            option.CultureName.Equals(_localizer.Culture.Name, StringComparison.OrdinalIgnoreCase));
+        this.RaiseAndSetIfChanged(ref _selectedLanguage, language, nameof(SelectedLanguage));
+        this.RaisePropertyChanged(nameof(IsSimplifiedChineseSelected));
+        this.RaisePropertyChanged(nameof(IsEnglishSelected));
+        UpdateAheadBehindText();
+        RaiseLocalizedDerivedText();
+        RebuildRepositoryGroups();
+        this.RaisePropertyChanged(nameof(RepositorySelectorTitle));
+        this.RaisePropertyChanged(nameof(RepositorySelectorDetail));
+        RaiseSyncStateChanged();
+        RaiseAccountStateChanged();
+        QueueDiffLoad();
+    }
 
     public async Task InitializeAsync()
     {

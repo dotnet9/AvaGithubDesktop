@@ -17,7 +17,7 @@
   };
   const node = (tag,text,className) => { const item=document.createElement(tag); if(text!==undefined)item.textContent=text; if(className)item.className=className; return item; };
   const keyNode = (tag,key) => {const item=node(tag,t(key));item.dataset.key=key;return item;};
-  const version = '0.118.0.17';
+  const version = '0.118.0.18';
   const about = $('#about-dialog'), popup = $('#popup');
   let updateTimer, toastTimer, dialogAction, dialogKey;
   const scenario = new URLSearchParams(location.search).get('update')||'new';
@@ -73,6 +73,7 @@
     if(!state.files.length)$('#files').append(node('div',t('NoChangesTitle'),'empty'));
     $('#history').replaceChildren(...state.history.map((entry,index)=>{const button=node('button',undefined,'history-item'+(state.selectedCommit===index?' selected':''));button.append(node('b',entry.summary),node('small',t('PrototypeAuthor')+' · '+entry.sha+' · '+t('PrototypeJustNow')));button.onclick=()=>{state.selectedCommit=index;renderDiff();renderWorkspace();};return button;}));
     $('#commit').textContent=$('#amend').checked?t('AmendLastCommitButton'):t(included===1?'CommitFileToBranchFormat':'CommitFilesToBranchFormat',included,state.branch);
+    $('#commit').title=$('#commit').textContent;
     $('#commit').disabled=!included||!$('#summary').value.trim();$('#stash').disabled=!state.files.length;
     renderDiff();
   }

@@ -951,14 +951,12 @@
                                 HorizontalAlignment="Stretch"
                                 Classes="commitButton"
                                 Command="{Binding CommitCommand}"
-                                IsEnabled="{Binding CanCommit}">
-                                <StackPanel
-                                    HorizontalAlignment="Center"
-                                    Orientation="Horizontal"
-                                    Spacing="6">
+                                IsEnabled="{Binding CanCommit}"
+                                ToolTip.Tip="{Binding CommitButtonText}">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
                                     <PathIcon Classes="buttonGlyph" Data="{StaticResource OcticonGitCommit}" />
-                                    <TextBlock Text="{Binding CommitButtonText}" />
-                                </StackPanel>
+                                    <TextBlock Grid.Column="1" Text="{Binding CommitButtonText}" TextTrimming="CharacterEllipsis" />
+                                </Grid>
                             </Button>
                         </Grid>
                     </Border>

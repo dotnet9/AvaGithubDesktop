@@ -22,7 +22,7 @@ using AvaGithubDesktop.Core.Models;
 var directory = Path.GetFullPath(args.FirstOrDefault() ?? "artifacts/ui-verification");
 Directory.CreateDirectory(directory);
 Logger.Initialize(new LoggerOptions { EnableConsole = false });
-AppBuilder.Configure<App>().UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false })
+AppBuilder.Configure<VerificationApp>().UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false })
     .UseSkia().WithInterFont()
     .With(new FontManagerOptions
             {
@@ -37,11 +37,9 @@ AppBuilder.Configure<App>().UseHeadless(new AvaloniaHeadlessPlatformOptions { Us
 var app = (App)Application.Current!;
 // 仓库历史和配置均隔离到验证目录，避免修改用户最近打开的项目。
 AppContext.SetData("APP_CONFIG_FILE", Path.Combine(directory, "App.config"));
-((IContainerRegistry)app.Container).RegisterInstance<IRepositoryHistoryService>(new VerificationHistory());
-((IContainerRegistry)app.Container).RegisterInstance<IGitHubAccountService>(new VerificationAccounts());
 var repository = Path.Combine(directory, "studio-workspace-" + Guid.NewGuid().ToString("N")[..8]);
 Directory.CreateDirectory(repository);
-RunGit(repository, "init", "--initial-branch=main");
+RunGit(repository, "init", "--initial-branch=feature/" + new string('f', 120));
 File.WriteAllText(Path.Combine(repository, "README.md"), "# Verification\n\nA local Git workspace.\n");
 File.WriteAllText(Path.Combine(repository, "settings.json"), "{\n  \"theme\": \"system\"\n}\n");
 RunGit(repository, "add", ".");
@@ -55,7 +53,47 @@ model.RepositoryPath = repository;
 var window = new MainWindow(model) { Width = 1440, Height = 900 };
 window.Show();
 ControlLocaleVerification.Run(window, ["zh-CN", "en-US"], localizer.SetCulture);
-// 显式打开隔离仓库，避免 Prism 初始外壳的异步初始化先于测试注入服务完成。
+var languageSelector = window.FindControl<ComboBox>("TitleBarLanguageSelector")!;
+foreach (var culture in new[] { "en-US", "zh-CN" })
+{
+    CodeWF.Toolkit.Lang.I18nManager.Instance.Culture = new System.Globalization.CultureInfo(culture);
+    Dispatcher.UIThread.RunJobs(); window.UpdateLayout();
+    if (model.SelectedLanguage?.CultureName != culture || (languageSelector.SelectedItem as LanguageOption)?.CultureName != culture)
+        throw new InvalidOperationException("The global language did not update the actual title bar selection: " + culture);
+    var returnCulture = culture == "en-US" ? "zh-CN" : "en-US";
+    languageSelector.SelectedItem = model.Languages.Single(option => option.CultureName == returnCulture);
+    Dispatcher.UIThread.RunJobs(); window.UpdateLayout();
+    if (localizer.Culture.Name != returnCulture)
+        throw new InvalidOperationException("The title bar selection cannot switch back after a global language change.");
+}
+Console.WriteLine("PASS global language and title bar selection synchronize in both directions");
+foreach (var culture in new[] { "zh-CN", "en-US" })
+{
+    Task.Run(() => CodeWF.Toolkit.Lang.I18nManager.Instance.Culture = new System.Globalization.CultureInfo(culture))
+        .GetAwaiter().GetResult();
+    Dispatcher.UIThread.RunJobs(); window.UpdateLayout();
+    if (model.SelectedLanguage?.CultureName != culture || (languageSelector.SelectedItem as LanguageOption)?.CultureName != culture)
+        throw new InvalidOperationException("Background global culture did not update the actual title bar selection: " + culture);
+    var returnCulture = culture == "en-US" ? "zh-CN" : "en-US";
+    languageSelector.SelectedItem = model.Languages.Single(option => option.CultureName == returnCulture);
+    Dispatcher.UIThread.RunJobs(); window.UpdateLayout();
+    if (localizer.Culture.Name != returnCulture)
+        throw new InvalidOperationException("The same selector cannot switch back after a background culture change.");
+}
+Console.WriteLine("PASS background global language and actual title bar selection synchronize in both directions");
+var helpDocument = new MarkdownDocumentWindow(localizer.Get(AvaGithubDesktopL.Changelog), "# Verification\n\n```text\nRuntime language sample\n```\n");
+helpDocument.Show(window); helpDocument.UpdateLayout(); Dispatcher.UIThread.RunJobs();
+foreach (var culture in new[] { "zh-CN", "en-US" })
+{
+    Task.Run(() => CodeWF.Toolkit.Lang.I18nManager.Instance.Culture = new System.Globalization.CultureInfo(culture))
+        .GetAwaiter().GetResult();
+    Dispatcher.UIThread.RunJobs(); helpDocument.UpdateLayout();
+    if (helpDocument.FindControl<CodeWF.Avalonia.Markdown.Controls.MarkdownViewer>("DocumentMarkdownViewer")?.Markdown is not { Length: > 0 })
+        throw new InvalidOperationException("The live help document lost its Markdown after background culture changes.");
+}
+helpDocument.Close();
+Console.WriteLine("PASS live Markdown help document survives background global language changes");
+// 显式打开隔离仓库，后续用例只操作本轮新建的测试数据。
 model.OpenRepositoryCommand.Execute().Subscribe();
 PumpUntil(() => model.HasRepository && !model.IsLoading, () => $"HasRepository={model.HasRepository}; Loading={model.IsLoading}; Path={model.RepositoryPath}; Root={model.RootPath}; Error={model.ErrorMessage}");
 if (model.ChangedFiles.Count != 2 || model.HistoryCommits.Count != 1)
@@ -142,9 +180,16 @@ foreach (var culture in new[] { "zh-CN", "en-US" })
         if (left.TranslatePoint(new Point(left.Bounds.Width, 0), window)!.Value.X > right.TranslatePoint(default, window)!.Value.X)
             throw new InvalidOperationException("Title bar menus and appearance controls overlap.");
         var workspace = window.FindControl<Grid>("WorkspaceGrid")!;
-        foreach (var action in window.GetVisualDescendants().OfType<Button>()
-            .Where(button => button.Classes.Contains("commitButton") || button.Classes.Contains("stashButton")))
+        var commitActions = window.GetVisualDescendants().OfType<Button>()
+            .Where(button => button.Classes.Contains("commitButton") || button.Classes.Contains("stashButton")).ToArray();
+        if (commitActions.Length != 2) throw new InvalidOperationException("Both commit and stash actions must remain present.");
+        foreach (var action in commitActions)
             VerifyInside(action, workspace, "Commit action at " + culture + "/" + width);
+        var commitButton = commitActions.Single(button => button.Classes.Contains("commitButton"));
+        var commitText = commitButton.GetVisualDescendants().OfType<TextBlock>().Single(block => block.Text == model.CommitButtonText);
+        VerifyInside(commitText, commitButton, "Long branch commit text at " + culture + "/" + width);
+        if (commitText.TextTrimming != TextTrimming.CharacterEllipsis || ToolTip.GetTip(commitButton)?.ToString() != model.CommitButtonText)
+            throw new InvalidOperationException("Long branch names must be trimmed with the complete action in the tooltip.");
         var changes = window.GetVisualDescendants().OfType<ListBox>().Single(list => list.Classes.Contains("changes") && list.IsEffectivelyVisible);
         if (changes.Bounds.Height < 34) throw new InvalidOperationException("The changes list cannot display one complete file row at " + culture + "/" + width);
         if (width == 960)
@@ -186,8 +231,10 @@ foreach (var culture in new[] { "zh-CN", "en-US" })
     VerifyInside(history, window.FindControl<Grid>("WorkspaceGrid")!, "History workspace at minimum size: " + culture);
     foreach (var column in history.Children.OfType<Control>().Where(control => control is not GridSplitter))
         VerifyInside(column, history, "History column at minimum size: " + culture);
-    foreach (var action in window.GetVisualDescendants().OfType<Button>()
-        .Where(button => button.IsEffectivelyVisible && button.Classes.Contains("inlineAction")))
+    var historyActions = window.GetVisualDescendants().OfType<Button>()
+        .Where(button => button.IsEffectivelyVisible && button.Classes.Contains("inlineAction")).ToArray();
+    if (historyActions.Length != 5) throw new InvalidOperationException("All five history actions must remain visible.");
+    foreach (var action in historyActions)
         VerifyInside(action, window.FindControl<Grid>("WorkspaceGrid")!, "History action at minimum size: " + culture);
     using var bitmap = new RenderTargetBitmap(new PixelSize(960, 620));
     bitmap.Render(window);
@@ -292,6 +339,17 @@ sealed class VerificationHistory : IRepositoryHistoryService
     {
         _entries.RemoveAll(entry => entry.Path == repositoryPath);
         return Task.CompletedTask;
+    }
+}
+
+/// <summary>在 Prism 首次创建外壳前替换持久化服务，隔离真实账号和仓库历史。</summary>
+sealed class VerificationApp : App
+{
+    protected override void RegisterTypes(IContainerRegistry registry)
+    {
+        base.RegisterTypes(registry);
+        registry.RegisterInstance<IRepositoryHistoryService>(new VerificationHistory());
+        registry.RegisterInstance<IGitHubAccountService>(new VerificationAccounts());
     }
 }
 

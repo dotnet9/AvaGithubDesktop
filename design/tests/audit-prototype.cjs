@@ -55,10 +55,21 @@ const { chromium } = require('playwright');
         await capture(`workspace-${culture}-${width}`);
       }
       await page.setViewportSize({width:960,height:620});
-      assert.ok(await page.locator('#stash, #commit').evaluateAll(buttons=>buttons.every(button=>{
+      assert.ok(await page.locator('#stash, #commit').evaluateAll(buttons=>buttons.length===2&&buttons.every(button=>{
         const bounds=button.getBoundingClientRect(), host=button.closest('.workspace').getBoundingClientRect();
         return bounds.width>0&&bounds.height>0&&bounds.top>=host.top&&bounds.bottom<=host.bottom+1;
       })), 'Commit and stash actions stay inside the minimum workspace');
+      await menu('MenuBranch','MenuNewBranch');
+      await page.locator('#action-value').fill('feature/'+culture+'-'+'f'.repeat(120));
+      await page.locator('#action-confirm').click();
+      assert.ok(await page.locator('#commit').evaluate(button=>{
+        const bounds=button.getBoundingClientRect(),host=button.closest('#commit-form').getBoundingClientRect();
+        return getComputedStyle(button).textOverflow==='ellipsis'&&button.scrollWidth>button.clientWidth
+          &&button.title===button.textContent&&bounds.left>=host.left&&bounds.right<=host.right;
+      }), 'A long branch is constrained with an ellipsis and complete action tooltip');
+      await capture('workspace-long-branch-'+culture);
+      await page.locator('#branch').click();
+      await page.locator('#popup').getByRole('button',{name:'main',exact:true}).click();
       assert.ok(await page.locator('.file-area').evaluate(element=>element.clientHeight>=100), 'Minimum workspace retains file navigation');
       await capture(`workspace-minimum-${culture}`);
       await page.setViewportSize({width:1440,height:900});
