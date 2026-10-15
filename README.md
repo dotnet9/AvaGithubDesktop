@@ -4,7 +4,7 @@ AvaGithubDesktop 是一个受 GitHub Desktop 启发的 Avalonia 桌面 Git 客�
 
 ## 仓库规范
 
-- 当前版本：`0.118.0.15`，版本号统一维护在根目录 `Directory.Build.props` 的 `<Version>` 节点。
+- 当前版本：`0.118.0.16`，版本号统一维护在根目录 `Directory.Build.props` 的 `<Version>` 节点。
 - NuGet 包项目统一支持 `net8.0;net10.0`；Demo、App、测试与内部应用项目统一使用 `net10.0` / `net10.0-windows`。
 - 根目录 `logo.svg`、`logo.png`、`logo.ico` 是唯一图标源，子工程只通过 MSBuild `Link` 引用，不维护图标副本。
 - 运行时帮助、Markdown 示例、内置备忘录、设计说明等业务文档按功能保留；仓库级入口文档使用根目录 `README.md` 和 `UpdateLog.md`。
@@ -20,7 +20,7 @@ AvaGithubDesktop 是一个受 GitHub Desktop 启发的 Avalonia 桌面 Git 客�
 - 标签创建与推送、远程仓库管理（添加/设置/移除）。
 - GitHub 联动：账号登录（OAuth）、在 GitHub 查看仓库/比较分支/创建 Issue 与 PR。
 - 冲突解决、Revert/Cherry-pick、LFS 与子模块支持。
-- 浅色、深色、跟随系统三态与八套配色分别选择并保存，包含 .NET 紫、AI 极光、AI 赤陶及 Semi 扩展配色。
+- 标题栏仅保留单排八色点、Ursa 三态模式按钮和语言图标下拉；浅色、深色、跟随系统与 .NET 紫、AI 极光、AI 赤陶及 Semi 扩展配色分别保存。
 - 中英双语、完整快捷键体系与操作日志；关于界面提供程序集版本、运行平台、编译时间与检查/校验下载/安装流程。
 
 ## 当前界面
