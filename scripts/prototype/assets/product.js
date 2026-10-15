@@ -34,17 +34,13 @@
     try{localStorage.setItem('ava-desktop-appearance',JSON.stringify({culture:state.culture,mode:state.mode,palette:state.palette}));}catch{}
     all('[data-key]').forEach(item=>item.textContent=t(item.dataset.key));
     all('[data-placeholder]').forEach(item=>item.placeholder=t(item.dataset.placeholder));
-    $('#palette').replaceChildren(...palettes.map(([value,key])=>new Option(t(key),value)));
-    $('#palette').value=state.palette;
-    $('#theme-mode').replaceChildren(...['system','light','dark'].map(value=>new Option(t('Theme'+value[0].toUpperCase()+value.slice(1)),value)));
-    $('#theme-mode').value=state.mode;
-    $('#palette').setAttribute('aria-label',t('Theme'));
-    $('#theme-mode').setAttribute('aria-label',t('Theme'));
+    $('#theme-mode').textContent=({system:'▣',light:'☀',dark:'☾'})[state.mode];$('#theme-mode').title=t('Theme')+': '+t('Theme'+state.mode[0].toUpperCase()+state.mode.slice(1));$('#theme-mode').setAttribute('aria-label',$('#theme-mode').title);
+    $('#language-button').title=t('Language');$('#language-button').setAttribute('aria-label',t('Language'));
     all('#swatches button').forEach(button=>{button.title=t(palettes.find(item=>item[0]===button.dataset.palette)[1]);button.setAttribute('aria-label',button.title);button.setAttribute('aria-pressed',String(button.dataset.palette===state.palette));});
     renderWorkspace();renderAbout();renderUpdate();renderLogs();status(state.logs.length?t(state.logs.at(-1).key,...state.logs.at(-1).args):t('StatusReady'));
   }
-  $('#palette').onchange=event=>setAppearance({palette:event.target.value});
-  $('#theme-mode').onchange=event=>setAppearance({mode:event.target.value});
+  $('#theme-mode').onclick=()=>{const modes=['system','light','dark'];setAppearance({mode:modes[(modes.indexOf(state.mode)+1)%3]});};
+  $('#language-button').onclick=event=>{event.stopPropagation();showMenu(event.currentTarget,[{key:'SimplifiedChinese'},{key:'English'}]);};
   media.addEventListener('change',()=>{if(state.mode==='system')setAppearance({});});
   function status(text){$('#status').textContent=text;}
   function log(key,...args){state.logs.push({key,args,time:new Date().toLocaleTimeString('en-GB')});renderLogs();status(t(key,...args));}

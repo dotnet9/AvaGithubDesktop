@@ -27,12 +27,12 @@ const { chromium } = require('playwright');
     const palettes = await page.locator('.swatches button').evaluateAll(items => items.map(item => item.dataset.palette));
     assert.equal(palettes.length, 8);
     for(const culture of ['zh-CN','en-US']){
-      await menu('MenuView','Language');await page.locator(`#popup [data-command="${culture==='zh-CN'?'SimplifiedChinese':'English'}"]`).click();
+      await page.locator('#language-button').click();assert.equal(await page.locator('#popup').isVisible(),true);await page.locator(`#popup [data-command="${culture==='zh-CN'?'SimplifiedChinese':'English'}"]`).click();
       assert.equal(await page.locator('html').getAttribute('lang'),culture);
       for (const palette of palettes) {
         await page.locator(`.swatches button[data-palette="${palette}"]`).click();
         for (const mode of ['light', 'dark']) {
-          await page.locator('#theme-mode').selectOption(mode);
+          while(await page.locator('html').getAttribute('data-theme-mode')!==mode)await page.locator('#theme-mode').click();
           assert.equal(await page.locator('html').getAttribute('data-theme'), mode);
           assert.equal(await page.locator('html').getAttribute('data-palette'), palette);
         }
@@ -43,7 +43,7 @@ const { chromium } = require('playwright');
         assert.equal(geometry.toolbar.height,50);assert.equal(geometry.left.width,360);assert.equal(geometry.log.height,180);
         assert.equal(geometry.diff.x,386);assert.equal(geometry.diff.y,123);assert.equal(geometry.diff.width,width-405);
         assert.ok(await page.locator('.captions').evaluate(el=>el.getBoundingClientRect().right<=innerWidth));
-        assert.equal(await page.locator('#palette').evaluate(el=>getComputedStyle(el).textAlign),'left');
+        assert.equal(await page.locator('.top select').count(),0);
         await capture(`workspace-${culture}-${width}`);
       }
       await page.setViewportSize({width:1440,height:900});
@@ -52,7 +52,7 @@ const { chromium } = require('playwright');
       await page.locator('#about-dialog').screenshot({path:path.join(output,`about-${culture}.png`)});
       await page.locator('#about-close').click();
     }
-    await page.locator('#theme-mode').selectOption('system');
+    while(await page.locator('html').getAttribute('data-theme-mode')!=='system')await page.locator('#theme-mode').click();
     for(const mode of ['dark','light']){await page.emulateMedia({colorScheme:mode});await page.waitForFunction(value=>document.documentElement.dataset.theme===value,mode);}
     await page.reload();assert.equal(await page.locator('html').getAttribute('data-palette'),palettes.at(-1));
     assert.equal(await page.locator('html').getAttribute('lang'),'en-US');
