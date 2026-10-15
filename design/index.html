@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
@@ -42,7 +42,211 @@
   .menu div { padding:7px 10px; border-radius:7px; }
   .menu div:hover { background:#eef1f4; }
 </style>
-<link rel="stylesheet" href="assets/appearance.css">
+<style>
+/* 与共享 StudioTheme 对应的八套浅深资源。 */
+html[data-palette="dotnet"][data-theme="light"] {
+  --bg:#FFFFFF;
+  --panel:#F7F6FC;
+  --line:#DDD8EC;
+  --ink:#242036;
+  --dim:#6E6684;
+  --accent:#512BD4;
+  --blue:#512BD4;
+  --raised:#EFEDF7;
+  --start:#512BD4;
+  --secondary:#7355DE;
+}
+html[data-palette="dotnet"][data-theme="dark"] {
+  --bg:#12111C;
+  --panel:#191724;
+  --line:#343044;
+  --ink:#F3F0FC;
+  --dim:#AAA5C0;
+  --accent:#A78BFA;
+  --blue:#A78BFA;
+  --raised:#211E30;
+  --start:#512BD4;
+  --secondary:#7654EA;
+}
+html[data-palette="aurora"][data-theme="light"] {
+  --bg:#FFFFFF;
+  --panel:#F7F6FC;
+  --line:#DDD8EC;
+  --ink:#242036;
+  --dim:#6E6684;
+  --accent:#6745D6;
+  --blue:#6745D6;
+  --raised:#EFEDF7;
+  --start:#8968FF;
+  --secondary:#1AAFA9;
+}
+html[data-palette="aurora"][data-theme="dark"] {
+  --bg:#101820;
+  --panel:#16212A;
+  --line:#2C3B48;
+  --ink:#F3F0FC;
+  --dim:#AAA5C0;
+  --accent:#AE96FF;
+  --blue:#AE96FF;
+  --raised:#20303A;
+  --start:#8968FF;
+  --secondary:#26D4CC;
+}
+html[data-palette="ember"][data-theme="light"] {
+  --bg:#FFFFFF;
+  --panel:#FCF7F3;
+  --line:#DDCABC;
+  --ink:#242036;
+  --dim:#6E6684;
+  --accent:#A94F36;
+  --blue:#A94F36;
+  --raised:#F4ECE5;
+  --start:#BD674D;
+  --secondary:#D09566;
+}
+html[data-palette="ember"][data-theme="dark"] {
+  --bg:#1B1616;
+  --panel:#241D1B;
+  --line:#443631;
+  --ink:#F3F0FC;
+  --dim:#AAA5C0;
+  --accent:#E6A58F;
+  --blue:#E6A58F;
+  --raised:#302522;
+  --start:#BD674D;
+  --secondary:#E9BD87;
+}
+html[data-palette="default"][data-theme="light"] {
+  --bg:#FFFFFF;
+  --panel:#F8F9FB;
+  --line:#DDE2EB;
+  --ink:#202736;
+  --dim:#68758B;
+  --accent:#0064FA;
+  --blue:#0064FA;
+  --raised:#EEF1F6;
+  --start:#0064FA;
+  --secondary:#4D8EFF;
+}
+html[data-palette="default"][data-theme="dark"] {
+  --bg:#13161C;
+  --panel:#1A1E26;
+  --line:#354051;
+  --ink:#EDF1F8;
+  --dim:#A6B2C6;
+  --accent:#6AA8FF;
+  --blue:#6AA8FF;
+  --raised:#242A35;
+  --start:#0064FA;
+  --secondary:#4D8EFF;
+}
+html[data-palette="aquatic"][data-theme="light"] {
+  --bg:#F4FCFC;
+  --panel:#EBF7F8;
+  --line:#BFDCE0;
+  --ink:#183B42;
+  --dim:#526F77;
+  --accent:#007D8F;
+  --blue:#007D8F;
+  --raised:#DCEFF1;
+  --start:#007D8F;
+  --secondary:#159BA5;
+}
+html[data-palette="aquatic"][data-theme="dark"] {
+  --bg:#101B20;
+  --panel:#17262D;
+  --line:#35505B;
+  --ink:#E6F6F7;
+  --dim:#A4C2C8;
+  --accent:#62D7DC;
+  --blue:#62D7DC;
+  --raised:#20343D;
+  --start:#007D8F;
+  --secondary:#239DA9;
+}
+html[data-palette="desert"][data-theme="light"] {
+  --bg:#FFFCF5;
+  --panel:#FBF4E7;
+  --line:#DECDB0;
+  --ink:#3C3022;
+  --dim:#7B6C55;
+  --accent:#9B651E;
+  --blue:#9B651E;
+  --raised:#F3E8D5;
+  --start:#9B651E;
+  --secondary:#BD8437;
+}
+html[data-palette="desert"][data-theme="dark"] {
+  --bg:#211C16;
+  --panel:#2C251C;
+  --line:#544630;
+  --ink:#F7EDDB;
+  --dim:#C8B799;
+  --accent:#E6B96D;
+  --blue:#E6B96D;
+  --raised:#3A3023;
+  --start:#9B651E;
+  --secondary:#BD8437;
+}
+html[data-palette="dusk"][data-theme="light"] {
+  --bg:#FAF8FE;
+  --panel:#F1EDF9;
+  --line:#D3C7E6;
+  --ink:#332841;
+  --dim:#786887;
+  --accent:#7052B5;
+  --blue:#7052B5;
+  --raised:#E7E0F3;
+  --start:#7052B5;
+  --secondary:#9676CC;
+}
+html[data-palette="dusk"][data-theme="dark"] {
+  --bg:#1C1725;
+  --panel:#272033;
+  --line:#4B3E5D;
+  --ink:#F2EAFB;
+  --dim:#BEB0D0;
+  --accent:#BBA0EB;
+  --blue:#BBA0EB;
+  --raised:#342B43;
+  --start:#7052B5;
+  --secondary:#9676CC;
+}
+html[data-palette="night-sky"][data-theme="light"] {
+  --bg:#F6F9FF;
+  --panel:#EDF3FC;
+  --line:#BED0E8;
+  --ink:#20314A;
+  --dim:#62758E;
+  --accent:#235FAD;
+  --blue:#235FAD;
+  --raised:#DDE9F8;
+  --start:#235FAD;
+  --secondary:#4B84C6;
+}
+html[data-palette="night-sky"][data-theme="dark"] {
+  --bg:#101724;
+  --panel:#172235;
+  --line:#344965;
+  --ink:#E8F0FF;
+  --dim:#A8BCD8;
+  --accent:#79ADFF;
+  --blue:#79ADFF;
+  --raised:#203047;
+  --start:#235FAD;
+  --secondary:#4B84C6;
+}
+
+.swatches button[data-palette="dotnet"]{background:#512BD4}.swatches button[data-palette="aurora"]{background:#8968FF}.swatches button[data-palette="ember"]{background:#BD674D}.swatches button[data-palette="default"]{background:#0064FA}.swatches button[data-palette="aquatic"]{background:#008D9E}.swatches button[data-palette="desert"]{background:#B57532}.swatches button[data-palette="dusk"]{background:#7A5CC4}.swatches button[data-palette="night-sky"]{background:#2B6CB0}
+.win{color:var(--ink)}.top{background:linear-gradient(115deg,var(--start),var(--secondary));color:white}.repo small{color:#ffffffb8}
+.top .logo{background:white;color:var(--accent);display:grid;place-items:center;border-radius:4px;font-weight:700}.top select{max-width:108px;padding:5px;border:1px solid #ffffff55;border-radius:5px;background:var(--panel);color:var(--ink);text-align:left}
+.swatches{display:flex;gap:4px}.swatches button{width:20px;height:20px;border:1px solid #ffffff66;border-radius:50%;cursor:pointer;background:var(--accent)}.swatches button[aria-pressed=true]{outline:2px solid white;outline-offset:2px}
+.menu{background:var(--panel);color:var(--ink)}.menu div:hover,.side i.on,.file:hover{background:var(--raised)}
+dialog{margin:auto;width:620px;max-width:90vw;border:1px solid var(--line);border-radius:10px;padding:24px;background:var(--panel);color:var(--ink);box-shadow:0 20px 80px #0005}dialog::backdrop{background:#0005}
+.about-head{display:flex;align-items:center;gap:12px;margin-bottom:20px}.about-head img{width:40px;height:40px}.about-head h2{font-size:20px}.about-head p{font-size:13px;color:var(--dim);margin-top:4px}.update-row{padding:14px;background:var(--raised);border-radius:10px;margin-bottom:20px;display:grid;grid-template-columns:1fr auto;gap:10px}.update-row p{font-size:13px;line-height:1.5;color:var(--dim);margin-top:4px}.update-row #update-status{grid-column:1/-1;color:var(--ink)}.update-row progress{grid-column:1/-1;width:100%;accent-color:var(--accent)}
+.about-info{display:grid;grid-template-columns:auto 1fr;gap:12px 18px;font-size:14px}.about-info dt{color:var(--dim)}.about-info a{color:var(--accent)}.about-actions{display:flex;justify-content:flex-end;margin-top:24px}
+
+</style>
 </head>
 <body>
 <div class="win">
@@ -92,12 +296,88 @@
   <div class="toast" id="toast"></div>
 </div>
 <dialog id="about-dialog" aria-labelledby="about-title">
-  <div class="about-head"><img src="../logo.png" alt=""><div><h2 id="about-title">AvaGithubDesktop</h2><p>跨平台 Git 桌面客户端</p></div></div>
+  <div class="about-head"><img src="data:image/png;base64,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" alt=""><div><h2 id="about-title">AvaGithubDesktop</h2><p>跨平台 Git 桌面客户端</p></div></div>
   <div class="update-row"><div><strong>检查更新</strong><p>从 AvaGithubDesktop 更新服务检查新版本，下载后需退出并重新安装。</p></div><button class="btn primary" id="update-action">检查更新</button><p id="update-status" role="status"></p><progress id="update-progress" max="100" hidden></progress></div>
   <dl class="about-info"><dt>版本</dt><dd>0.118.0.13</dd><dt>开发平台</dt><dd>.NET 10 · Avalonia 12</dd><dt>编译时间</dt><dd>2026-10-14 18:53:57</dd><dt>作者</dt><dd>沙漠尽头的狼</dd><dt>仓库</dt><dd><a href="https://github.com/dotnet9/AvaGithubDesktop">github.com/dotnet9/AvaGithubDesktop</a></dd><dt>版权</dt><dd>Copyright © 2026 CodeWF</dd></dl>
   <div class="about-actions"><button class="btn" id="about-close">关闭</button></div>
 </dialog>
-<script src="assets/appearance.js"></script>
+<script>
+// 原型只模拟更新状态；实际应用通过 Toolkit 服务检查、校验和安装。
+(() => {
+  const palettes = [
+    ['dotnet', '.NET 紫'], ['aurora', 'AI 极光'], ['ember', 'AI 赤陶'], ['default', '默认蓝'],
+    ['aquatic', '水生'], ['desert', '沙漠'], ['dusk', '黄昏'], ['night-sky', '夜空']
+  ];
+  const system = matchMedia('(prefers-color-scheme: dark)');
+  const mode = document.querySelector('#theme-mode');
+  let palette = 'dotnet';
+  try {
+    const saved = JSON.parse(localStorage.getItem('ava-desktop-appearance') || '{}');
+    if (['system', 'light', 'dark'].includes(saved.mode)) mode.value = saved.mode;
+    if (palettes.some(item => item[0] === saved.palette)) palette = saved.palette;
+  } catch (_) {}
+  const swatches = document.querySelector('.swatches');
+  for (const [key, title] of palettes) {
+    const button = document.createElement('button');
+    button.dataset.palette = key;
+    button.title = title;
+    button.setAttribute('aria-label', title);
+    button.onclick = () => { palette = key; apply(); };
+    // 每个色圈取自身主题资源，避免按 RGB 值判断当前主题。
+    button.dataset.theme = 'light';
+    swatches.append(button);
+  }
+  function apply() {
+    const effective = mode.value === 'system' ? (system.matches ? 'dark' : 'light') : mode.value;
+    document.documentElement.dataset.theme = effective;
+    document.documentElement.dataset.themeMode = mode.value;
+    document.documentElement.dataset.palette = palette;
+    for (const button of swatches.children) button.setAttribute('aria-pressed', String(button.dataset.palette === palette));
+    try { localStorage.setItem('ava-desktop-appearance', JSON.stringify({ mode: mode.value, palette })); } catch (_) {}
+  }
+  mode.onchange = apply;
+  system.addEventListener('change', () => { if (mode.value === 'system') apply(); });
+  apply();
+  const menu = document.querySelector('#moreMenu');
+  const dialog = document.querySelector('#about-dialog');
+  const action = document.querySelector('#update-action');
+  const status = document.querySelector('#update-status');
+  const progress = document.querySelector('#update-progress');
+  const scenario = new URLSearchParams(location.search).get('update') || 'new';
+  let state = 'idle', timer;
+  function showAbout() { menu.classList.remove('open'); if (!dialog.open) dialog.showModal(); }
+  function setState(next, text, label = '检查更新') {
+    state = next; status.textContent = text; action.textContent = label;
+    action.disabled = ['checking', 'downloading'].includes(state);
+    progress.hidden = state !== 'downloading';
+  }
+  document.querySelector('#moreBtn').onclick = event => { event.stopPropagation(); menu.classList.toggle('open'); };
+  document.body.addEventListener('click', () => menu.classList.remove('open'));
+  document.querySelector('#aboutItem').onclick = showAbout;
+  for (const id of ['checkUpdateItem', 'checkUpdateFoot']) document.getElementById(id).onclick = showAbout;
+  document.querySelector('#about-close').onclick = () => dialog.close();
+  dialog.addEventListener('close', () => { clearInterval(timer); if (['checking', 'downloading'].includes(state)) setState('idle', ''); });
+  action.onclick = () => {
+    if (state === 'available') {
+      if (scenario === 'noasset') { setState('idle', '当前平台暂无可用安装包，请访问发布页。', '打开发布页'); return; }
+      setState('downloading', '正在下载并校验…', '正在下载…'); progress.value = 0;
+      timer = setInterval(() => {
+        progress.value += 20;
+        if (progress.value >= 100) { clearInterval(timer); setState('downloaded', '下载及 SHA256 校验完成。', '安装更新'); }
+      }, 100);
+    } else if (state === 'downloaded') setState('installed', '已演示启动安装程序。');
+    else {
+      setState('checking', '正在检查更新…', '正在检查…');
+      timer = setTimeout(() => {
+        if (scenario === 'latest') setState('current', '当前已是最新版本。');
+        else if (scenario === 'offline') setState('failed', '检查更新失败：网络不可用。');
+        else setState('available', '发现新版本 0.119.0。', scenario === 'noasset' ? '打开发布页' : '下载更新');
+      }, 200);
+    }
+  };
+})();
+
+</script>
 
 </body>
 </html>

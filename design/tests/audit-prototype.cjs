@@ -1,3 +1,4 @@
+const standaloneFixture = require('./standalone-fixture.cjs');
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
@@ -5,12 +6,14 @@ const { chromium } = require('playwright');
 
 // 验证真实菜单、主题事件和关于状态，不请求外部发布站点。
 (async () => {
+  const standalone = standaloneFixture(path.resolve(__dirname, '../index.html'));
   const browser = await chromium.launch({ headless: true });
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await standalone.attach(page);
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
-    const url = pathToFileURL(path.join(__dirname, '..', 'index.html')).href;
+    const url = standalone.url;
     await page.goto(url);
     const palettes = await page.locator('.swatches button').evaluateAll(items => items.map(item => item.dataset.palette));
     assert.equal(palettes.length, 8);
@@ -49,6 +52,7 @@ const { chromium } = require('playwright');
       await page.locator('#about-close').click();
     }
     assert.deepEqual(errors, []);
+    await standalone.verify(page);
     console.log('PASS: sixteen palette combinations, system changes, persistence, real about menu and four update scenarios.');
-  } finally { await browser.close(); }
+  } finally { await browser.close(); standalone.dispose(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });
