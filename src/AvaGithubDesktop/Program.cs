@@ -12,6 +12,11 @@ internal sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        if (args is ["--verify-runtime", var directory])
+        {
+            RuntimeVerification.Run(directory);
+            return;
+        }
         Logger.Initialize(new LoggerOptions
         {
             MinimumLevel = LogLevel.Debug,

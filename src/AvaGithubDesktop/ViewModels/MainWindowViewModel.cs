@@ -1752,6 +1752,13 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    /// <summary>标题栏三态按钮与现有菜单共用持久化设置。</summary>
+    public CodeWF.Avalonia.Controls.Themes.StudioThemeMode ThemeMode
+    {
+        get => SelectedTheme?.Mode ?? CodeWF.Avalonia.Controls.Themes.StudioThemeMode.System;
+        set => SelectedTheme = ThemeOptions.First(option => option.Mode == value);
+    }
+
     public ThemeOption? SelectedTheme
     {
         get => _selectedTheme;
@@ -2181,6 +2188,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private void RaiseThemeSelectionChanged()
     {
+        this.RaisePropertyChanged(nameof(ThemeMode));
         this.RaisePropertyChanged(nameof(IsDotNetThemeSelected));
         this.RaisePropertyChanged(nameof(IsAuroraThemeSelected));
         this.RaisePropertyChanged(nameof(IsEmberThemeSelected));

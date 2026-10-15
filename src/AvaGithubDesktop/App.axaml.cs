@@ -7,8 +7,8 @@ using AvaGithubDesktop.Views;
 using CodeWF.Toolkit.EventBus;
 using CodeWF.Toolkit.Core.UpdateChecking;
 using CodeWF.Toolkit.Files.Helpers;
-using CodeWF.Avalonia.Lang;
-using CodeWF.Avalonia.Lang.Json;
+using CodeWF.Toolkit.Lang;
+using CodeWF.Toolkit.Lang.Json;
 using Prism.DryIoc;
 using Prism.Ioc;
 
@@ -18,14 +18,18 @@ public partial class App : PrismApplication
 {
     public override void Initialize()
     {
+        var resourceDirectory = AppContext.BaseDirectory;
+        var bundleResources = Path.GetFullPath(Path.Combine(resourceDirectory, "..", "Resources"));
+        if (OperatingSystem.IsMacOS() && Directory.Exists(Path.Combine(bundleResources, "I18n")))
+            resourceDirectory = bundleResources;
         // CodeWF.Toolkit.Core.Files 的 AppConfigHelper 支持 APP_CONFIG_FILE；这里固定读取输出目录的 App.config，
         // 便于人工维护 GitHub OAuth Client ID，而不是落到 exe/dll.config 这类生成文件名里。
-        AppContext.SetData("APP_CONFIG_FILE", Path.Combine(AppContext.BaseDirectory, "App.config"));
+        AppContext.SetData("APP_CONFIG_FILE", Path.Combine(resourceDirectory, "App.config"));
         AvaloniaXamlLoader.Load(this);
         var cultureName = GetConfiguredCultureName();
         var langPlugin = new JsonLangPlugin
         {
-            ResourceFolder = Path.Combine(AppContext.BaseDirectory, "I18n")
+            ResourceFolder = Path.Combine(resourceDirectory, "I18n")
         };
         I18nManager.Instance.Register(langPlugin, new CultureInfo(cultureName), out _);
         AppLocalizer.ApplyThirdPartyCulture(cultureName);

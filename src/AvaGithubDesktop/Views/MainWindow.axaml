@@ -3,6 +3,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:codewf="https://codewf.com"
+    xmlns:u="https://irihi.tech/ursa"
     xmlns:controls="using:AvaGithubDesktop.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i18n="https://codewf.com"
@@ -240,13 +241,21 @@
                     <Ellipse Width="13" Height="13" Fill="{Binding Swatch}" ToolTip.Tip="{i18n:I18n {Binding DisplayNameResourceKey}}" />
                 </DataTemplate></ListBox.ItemTemplate>
             </ListBox>
-            <ComboBox x:Name="TitleBarPaletteSelector" ItemsSource="{Binding PaletteOptions}" SelectedItem="{Binding SelectedPalette}"
-                      MinWidth="96" Height="28" FontSize="11.5" HorizontalContentAlignment="Left">
-                <ComboBox.ItemTemplate><DataTemplate x:DataType="models:PaletteOption"><TextBlock Text="{i18n:I18n {Binding DisplayNameResourceKey}}" /></DataTemplate></ComboBox.ItemTemplate>
-            </ComboBox>
-            <ComboBox x:Name="TitleBarModeSelector" ItemsSource="{Binding ThemeOptions}" SelectedItem="{Binding SelectedTheme}"
-                      MinWidth="100" Height="28" FontSize="11.5" HorizontalContentAlignment="Left">
-                <ComboBox.ItemTemplate><DataTemplate x:DataType="models:ThemeOption"><TextBlock Text="{i18n:I18n {Binding DisplayNameResourceKey}}" /></DataTemplate></ComboBox.ItemTemplate>
+            <ThemeVariantScope x:Name="TitleBarThemeScope"
+                               RequestedThemeVariant="{Binding ThemeMode, Mode=TwoWay, Converter={x:Static codewf:StudioThemeModeConverter.Instance}}">
+                <ThemeVariantScope.Resources>
+                    <TextBlock x:Key="STRING_THEME_TOGGLE_SYSTEM" Text="{codewf:I18n {x:Static l:AvaGithubDesktopL.ThemeSystem}}" />
+                    <TextBlock x:Key="STRING_THEME_TOGGLE_LIGHT" Text="{codewf:I18n {x:Static l:AvaGithubDesktopL.ThemeLight}}" />
+                    <TextBlock x:Key="STRING_THEME_TOGGLE_DARK" Text="{codewf:I18n {x:Static l:AvaGithubDesktopL.ThemeDark}}" />
+                </ThemeVariantScope.Resources>
+                <u:ThemeToggleButton x:Name="TitleBarThemeToggle" Width="30" Height="30" IsThreeState="True"
+                                     TargetScope="{Binding #TitleBarThemeScope}" ToolTip.Tip="{i18n:I18n {x:Static l:AvaGithubDesktopL.Theme}}" />
+            </ThemeVariantScope>
+            <ComboBox x:Name="TitleBarLanguageSelector" ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}"
+                      Width="50" Height="30" MinHeight="0" Padding="6,0" HorizontalContentAlignment="Left"
+                      ToolTip.Tip="{i18n:I18n {x:Static l:AvaGithubDesktopL.Language}}">
+                <ComboBox.SelectionBoxItemTemplate><DataTemplate><PathIcon Width="16" Height="16" Data="{DynamicResource SemiIconLanguage}" /></DataTemplate></ComboBox.SelectionBoxItemTemplate>
+                <ComboBox.ItemTemplate><DataTemplate x:DataType="models:LanguageOption"><TextBlock MinWidth="120" Text="{Binding DisplayName}" /></DataTemplate></ComboBox.ItemTemplate>
             </ComboBox>
         </StackPanel>
     </codewf:CodeWFWindow.RightContent>

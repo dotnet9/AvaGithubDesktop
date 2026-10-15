@@ -1,4 +1,4 @@
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Media;
@@ -38,6 +38,7 @@ var app = (App)Application.Current!;
 // 仓库历史和配置均隔离到验证目录，避免修改用户最近打开的项目。
 AppContext.SetData("APP_CONFIG_FILE", Path.Combine(directory, "App.config"));
 ((IContainerRegistry)app.Container).RegisterInstance<IRepositoryHistoryService>(new VerificationHistory());
+((IContainerRegistry)app.Container).RegisterInstance<IGitHubAccountService>(new VerificationAccounts());
 var repository = Path.Combine(directory, "studio-workspace-" + Guid.NewGuid().ToString("N")[..8]);
 Directory.CreateDirectory(repository);
 RunGit(repository, "init", "--initial-branch=main");
@@ -53,11 +54,14 @@ localizer.SetCulture("zh-CN");
 model.RepositoryPath = repository;
 var window = new MainWindow(model) { Width = 1440, Height = 900 };
 window.Show();
-PumpUntil(() => model.HasRepository && !model.IsLoading, () => model.ErrorMessage);
+PumpUntil(() => model.HasRepository && !model.IsLoading, () => $"HasRepository={model.HasRepository}; Loading={model.IsLoading}; Path={model.RepositoryPath}; Root={model.RootPath}; Error={model.ErrorMessage}");
 if (model.ChangedFiles.Count != 2 || model.HistoryCommits.Count != 1)
     throw new InvalidOperationException("The real Git workspace did not load both changes and its initial commit.");
+window.UpdateLayout();
+Dispatcher.UIThread.RunJobs();
 model.SelectedChange = model.ChangedFiles.First(change => change.Path == "README.md");
-PumpUntil(() => !model.IsDiffLoading && model.DiffText.Contains("visible diff", StringComparison.Ordinal), () => model.DiffText);
+PumpUntil(() => !model.IsDiffLoading && model.DiffText.Contains("visible diff", StringComparison.Ordinal),
+    () => $"Diff={model.DiffText}; Title={model.DiffTitle}; Selected={model.SelectedChange?.Path}; Changes={model.IsChangesSelected}; Loading={model.IsDiffLoading}; Error={model.ErrorMessage}");
 var renders = 0;
 foreach (var palette in model.PaletteOptions)
 {
@@ -89,16 +93,44 @@ if (renders != 16) throw new InvalidOperationException("Expected eight independe
 foreach (var culture in new[] { "zh-CN", "en-US" })
 {
     localizer.SetCulture(culture);
+    // 切语会重新加载 Diff，必须等真实内容完成后再做布局和截图检查。
+    PumpUntil(() => !model.IsDiffLoading && model.DiffText.Contains("visible diff", StringComparison.Ordinal), () => model.DiffText);
     foreach (var width in new[] { 1440, 1120 })
     {
         window.Width = width;
         window.UpdateLayout();
         Dispatcher.UIThread.RunJobs();
         var swatches = window.FindControl<ListBox>("TitleBarPalettes")!;
-        var selector = window.FindControl<ComboBox>("TitleBarPaletteSelector")!;
-        if (swatches.ItemCount != 8 || !ReferenceEquals(selector.SelectedItem, model.SelectedPalette) || !ReferenceEquals(swatches.SelectedItem, model.SelectedPalette)
-            || selector.Bounds.Width < 96 || selector.GetVisualDescendants().OfType<TextBlock>().Any(text => text.Text?.StartsWith("AvaGithubDesktop.") == true))
-            throw new InvalidOperationException("Title bar palette selection, localization or layout failed.");
+        var toggle = window.FindControl<Ursa.Controls.ThemeToggleButton>("TitleBarThemeToggle")!;
+        var language = window.FindControl<ComboBox>("TitleBarLanguageSelector")!;
+        var themeButton = toggle.GetVisualDescendants().OfType<Button>().Single(item => item.Name == "PART_ThemeButton");
+        foreach (var palette in model.PaletteOptions)
+        {
+            swatches.SelectedItem = palette;
+            model.ThemeMode = StudioThemeMode.System;
+            Dispatcher.UIThread.RunJobs(); window.UpdateLayout();
+            foreach (var expected in new[] { StudioThemeMode.Light, StudioThemeMode.Dark, StudioThemeMode.System })
+            {
+                themeButton.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+                Dispatcher.UIThread.RunJobs(); window.UpdateLayout();
+                if (model.ThemeMode != expected || !ReferenceEquals(model.SelectedPalette, palette))
+                    throw new InvalidOperationException("Title bar Ursa theme cycle or palette preservation failed: " + expected);
+                var key = expected switch { StudioThemeMode.Light => AvaGithubDesktopL.ThemeLight, StudioThemeMode.Dark => AvaGithubDesktopL.ThemeDark, _ => AvaGithubDesktopL.ThemeSystem };
+                if (ToolTip.GetTip(themeButton) is not TextBlock tip || tip.Text != localizer.Get(key))
+                    throw new InvalidOperationException("The existing Ursa tooltip did not follow the current language and mode.");
+            }
+        }
+        language.IsDropDownOpen = true; Dispatcher.UIThread.RunJobs();
+        if (!language.IsDropDownOpen || language.ItemCount != model.Languages.Count) throw new InvalidOperationException("Language icon failed to open all languages.");
+        language.SelectedItem = model.Languages.Single(option => option.CultureName == culture);
+        language.IsDropDownOpen = false; Dispatcher.UIThread.RunJobs(); window.UpdateLayout();
+        if (CodeWF.Toolkit.Lang.I18nManager.Instance.Culture?.Name != culture || swatches.ItemCount != 8 || !ReferenceEquals(swatches.SelectedItem, model.SelectedPalette)
+            || window.FindControl<ComboBox>("TitleBarPaletteSelector") is not null)
+            throw new InvalidOperationException("Title bar palette selection, localization or duplicate entry failed.");
+        var left = (Control)window.LeftContent!;
+        var right = (Control)window.RightContent!;
+        if (left.TranslatePoint(new Point(left.Bounds.Width, 0), window)!.Value.X > right.TranslatePoint(default, window)!.Value.X)
+            throw new InvalidOperationException("Title bar menus and appearance controls overlap.");
         using var bitmap = new RenderTargetBitmap(new PixelSize(width, 900));
         bitmap.Render(window);
         bitmap.Save(Path.Combine(directory, $"workspace-{culture}-{width}.png"), new PngBitmapEncoderOptions());
@@ -106,7 +138,7 @@ foreach (var culture in new[] { "zh-CN", "en-US" })
 }
 window.Width = 1440;
 model.ShowHistoryCommand.Execute().Subscribe();
-PumpUntil(() => !model.IsDiffLoading, () => model.DiffText);
+PumpUntil(() => !model.IsDiffLoading && model.DiffText.Contains("Verification", StringComparison.Ordinal), () => model.DiffText);
 window.UpdateLayout();
 Dispatcher.UIThread.RunJobs();
 using (var bitmap = new RenderTargetBitmap(new PixelSize(1440, 900)))
@@ -124,10 +156,16 @@ using var updates = new UpdateService(new UpdateServiceOptions { Repository = "A
 using var about = new AboutViewModel(updates, localizer, _ => { }, () => { });
 var dialog = new AboutWindow(about);
 dialog.Show(window);
+Dispatcher.UIThread.RunJobs();
+dialog.UpdateLayout();
+var minimizeButton = dialog.GetVisualDescendants().OfType<Button>().Single(button => button.Name == "PART_MinimizeButton");
+var maximizeButton = dialog.GetVisualDescendants().OfType<Button>().Single(button => button.Name == "PART_MaximizeRestoreButton");
+if (minimizeButton.IsEnabled != dialog.CanMinimize || maximizeButton.IsEnabled != (dialog.CanResize && dialog.CanMaximize))
+    throw new InvalidOperationException("About caption buttons do not follow the actual window capabilities.");
 foreach (var culture in new[] { "zh-CN", "en-US" })
 {
     localizer.SetCulture(culture);
-    if (about.ActionText.StartsWith("AvaGithubDesktop.") || about.VersionText != UpdateVersion.Display(typeof(App).Assembly)
+    if (CodeWF.Toolkit.Lang.I18nManager.Instance.Culture?.Name != culture || about.ActionText.StartsWith("AvaGithubDesktop.") || about.VersionText != UpdateVersion.Display(typeof(App).Assembly)
         || !DateTime.TryParse(about.CompileTimeText, out _))
         throw new InvalidOperationException("About metadata or localization failed.");
     dialog.UpdateLayout();
@@ -181,4 +219,15 @@ sealed class VerificationHistory : IRepositoryHistoryService
         _entries.RemoveAll(entry => entry.Path == repositoryPath);
         return Task.CompletedTask;
     }
+}
+
+// 外观与Git验证不读取用户账号，也不发起登录或网络请求。
+sealed class VerificationAccounts : IGitHubAccountService
+{
+    public GitHubAccount? CurrentAccount => null;
+    public Task<IReadOnlyList<GitHubAccount>> LoadAsync(CancellationToken cancellationToken) => Task.FromResult<IReadOnlyList<GitHubAccount>>([]);
+    public Task<GitHubDeviceAuthorization> BeginDeviceAuthorizationAsync(string endpoint, CancellationToken cancellationToken) => throw new NotSupportedException();
+    public Task<GitHubAccount> CompleteDeviceSignInAsync(GitHubDeviceAuthorization authorization, CancellationToken cancellationToken) => throw new NotSupportedException();
+    public Task<GitHubAccount> SignInWithTokenAsync(string endpoint, string token, CancellationToken cancellationToken) => throw new NotSupportedException();
+    public Task SignOutAsync(GitHubAccount account, CancellationToken cancellationToken) => throw new NotSupportedException();
 }

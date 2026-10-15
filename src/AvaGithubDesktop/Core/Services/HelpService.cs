@@ -119,6 +119,7 @@ public sealed class HelpService : IHelpService
     {
         // 发布后从输出目录读取；开发调试时从仓库 docs 目录兜底，避免菜单窗口因复制遗漏打不开。
         yield return DocumentsFolder;
+        yield return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "Resources", "docs"));
         yield return Path.Combine(Directory.GetCurrentDirectory(), "docs");
     }
 
