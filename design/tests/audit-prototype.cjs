@@ -2,10 +2,12 @@ const standaloneFixture = require('./standalone-fixture.cjs');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const { execFileSync } = require('node:child_process');
 const { chromium } = require('playwright');
 
 // 验证交付 HTML 的实际菜单、布局与样例交互，不请求外部服务。
 (async () => {
+  execFileSync(process.execPath,[path.resolve(__dirname,'../../scripts/prototype/build-resources.cjs'),'--check']);
   const standalone = standaloneFixture(path.resolve(__dirname, '../index.html'));
   const output=path.resolve(process.env.AVA_AUDIT_OUTPUT||path.join(__dirname,'../../artifacts/prototype-audit'));
   fs.mkdirSync(output,{recursive:true});
@@ -16,6 +18,9 @@ const { chromium } = require('playwright');
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(standalone.url);
+    assert.ok(await page.locator('.win').evaluate(el=>el.getBoundingClientRect().x===18&&parseFloat(getComputedStyle(el).borderTopWidth)>0));
+    assert.equal(await page.locator('.captions button').count(),3);
+    await page.goto(standalone.url+'?capture=window');
     assert.equal(await page.locator('#main-menu>button').count(),6);
     async function menu(key,command){await page.locator(`[data-menu="${key}"]`).click();await page.locator(`#popup [data-command="${command}"]`).click();}
     async function capture(name){await page.screenshot({path:path.join(output,name+'.png')});const geometry=await page.evaluate(()=>AvaPrototype.geometry());fs.writeFileSync(path.join(output,name+'.geometry.json'),JSON.stringify(geometry,null,2));}
@@ -43,7 +48,7 @@ const { chromium } = require('playwright');
       }
       await page.setViewportSize({width:1440,height:900});
       await menu('MenuHelp','MenuAbout');assert.ok(await page.locator('#about-dialog').evaluate(dialog=>dialog.open));
-      assert.equal(await page.locator('#about-info dt').count(),8);
+      assert.equal(await page.locator('#about-info dt').count(),8);assert.match(await page.locator('#about-info').innerText(),/2026-10-15 00:00:00/);assert.equal(await page.locator('.about-captions button').count(),3);
       await page.locator('#about-dialog').screenshot({path:path.join(output,`about-${culture}.png`)});
       await page.locator('#about-close').click();
     }
@@ -65,13 +70,13 @@ const { chromium } = require('playwright');
     await menu('MenuView','ShowOperationLog');assert.equal(await page.locator('.operation-log').isVisible(),false);await menu('MenuView','ShowOperationLog');
     const splitter=await page.locator('.vertical-splitter').boundingBox();await page.mouse.move(splitter.x+2,splitter.y+20);await page.mouse.down();await page.mouse.move(splitter.x+42,splitter.y+20);await page.mouse.up();assert.equal(await page.locator('.left').evaluate(el=>el.offsetWidth),400);
     for(const scenario of ['new','latest','offline','noasset']){
-      await page.goto(standalone.url+'?update='+scenario);await menu('MenuHelp','CheckUpdate');await page.locator('#update-action').click();await page.waitForFunction(()=>AvaPrototype.getState().update!=='checking');
+      await page.goto(standalone.url+'?capture=window&update='+scenario);await menu('MenuHelp','CheckUpdate');await page.locator('#update-action').click();await page.waitForFunction(()=>AvaPrototype.getState().update!=='checking');
       if(scenario==='new'){assert.equal(await page.evaluate(()=>AvaPrototype.getState().update),'available');await page.locator('#update-action').click();await page.waitForFunction(()=>AvaPrototype.getState().update==='downloaded');assert.match(await page.locator('#update-status').innerText(),/SHA256/);await page.locator('#update-action').click();assert.equal(await page.evaluate(()=>AvaPrototype.getState().update),'installed');}
       else if(scenario==='latest'||scenario==='offline')assert.equal(await page.evaluate(()=>AvaPrototype.getState().update),scenario);
       else assert.equal(await page.locator('#update-action').innerText(),'Open release page');
       await page.locator('#about-close').click();
     }
-    await page.goto(standalone.url);await menu('MenuHelp','CheckUpdate');await page.locator('#update-action').click();await page.locator('#update-cancel').click();assert.equal(await page.evaluate(()=>AvaPrototype.getState().update),'canceled');
+    await page.goto(standalone.url+'?capture=window');await menu('MenuHelp','CheckUpdate');await page.locator('#update-action').click();await page.locator('#update-cancel').click();assert.equal(await page.evaluate(()=>AvaPrototype.getState().update),'canceled');
     assert.deepEqual(errors,[]);await standalone.verify(page);
     console.log('PASS six source-derived menus, 32 appearance/language combinations, 1120/1440 layouts, Changes/History/commit/stash/branch/splitters, metadata and update flows.');
   } finally { await browser.close(); standalone.dispose(); }

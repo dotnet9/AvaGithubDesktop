@@ -21,7 +21,8 @@
   const about = $('#about-dialog'), popup = $('#popup');
   let updateTimer, toastTimer, dialogAction, dialogKey;
   const scenario = new URLSearchParams(location.search).get('update')||'new';
-  const metadata = [['AboutVersionLabel',version],['AboutPlatformLabel','.NET 10.0.13 · Avalonia 12.1.4.0'],['AboutCompileTimeLabel','2026-10-15 14:27:19'],['AboutAuthorLabel','@AboutAuthorName'],['AboutRepositoryLabel','https://github.com/dotnet9/AvaGithubDesktop'],['AboutWebsiteLabel','https://codewf.com'],['AboutBrandLabel','@AboutBrandName'],['AboutCopyrightLabel','@PrototypeCopyright']];
+  if(new URLSearchParams(location.search).has('capture'))document.body.classList.add('capture-window');
+  const metadata = [['AboutVersionLabel',version],['AboutPlatformLabel','.NET 10.0.13 · Avalonia 12.1.4.0'],['AboutCompileTimeLabel','2026-10-15 00:00:00'],['AboutAuthorLabel','@AboutAuthorName'],['AboutRepositoryLabel','https://github.com/dotnet9/AvaGithubDesktop'],['AboutWebsiteLabel','https://codewf.com'],['AboutBrandLabel','@AboutBrandName'],['AboutCopyrightLabel','@PrototypeCopyright']];
   for(const [key,,color] of palettes){const button=node('button');button.dataset.palette=key;button.style.setProperty('--swatch',color);button.onclick=()=>setAppearance({palette:key});$('#swatches').append(button);}
   AVA_PRODUCT.menus.forEach(menu=>{const button=keyNode('button',menu.key);button.dataset.menu=menu.key;button.setAttribute('aria-haspopup','menu');button.onclick=event=>{event.stopPropagation();showMenu(button,menu.children);};$('#main-menu').append(button);});
   function setAppearance(values) {
@@ -183,6 +184,7 @@
   };
   $('#update-cancel').onclick=()=>{clearInterval(updateTimer);state.update='canceled';renderUpdate();};
   $('#update-recheck').onclick=()=>{state.update='idle';$('#update-action').click();};
+  $('#about-minimize').onclick=()=>about.close();$('#about-maximize').onclick=()=>about.classList.toggle('about-maximized');
   for(const selector of ['#about-close','#about-close-caption'])$(selector).onclick=()=>about.close();
   about.addEventListener('close',()=>{clearInterval(updateTimer);if(['checking','downloading'].includes(state.update)){state.update='canceled';renderUpdate();}});
   for(const [selector,direction]of [['.vertical-splitter','x'],['.horizontal-splitter','y']]){
