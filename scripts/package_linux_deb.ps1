@@ -37,25 +37,43 @@ if ((Test-Path -LiteralPath $outputPath) -and -not $Force) {
 }
 
 $staging = Join-Path $repositoryRoot "artifacts/deb/$RuntimeIdentifier/ava-github-desktop"
+if (-not ([IO.Path]::GetFullPath($staging)).StartsWith(([IO.Path]::GetFullPath($repositoryRoot) + [IO.Path]::DirectorySeparatorChar), [StringComparison]::OrdinalIgnoreCase)) {
+    throw "拒绝使用仓库外的打包暂存目录。"
+}
 if (Test-Path -LiteralPath $staging) {
     Remove-Item -LiteralPath $staging -Recurse -Force
 }
 New-Item -ItemType Directory -Path (Join-Path $staging "DEBIAN") -Force | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $staging "usr/local/share/AvaGithubDesktop") -Force | Out-Null
+New-Item -ItemType Directory -Path (Join-Path $staging 'usr/local/bin'), (Join-Path $staging 'usr/share/applications'), (Join-Path $staging 'usr/share/pixmaps') -Force | Out-Null
 
 # 程序文件
-Copy-Item -Path (Join-Path $SourceDirectory "*") -Destination (Join-Path $staging "usr/local/share/AvaGithubDesktop/") -Recurse -Force
+$sourceRoot = (Resolve-Path -LiteralPath $SourceDirectory).Path
+$appPath = Join-Path $staging 'usr/local/share/AvaGithubDesktop'
+if (-not (Test-Path -LiteralPath (Join-Path $sourceRoot 'AvaGithubDesktop') -PathType Leaf)) { throw '发布目录缺少主程序。' }
+Get-ChildItem -LiteralPath $sourceRoot -Recurse -File -Force | ForEach-Object {
+    $relative = [IO.Path]::GetRelativePath($sourceRoot, $_.FullName)
+    if ($_.Extension -in '.pdb', '.dbg' -or $relative -match '(^|[\\/])[^\\/]+\.dSYM([\\/]|$)') { return }
+    $destination = Join-Path $appPath $relative
+    New-Item -ItemType Directory -Path (Split-Path -Parent $destination) -Force | Out-Null
+    Copy-Item -LiteralPath $_.FullName -Destination $destination -Force
+}
+Copy-Item -LiteralPath (Join-Path $repositoryRoot 'logo.png') -Destination (Join-Path $staging 'usr/share/pixmaps/ava-github-desktop.png')
+# Shell 入口使用 LF，原样保留带空格的参数。
+[IO.File]::WriteAllText((Join-Path $staging 'usr/local/bin/ava-github-desktop'), "#!/bin/sh`n" + 'exec /usr/local/share/AvaGithubDesktop/AvaGithubDesktop "$@"' + "`n")
+$desktop = @('[Desktop Entry]', 'Type=Application', 'Name=AvaGithubDesktop', 'Exec=ava-github-desktop', 'Icon=ava-github-desktop', 'Terminal=false', 'Categories=Development;RevisionControl;') -join "`n"
+[IO.File]::WriteAllText((Join-Path $staging 'usr/share/applications/ava-github-desktop.desktop'), $desktop + "`n")
 
 # control（dpkg-deb 要求 DEBIAN/control 为 root 所属、644）
 $installedSizeKb = [Math]::Ceiling(
-    ((Get-ChildItem -LiteralPath $SourceDirectory -Recurse -File | Measure-Object Length -Sum).Sum) / 1KB)
+    ((Get-ChildItem -LiteralPath (Join-Path $staging 'usr') -Recurse -File | Measure-Object Length -Sum).Sum) / 1KB)
 $control = @"
 Package: ava-github-desktop
 Version: $Version
 Architecture: $architecture
 Maintainer: Dotnet9 <dotnet9.com@gmail.com>
 Installed-Size: $installedSizeKb
-Depends: libfontconfig1, libx11-6
+Depends: libc6, libx11-6, libxrandr2, libxrender1, libxi6, libfontconfig1, libfreetype6, libglib2.0-0
 Section: utils
 Priority: optional
 Description: AvaGithubDesktop：受 GitHub Desktop 启发的 Avalonia 桌面 Git 客户端
@@ -64,7 +82,10 @@ Set-Content -LiteralPath (Join-Path $staging "DEBIAN/control") -Value ($control 
 
 # dpkg-deb 需要 posix 权限语义；control 文件权限固定 644
 if ($IsLinux) {
-    $null = chmod 644 (Join-Path $staging "DEBIAN/control")
+    & chmod 755 (Join-Path $appPath 'AvaGithubDesktop') (Join-Path $staging 'usr/local/bin/ava-github-desktop')
+    if ($LASTEXITCODE -ne 0) { throw '无法设置程序启动权限。' }
+    & chmod 644 (Join-Path $staging "DEBIAN/control")
+    if ($LASTEXITCODE -ne 0) { throw '无法设置 DEB 元数据权限。' }
 }
 
 dpkg-deb --build --root-owner-group $staging $outputPath
