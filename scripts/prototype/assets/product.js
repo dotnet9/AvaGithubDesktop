@@ -3,7 +3,7 @@
   'use strict';
   const $ = selector => document.querySelector(selector);
   const all = selector => [...document.querySelectorAll(selector)];
-  const palettes = [['dotnet','ThemeDotNet','#512BD4'],['aurora','ThemeAurora','#8968FF'],['ember','ThemeEmber','#BD674D'],['default','ThemeDefault','#0064FA'],['aquatic','ThemeAquatic','#008D9E'],['desert','ThemeDesert','#B57532'],['dusk','ThemeDusk','#7A5CC4'],['night-sky','ThemeNightSky','#2B6CB0']];
+  const palettes = [['dotnet','ThemeDotNet','#512BD4'],['aurora','ThemeAurora','linear-gradient(135deg,#8968FF,#26D4CC)'],['ember','ThemeEmber','#BD674D'],['default','ThemeDefault','#0064FA'],['aquatic','ThemeAquatic','#008D9E'],['desert','ThemeDesert','#B57532'],['dusk','ThemeDusk','#7A5CC4'],['night-sky','ThemeNightSky','#2B6CB0']];
   const media = matchMedia('(prefers-color-scheme: dark)');
   const state = { culture:'zh-CN', mode:'system', palette:'dotnet', view:'changes', repository:'studio-workspace', branch:'main', branches:['main','develop','feature/studio'], files:[{path:'README.md',selected:true},{path:'settings.json',selected:true}], activeFile:'README.md', history:[{summary:'Create isolated verification workspace',sha:'e9754cd'}], selectedCommit:0, logs:[], stash:[], signedIn:false, logVisible:true, sideBySide:false, whitespace:false, update:'idle' };
   try { const saved=JSON.parse(localStorage.getItem('ava-desktop-appearance')||'{}'); for(const key of ['culture','mode','palette'])if(saved[key])state[key]=saved[key]; } catch {}
@@ -36,6 +36,7 @@
     all('[data-placeholder]').forEach(item=>item.placeholder=t(item.dataset.placeholder));
     $('#theme-mode').textContent=({system:'▣',light:'☀',dark:'☾'})[state.mode];$('#theme-mode').title=t('Theme')+': '+t('Theme'+state.mode[0].toUpperCase()+state.mode.slice(1));$('#theme-mode').setAttribute('aria-label',$('#theme-mode').title);
     $('#language-button').title=t('Language');$('#language-button').setAttribute('aria-label',t('Language'));
+    const captionLabels=state.culture==='zh-CN'?['最小化','最大化或还原','关闭']:['Minimize','Maximize or restore','Close'];all('.captions > button').forEach((button,index)=>{button.title=captionLabels[index];button.setAttribute('aria-label',button.title);});
     all('#swatches button').forEach(button=>{button.title=t(palettes.find(item=>item[0]===button.dataset.palette)[1]);button.setAttribute('aria-label',button.title);button.setAttribute('aria-pressed',String(button.dataset.palette===state.palette));});
     renderWorkspace();renderAbout();renderUpdate();renderLogs();status(state.logs.length?t(state.logs.at(-1).key,...state.logs.at(-1).args):t('StatusReady'));
   }
@@ -151,14 +152,14 @@
     if(key==='MenuSelectAll'){const input=document.activeElement;if(input?.select)input.select();else{state.files.forEach(file=>file.selected=true);renderWorkspace();}return;}
     if(['MenuUndo','MenuRedo','MenuCut','MenuCopy','MenuPaste'].includes(key)){document.execCommand(key.replace('Menu','').toLowerCase());toast(t(key));return;}
     if(/Copy/.test(key)){const text=/Sha/.test(key)?state.history[state.selectedCommit]?.sha:/Branch/.test(key)?state.branch:/RepositoryName/.test(key)?state.repository:/Path/.test(key)?state.activeFile:'https://github.com/dotnet9/'+state.repository;navigator.clipboard?.writeText(text).catch(()=>{});toast(t('PrototypeCopied',text));return;}
-    if(['MenuExit','quit'].includes(key)){$('#relaunch').hidden=false;return;}
+    if(['MenuExit','quit'].includes(key)){$('.win').hidden=true;$('.win').dataset.windowState='closed';$('#relaunch').hidden=false;return;}
     if(key==='MenuToggleFullScreen'||key==='maximize'){$('.win').classList.toggle('maximized');toast(t('MenuToggleFullScreen'));return;}
     if(key==='MenuExpandActiveResizable'||key==='MenuContractActiveResizable'){$('.workspace').style.gridTemplateColumns=(key==='MenuExpandActiveResizable'?'440':'300')+'px 4px minmax(0,1fr)';return;}
     if(/(?:Push|Pull|Fetch|Refresh|UpdateSubmodules|UpdateFromDefault|UnsetUpstream|SetCurrentBranchAsDefault)/.test(key)){log('PrototypeOperationCompleted',t(key));return;}
     ask(key,null,null,t('PrototypeExternalAction',/GitHub|Issue|Support|UserGuides/.test(key)?'https://github.com/dotnet9/'+state.repository:t(key)));
   }
-  all('[data-action]').forEach(button=>button.onclick=()=>button.dataset.action==='minimize'?toast(t('AppTitle')):run({key:button.dataset.action}));
-  $('#relaunch button').onclick=()=>$('#relaunch').hidden=true;
+  all('[data-action]').forEach(button=>button.onclick=()=>{if(button.dataset.action==='minimize'){$('.win').hidden=true;$('.win').dataset.windowState='minimized';$('#relaunch').hidden=false;}else run({key:button.dataset.action});});
+  $('#relaunch button').onclick=()=>{$('#relaunch').hidden=true;$('.win').hidden=false;delete $('.win').dataset.windowState;};
   function renderAbout(){
     $('#about-info').className='about-info';$('#about-info').replaceChildren(...metadata.flatMap(([key,value])=>{const dd=node('dd');if(value.startsWith('https:')){const link=node('button',value,'link');link.onclick=()=>ask(key,null,null,t('PrototypeExternalAction',value));dd.append(link);}else dd.textContent=value.startsWith('@')?t(value.slice(1)):value;return[node('dt',t(key)),dd];}));
     $('#release-notes p').textContent=t('PrototypeReleaseNotes');

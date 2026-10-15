@@ -20,12 +20,19 @@ const { chromium } = require('playwright');
     await page.goto(standalone.url);
     assert.ok(await page.locator('.win').evaluate(el=>el.getBoundingClientRect().x===18&&parseFloat(getComputedStyle(el).borderTopWidth)>0));
     assert.equal(await page.locator('.captions button').count(),3);
+    assert.deepEqual(await page.locator('.captions > button').evaluateAll(items=>items.map(item=>item.dataset.action)),['minimize','maximize','quit']);
+    await page.locator('.captions [data-action="maximize"]').click();assert.ok(await page.locator('.win').evaluate(el=>el.classList.contains('maximized')&&el.getBoundingClientRect().x===0));
+    await page.locator('.captions [data-action="maximize"]').click();assert.ok(await page.locator('.win').evaluate(el=>!el.classList.contains('maximized')&&el.getBoundingClientRect().x===18));
+    for(const action of ['minimize','quit']){await page.locator('.captions [data-action="'+action+'"]').click();assert.equal(await page.locator('.win').isVisible(),false);assert.equal(await page.locator('#relaunch button').isVisible(),true);await page.locator('#relaunch button').click();assert.equal(await page.locator('.win').isVisible(),true);}
     await page.goto(standalone.url+'?capture=window');
     assert.equal(await page.locator('#main-menu>button').count(),6);
     async function menu(key,command){await page.locator(`[data-menu="${key}"]`).click();await page.locator(`#popup [data-command="${command}"]`).click();}
     async function capture(name){await page.screenshot({path:path.join(output,name+'.png')});const geometry=await page.evaluate(()=>AvaPrototype.geometry());fs.writeFileSync(path.join(output,name+'.geometry.json'),JSON.stringify(geometry,null,2));}
     const palettes = await page.locator('.swatches button').evaluateAll(items => items.map(item => item.dataset.palette));
     assert.equal(palettes.length, 8);
+    assert.deepEqual(palettes,['dotnet','aurora','ember','default','aquatic','desert','dusk','night-sky']);
+    const nativeSwatches=await page.locator('.swatches button').evaluateAll(items=>items.map(item=>getComputedStyle(item,':before').background));
+    assert.match(nativeSwatches[1],/linear-gradient.*137, 104, 255.*38, 212, 204/);
     for(const culture of ['zh-CN','en-US']){
       await page.locator('#language-button').click();assert.equal(await page.locator('#popup').isVisible(),true);await page.locator(`#popup [data-command="${culture==='zh-CN'?'SimplifiedChinese':'English'}"]`).click();
       assert.equal(await page.locator('html').getAttribute('lang'),culture);
@@ -35,6 +42,7 @@ const { chromium } = require('playwright');
           while(await page.locator('html').getAttribute('data-theme-mode')!==mode)await page.locator('#theme-mode').click();
           assert.equal(await page.locator('html').getAttribute('data-theme'), mode);
           assert.equal(await page.locator('html').getAttribute('data-palette'), palette);
+          assert.deepEqual(await page.locator('.swatches button').evaluateAll(items=>items.map(item=>getComputedStyle(item,':before').background)),nativeSwatches);
         }
       }
       for(const width of [1440,1120]){
