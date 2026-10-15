@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using Avalonia;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using AvaGithubDesktop.Core.Services;
 using AvaGithubDesktop.ViewModels;
 using AvaGithubDesktop.Views;
@@ -32,7 +33,8 @@ public partial class App : PrismApplication
             ResourceFolder = Path.Combine(resourceDirectory, "I18n")
         };
         I18nManager.Instance.Register(langPlugin, new CultureInfo(cultureName), out _);
-        AppLocalizer.ApplyThirdPartyCulture(cultureName);
+        I18nManager.Instance.CultureChanged += OnCultureChanged;
+        ApplyControlCulture();
         base.Initialize();
     }
 
@@ -99,4 +101,18 @@ public partial class App : PrismApplication
     private static bool IsSupportedCulture(string? cultureName) =>
         string.Equals(cultureName, "zh-CN", StringComparison.OrdinalIgnoreCase)
         || string.Equals(cultureName, "en-US", StringComparison.OrdinalIgnoreCase);
+    private static void OnCultureChanged(object? sender, EventArgs args)
+    {
+        if (Dispatcher.UIThread.CheckAccess()) ApplyControlCulture();
+        else Dispatcher.UIThread.Post(ApplyControlCulture);
+    }
+
+    /// <summary>更新主题内置文案，保留宿主资源的同键覆盖。</summary>
+    private static void ApplyControlCulture()
+    {
+        if (Application.Current is not { } application || I18nManager.Instance.Culture is not { } culture) return;
+        foreach (var theme in application.Styles.OfType<Semi.Avalonia.SemiTheme>()) theme.Locale = culture;
+        foreach (var theme in application.Styles.OfType<Ursa.Themes.Semi.UrsaSemiTheme>()) theme.Locale = culture;
+    }
+
 }
