@@ -7,3 +7,5 @@ body{padding:18px;background:radial-gradient(ellipse at top,#32334c,#13141e)}.wi
 
 /* 三态主题按钮、八色圆点和语言菜单，移除标题栏重复下拉框。 */
 .top .appearance-icon{width:32px;height:28px;flex:none;padding:5px;border:0;display:grid;place-items:center;font:20px "Segoe UI",sans-serif}.appearance-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+.top #language-button{width:50px;height:30px;grid-template-columns:16px 10px;gap:6px}.top #language-button::after{content:"⌄";font-size:12px}
