@@ -1,4 +1,4 @@
-﻿/* 与共享 StudioTheme 对应的八套浅深资源。 */
+/* 与共享 StudioTheme 对应的八套浅深资源。 */
 html[data-palette="dotnet"][data-theme="light"] {
   --bg:#FFFFFF;
   --panel:#F7F6FC;
@@ -193,10 +193,3 @@ html[data-palette="night-sky"][data-theme="dark"] {
 }
 
 .swatches button[data-palette="dotnet"]{background:#512BD4}.swatches button[data-palette="aurora"]{background:#8968FF}.swatches button[data-palette="ember"]{background:#BD674D}.swatches button[data-palette="default"]{background:#0064FA}.swatches button[data-palette="aquatic"]{background:#008D9E}.swatches button[data-palette="desert"]{background:#B57532}.swatches button[data-palette="dusk"]{background:#7A5CC4}.swatches button[data-palette="night-sky"]{background:#2B6CB0}
-.win{color:var(--ink)}.top{background:linear-gradient(115deg,var(--start),var(--secondary));color:white}.repo small{color:#ffffffb8}
-.top .logo{background:white;color:var(--accent);display:grid;place-items:center;border-radius:4px;font-weight:700}.top select{max-width:108px;padding:5px;border:1px solid #ffffff55;border-radius:5px;background:var(--panel);color:var(--ink);text-align:left}
-.swatches{display:flex;gap:4px}.swatches button{width:20px;height:20px;border:1px solid #ffffff66;border-radius:50%;cursor:pointer;background:var(--accent)}.swatches button[aria-pressed=true]{outline:2px solid white;outline-offset:2px}
-.menu{background:var(--panel);color:var(--ink)}.menu div:hover,.side i.on,.file:hover{background:var(--raised)}
-dialog{margin:auto;width:620px;max-width:90vw;border:1px solid var(--line);border-radius:10px;padding:24px;background:var(--panel);color:var(--ink);box-shadow:0 20px 80px #0005}dialog::backdrop{background:#0005}
-.about-head{display:flex;align-items:center;gap:12px;margin-bottom:20px}.about-head img{width:40px;height:40px}.about-head h2{font-size:20px}.about-head p{font-size:13px;color:var(--dim);margin-top:4px}.update-row{padding:14px;background:var(--raised);border-radius:10px;margin-bottom:20px;display:grid;grid-template-columns:1fr auto;gap:10px}.update-row p{font-size:13px;line-height:1.5;color:var(--dim);margin-top:4px}.update-row #update-status{grid-column:1/-1;color:var(--ink)}.update-row progress{grid-column:1/-1;width:100%;accent-color:var(--accent)}
-.about-info{display:grid;grid-template-columns:auto 1fr;gap:12px 18px;font-size:14px}.about-info dt{color:var(--dim)}.about-info a{color:var(--accent)}.about-actions{display:flex;justify-content:flex-end;margin-top:24px}

@@ -2,7 +2,7 @@
   "name": "ava-github-desktop-prototype-tests",
   "private": true,
   "scripts": {
-    "test": "node audit-prototype.cjs"
+    "test": "node audit-prototype.cjs && node compare-layout.cjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"
