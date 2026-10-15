@@ -1,5 +1,6 @@
-using System.Text;
+﻿using System.Text;
 using Avalonia;
+using Avalonia.Media;
 using CodeWF.Toolkit.Logging;
 using Microsoft.Extensions.Logging;
 using Avalonia.ReactiveUI;
@@ -44,6 +45,16 @@ internal sealed class Program
         return AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
+            // 中文缺字使用无衬线字体回退。
+            .With(new FontManagerOptions
+            {
+                FontFallbacks =
+                [
+                    new FontFallback { FontFamily = new FontFamily("Microsoft YaHei UI") },
+                    new FontFallback { FontFamily = new FontFamily("PingFang SC") },
+                    new FontFallback { FontFamily = new FontFamily("Noto Sans CJK SC") }
+                ]
+            })
             .UseReactiveUI()
             .LogToTrace();
     }

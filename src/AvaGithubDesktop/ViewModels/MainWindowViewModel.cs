@@ -1755,7 +1755,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ThemeOption? SelectedTheme
     {
         get => _selectedTheme;
-        private set
+        set
         {
             if (EqualityComparer<ThemeOption?>.Default.Equals(_selectedTheme, value))
             {
@@ -1779,7 +1779,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public PaletteOption? SelectedPalette
     {
         get => _selectedPalette;
-        private set
+        set
         {
             if (value is null || Equals(_selectedPalette, value)) return;
             this.RaiseAndSetIfChanged(ref _selectedPalette, value);
