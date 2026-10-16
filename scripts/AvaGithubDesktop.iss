@@ -14,6 +14,7 @@
 #endif
 
 [Setup]
+LicenseFile=..\LICENSE
 AppId={{D1E2F3A4-B5C6-4D7E-8F9A-0B1C2D3E4F5A}}
 AppName=AvaGithubDesktop
 AppVersion={#AppVersion}
@@ -32,6 +33,10 @@ ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog commandline
 
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
+Name: "chinesesimplified"; MessagesFile: "Languages\ChineseSimplified.isl"
+
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Excludes: "*.pdb,*.dbg,*.dSYM\*"; Flags: ignoreversion recursesubdirs createallsubdirs
 
@@ -45,5 +50,4 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Run]
 Filename: "{app}\AvaGithubDesktop.exe"; Description: "{cm:LaunchProgram,AvaGithubDesktop}"; Flags: nowait postinstall skipifsilent
 
-[UninstallDelete]
-Type: filesandordirs; Name: "{app}"
+#include "installer\CodeWF.Setup.iss"
