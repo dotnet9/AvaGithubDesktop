@@ -1,4 +1,4 @@
-// 离线样例复用实际菜单和宿主资源，只在内存演示 Git 与更新状态。
+﻿// 离线样例复用实际菜单和宿主资源，只在内存演示 Git 与更新状态。
 (() => {
   'use strict';
   const $ = selector => document.querySelector(selector);
@@ -17,7 +17,7 @@
   };
   const node = (tag,text,className) => { const item=document.createElement(tag); if(text!==undefined)item.textContent=text; if(className)item.className=className; return item; };
   const keyNode = (tag,key) => {const item=node(tag,t(key));item.dataset.key=key;return item;};
-  const version = '0.118.0.18';
+  const version = '0.118.0.19';
   const about = $('#about-dialog'), popup = $('#popup');
   let updateTimer, toastTimer, dialogAction, dialogKey;
   const scenario = new URLSearchParams(location.search).get('update')||'new';
