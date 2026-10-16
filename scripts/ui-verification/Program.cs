@@ -19,8 +19,10 @@ using System.Diagnostics;
 using AvaGithubDesktop.Core.Models;
 
 // 实际 XAML 与资源的离屏回归，不点击系统浏览器，不读取用户工作区。
-var directory = Path.GetFullPath(args.FirstOrDefault() ?? "artifacts/ui-verification");
+var outputArgument = args.FirstOrDefault() == "--palette-audit" ? args.Skip(1).FirstOrDefault() : args.FirstOrDefault();
+var directory = Path.GetFullPath(outputArgument ?? "artifacts/ui-verification");
 Directory.CreateDirectory(directory);
+AppContext.SetData("APP_CONFIG_FILE", Path.Combine(directory, "App.config"));
 Logger.Initialize(new LoggerOptions { EnableConsole = false });
 AppBuilder.Configure<VerificationApp>().UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false })
     .UseSkia().WithInterFont()
@@ -35,6 +37,11 @@ AppBuilder.Configure<VerificationApp>().UseHeadless(new AvaloniaHeadlessPlatform
             })
     .UseReactiveUI().SetupWithoutStarting();
 var app = (App)Application.Current!;
+if (args.FirstOrDefault() == "--palette-audit")
+{
+    ActionPaletteVerification.Run(directory);
+    return;
+}
 // 仓库历史和配置均隔离到验证目录，避免修改用户最近打开的项目。
 AppContext.SetData("APP_CONFIG_FILE", Path.Combine(directory, "App.config"));
 var repository = Path.Combine(directory, "studio-workspace-" + Guid.NewGuid().ToString("N")[..8]);

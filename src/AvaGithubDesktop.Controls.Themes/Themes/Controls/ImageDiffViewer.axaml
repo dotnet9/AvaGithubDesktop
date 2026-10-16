@@ -212,8 +212,22 @@
     </Style>
 
     <Style Selector="ToggleButton.imageDiffMode:checked">
-        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
-        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Background" Value="{DynamicResource SelectionBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style Selector="ToggleButton.imageDiffMode:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource StudioPrimaryHover}" />
+        <Setter Property="Foreground" Value="{DynamicResource StudioOnPrimary}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource StudioPrimaryHover}" />
+    </Style>
+
+    <Style Selector="ToggleButton.imageDiffMode:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource StudioPrimaryPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource StudioOnPrimary}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource StudioPrimaryPressed}" />
     </Style>
 
     <Style Selector="TextBlock.imageDiffSideTitle">

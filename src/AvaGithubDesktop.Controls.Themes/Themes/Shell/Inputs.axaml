@@ -187,28 +187,13 @@
     </Style>
 
     <Style Selector="Button.commitButton">
+        <Setter Property="Theme" Value="{DynamicResource SolidButton}" />
         <Setter Property="MinHeight" Value="30" />
         <Setter Property="Padding" Value="10,5" />
-        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="6" />
-        <Setter Property="Foreground" Value="{DynamicResource ToolbarTextBrush}" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="FontWeight" Value="SemiBold" />
-    </Style>
-
-    <Style Selector="Button.commitButton:pointerover">
-        <Setter Property="Background" Value="{DynamicResource ToolbarHoverBackgroundBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource ToolbarHoverBackgroundBrush}" />
-        <Setter Property="Foreground" Value="{DynamicResource ToolbarTextBrush}" />
-    </Style>
-
-    <Style Selector="Button.commitButton:disabled">
-        <Setter Property="Background" Value="{DynamicResource PanelBorderBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
-        <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
-        <Setter Property="Opacity" Value="1" />
     </Style>
 
     <Style Selector="Button.branchCheckout">
