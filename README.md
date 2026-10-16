@@ -4,7 +4,7 @@ AvaGithubDesktop 是一个受 GitHub Desktop 启发的 Avalonia 桌面 Git 客�
 
 ## 仓库规范
 
-- 当前版本：`0.118.0.18`，版本号统一维护在根目录 `Directory.Build.props` 的 `<Version>` 节点。
+- 当前版本：`0.118.0.19`，版本号统一维护在根目录 `Directory.Build.props` 的 `<Version>` 节点。
 - NuGet 包项目统一支持 `net8.0;net10.0`；Demo、App、测试与内部应用项目统一使用 `net10.0` / `net10.0-windows`。
 - 根目录 `logo.svg`、`logo.png`、`logo.ico` 是唯一图标源，子工程只通过 MSBuild `Link` 引用，不维护图标副本。
 - 运行时帮助、Markdown 示例、内置备忘录、设计说明等业务文档按功能保留；仓库级入口文档使用根目录 `README.md` 和 `UpdateLog.md`。
@@ -25,7 +25,7 @@ AvaGithubDesktop 是一个受 GitHub Desktop 启发的 Avalonia 桌面 Git 客�
 
 ## 当前界面
 
-以下 PNG 来自 Windows x64 NativeAOT 验证器绘制的实际 App 视图；Git 仓库为隔离目录中创建的真实样例，包含提交、变更和差异。
+以下 PNG 来自 0.118.0.19 Windows x64 NativeAOT 验证器绘制的实际 App 视图；Git 仓库为隔离目录中创建的真实样例，包含提交、变更和差异。
 
 ![中文工作区](docs/screenshots/studio-workspace-zh-CN-1440.png)
 
@@ -37,7 +37,9 @@ AvaGithubDesktop 是一个受 GitHub Desktop 启发的 Avalonia 桌面 Git 客�
 
 ![关于与更新](docs/screenshots/studio-about-zh-CN.png)
 
-![配色与视图巡览](docs/screenshots/studio-palettes.gif)
+以下 GIF 是 0.118.0.18 历史版本的四视图巡览，用于展示主题效果；当前版本界面以以上 PNG 为准。
+
+![0.118.0.18 历史配色与视图巡览](docs/screenshots/studio-palettes.gif)
 
 ## 开发验证
 
@@ -55,7 +57,7 @@ npm test --prefix design/tests
 pwsh scripts/publish.ps1 -RuntimeIdentifier win-x64
 ```
 
-更新回归覆盖 16 个 UI 状态场景。最新离屏回归验证真实 Git 变更、差异与历史，八套配色的浅深组合，中英文 × 1440/1120 宽度，独立主题与配置恢复，以及关于窗口的动态语言切换。Windows x64 已执行仓库脚本完成 App NativeAOT 发布，并将同一 UI 验证器编译为 NativeAOT 实际运行通过；不启动真实安装器。锁屏期间未补充人工键鼠、多 DPI 或跨屏检查，Linux/macOS 未实机运行。详情见 [验收记录](docs/UI-VERIFICATION.md)。
+更新回归覆盖 16 个 UI 状态场景。0.118.0.19 的原生离屏回归验证真实 Git 变更、差异与历史，八套配色的浅深组合，中英文 × 1440/1120/960 宽度、最小历史及关于窗口、后台动态切语和配置恢复；另有 128 项真实按钮状态对比检查。Windows x64 已执行仓库脚本完成 App NativeAOT 发布，正式 EXE 隔离自检及独立 NativeAOT UI 实际运行通过。当前仍有 NU1902 和裁剪/AOT 分析警告，未完成真实安装、人工键鼠、多 DPI、跨屏或 Linux/macOS 实机运行。详情见 [验收记录](docs/UI-VERIFICATION.md)。
 
 本机联调可使用 `temp_nugets` 环境变量指定的包目录和仓外 NuGet 配置；仓库只提交正式版本 PackageReference，从 nuget.org 还原，不需要克隆库仓库。
 
