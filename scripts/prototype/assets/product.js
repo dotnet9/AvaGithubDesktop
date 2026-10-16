@@ -17,7 +17,7 @@
   };
   const node = (tag,text,className) => { const item=document.createElement(tag); if(text!==undefined)item.textContent=text; if(className)item.className=className; return item; };
   const keyNode = (tag,key) => {const item=node(tag,t(key));item.dataset.key=key;return item;};
-  const version = '0.118.0.19';
+  const version = '0.118.0.20';
   const about = $('#about-dialog'), popup = $('#popup');
   let updateTimer, toastTimer, dialogAction, dialogKey;
   const scenario = new URLSearchParams(location.search).get('update')||'new';
