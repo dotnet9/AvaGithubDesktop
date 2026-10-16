@@ -1,0 +1,16 @@
+{
+  "id": "com.codewf.ava.github.desktop",
+  "package": "ava-github-desktop",
+  "command": "ava-github-desktop",
+  "name": "AvaGithubDesktop",
+  "chineseName": "Git 桌面客户端",
+  "summary": "Browse repositories and manage Git changes",
+  "chineseSummary": "浏览仓库和管理 Git 变更",
+  "description": "A desktop Git client for reviewing changes, commits and branches.",
+  "chineseDescription": "用于查看文件差异、提交和分支的 Git 桌面客户端。",
+  "categories": [
+    "Development",
+    "RevisionControl"
+  ],
+  "homepage": "https://github.com/dotnet9/AvaGithubDesktop"
+}
